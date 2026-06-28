@@ -601,17 +601,40 @@ Sprint 4.2 liefert damit den ersten nutzbaren Analyse-Stand des ACD Analyzers.
 
 ### Sprint 4.3 – Analyzer-Regeln strukturieren und erweitern
 
-Geplanter Fokus:
+Status:
+🚧 Gestartet
+
+---
+
+### Ziel
 
 Die Analyse-Logik soll aus dem `CrawlResultsService` herausgelöst und in eine besser erweiterbare Analyzer-Struktur überführt werden.
 
-Mögliche Deliverables:
+Der Sprint stärkt die Trennung zwischen:
 
-* `PageIssueAnalyzer` oder vergleichbare Analyse-Schicht einführen
+```txt
+CrawlResultsService → lädt und mapped Ergebnisdaten
+PageIssueAnalyzer   → bewertet Seiten und erzeugt Issues
+Frontend            → zeigt normalisierte Issues an
+```
 
-* bestehende Issue-Regeln aus `CrawlResultsService` auslagern
+---
 
-* neue einfache Regeln ergänzen:
+### Gestartet / umgesetzt
+
+* `PageIssueAnalyzer` eingeführt
+
+* bestehende Issue-Regeln aus `CrawlResultsService` ausgelagert
+
+* `CrawlResultsService` delegiert Page-Issue-Erkennung an `PageIssueAnalyzer`
+
+* API-Response bleibt kompatibel zum Frontend:
+
+  * `code`
+  * `severity`
+  * `message`
+
+* erste neue Regeln ergänzt:
 
   * Title zu kurz
   * Title zu lang
@@ -621,6 +644,26 @@ Mögliche Deliverables:
   * sehr wenige interne Links
   * hoher Anteil von Bildern ohne alt-Attribut
 
-* Issue-Severity fachlich klarer definieren
+* Unit-Test-Grundlage für `PageIssueAnalyzer` ergänzt
 
-* Grundlage für spätere Filter, Detailansichten und Reports schaffen
+* Architekturentscheidung dokumentiert:
+
+  * `ADR-0007: Page Issue Analyzer`
+
+---
+
+### Offene Sprint-4.3-Aufgaben
+
+* Severity-Semantik fachlich schärfen
+
+* Schwellwerte anhand echter Crawl-Ergebnisse prüfen
+
+* Issue-Codes dokumentieren
+
+* Ergebnisliste optisch/funktional für mehr Issues verbessern
+
+* Filterung nach `error`, `warning` und `info` vorbereiten
+
+* Detailansicht pro Seite vorbereiten
+
+* Tests ausbauen, sobald die Analyse-Regeln stabiler sind

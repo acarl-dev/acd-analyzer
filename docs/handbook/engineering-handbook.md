@@ -42,6 +42,9 @@ ACD entwickelt eine Intelligence Engine, die Unternehmenswebsites analysiert, wi
 * DTOs
 * Persister
 * Analyzer
+* Page-level issue detection belongs in analyzer classes.
+* Result mapping belongs in result services.
+
 
 ### Dashboard
 
@@ -107,7 +110,9 @@ Controller enthalten keine Geschäftslogik
 
 Form Requests werden für Validierung verwendet
 
-Analyse-Logik gehört backendseitig in Services, nicht ins Frontend.
+Analyse-Logik gehört backendseitig in Services, nicht ins Frontend
+
+Analyzer-Regeln gehören in Analyzer-Klassen, nicht direkt in Mapping- oder Controller-Klassen
 
 ---
 
