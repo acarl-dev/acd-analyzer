@@ -381,9 +381,15 @@ Status:
 ### Backend
 
 * Neuer Endpoint `GET /api/crawl-runs/{crawlRun}/results`
+
 * `CrawlResultsController` eingeführt
+
 * `CrawlResultsService` als zentrale Mapping- und Analyse-Schicht eingeführt
-* CrawlRun-, Website-, Page-, Heading-, Image- und Link-Daten werden zu einer strukturierten Ergebnis-Response aufbereitet
+
+* CrawlRun-, Website-, Page-, Heading-, Image-, Link- und CrawlError-Daten werden zu einer strukturierten Ergebnis-Response aufbereitet
+
+* Crawl-Fehler werden als eigene Ergebniszeilen mit `hasCrawlError`, `crawlError` und `crawl_error` Issue abgebildet
+
 * Summary-Werte werden berechnet:
 
   * Seiten gesamt
@@ -393,6 +399,7 @@ Status:
   * Errors
   * Warnings
   * Infos
+
 * Erste Issue-Regeln umgesetzt:
 
   * fehlender Title
@@ -400,18 +407,25 @@ Status:
   * fehlende H1
   * mehrere H1
   * Bilder ohne alt-Attribut
+  * Crawl-Fehler
 
 ### Frontend
 
 * TypeScript-Typen für Analyseergebnisse ergänzt
+
 * API-Funktion `getCrawlResults` eingeführt
+
 * Analyseergebnisse werden nach einem Crawl geladen
+
+* Ergebniszeilen unterstützen echte Pages und Crawl-Fehler-Zeilen
+
 * Dashboard zeigt eine erste Summary mit:
 
   * Seiten gesamt
   * Seiten mit Issues
   * Errors
   * Warnings
+
 * Dashboard zeigt pro Seite:
 
   * URL
@@ -427,19 +441,19 @@ Status:
 * Das Frontend analysiert kein rohes HTML
 * Controller bleibt schlank und delegiert Analyse-/Mapping-Logik an einen Service
 * Frontend nutzt typisierte API-Responses
+* Architekturentscheidung zu backendseitiger Analyse wurde in `ADR-0006: Backend-owned Analysis Results` dokumentiert
 
 ### Ergebnis
 
-Nach einem Crawl zeigt das Dashboard erstmals echte Analyseergebnisse aus gespeicherten Crawl-Daten an. Damit steht ein vollständiger vertikaler Schnitt von Crawler über Datenbank und Backend-API bis zur Dashboard-Anzeige.
+Nach einem Crawl zeigt das Dashboard erstmals echte Analyseergebnisse aus gespeicherten Crawl-Daten an. Neben erfolgreichen Seiten werden auch Crawl-Fehler in derselben Ergebnisstruktur sichtbar gemacht. Damit steht ein vollständiger vertikaler Schnitt von Crawler über Datenbank und Backend-API bis zur Dashboard-Anzeige.
 
 ---
 
 ### Offen / nächste Schritte
 
 * Analyse-Regeln weiter ausbauen
-* Crawl-Fehler in die Ergebnisanzeige integrieren
 * Ergebnisliste optisch und funktional verbessern
 * Filterung nach Errors/Warnings ergänzen
 * Detailansicht pro Seite vorbereiten
 * Designsystem weiter vereinheitlichen
-* Architekturentscheidung zu backendseitiger Analyse in einem ADR dokumentieren
+* Tests für `CrawlResultsService` ergänzen
