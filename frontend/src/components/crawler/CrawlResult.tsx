@@ -8,6 +8,30 @@ interface CrawlResultProps {
   crawlRun: CrawlRun;
 }
 
+function getIssueClassName(severity: "info" | "warning" | "error") {
+  if (severity === "error") {
+    return "rounded border border-red-900/60 bg-red-950/40 px-2 py-1 text-red-100";
+  }
+
+  if (severity === "warning") {
+    return "rounded border border-amber-900/60 bg-amber-950/40 px-2 py-1 text-amber-100";
+  }
+
+  return "rounded border border-sky-900/60 bg-sky-950/40 px-2 py-1 text-sky-100";
+}
+
+function formatBytes(bytes: number | null) {
+  if (bytes === null) {
+    return "n/a";
+  }
+
+  if (bytes < 1024) {
+    return `${bytes} B`;
+  }
+
+  return `${(bytes / 1024).toFixed(1)} KB`;
+}
+
 export function CrawlResult({ crawlRun }: CrawlResultProps) {
   const [results, setResults] = useState<CrawlResultsResponse | null>(null);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
@@ -52,7 +76,7 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
     <div className="mt-6 space-y-4">
       <div className="rounded-xl border border-emerald-900 bg-emerald-950/50 p-4">
         <h3 className="mb-3 font-semibold text-emerald-200">
-          Crawl erfolgreich gestartet
+          Crawl-Lauf
         </h3>
 
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
@@ -104,20 +128,28 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
               </div>
 
               <div>
-                <dt className="text-slate-400">Seiten mit Issues</dt>
+                <dt className="text-slate-400">Fehlgeschlagen</dt>
+                <dd className="font-medium text-red-300">
+                  {results.summary.failedPages}
+                </dd>
+              </div>
+
+              <div>
+                <dt className="text-slate-400">Seiten mit Problemen</dt>
                 <dd className="font-medium">
                   {results.summary.pagesWithIssues}
                 </dd>
               </div>
 
               <div>
-                <dt className="text-slate-400">Errors</dt>
-                <dd className="font-medium">{results.summary.errors}</dd>
-              </div>
-
-              <div>
-                <dt className="text-slate-400">Warnings</dt>
-                <dd className="font-medium">{results.summary.warnings}</dd>
+                <dt className="text-slate-400">Probleme gesamt</dt>
+                <dd className="font-medium">
+                  {results.summary.totalIssues}
+                </dd>
+                <dd className="mt-1 text-xs leading-relaxed text-slate-500">
+                  Fehler: {results.summary.errors} · Warnungen: {results.summary.warnings} · Hinweise:{" "}
+                  {results.summary.infos}
+                </dd>
               </div>
             </dl>
 
@@ -131,16 +163,25 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                     <p className="break-all text-sm font-medium text-slate-100">
                       {page.url}
                     </p>
-                    <span className="text-xs text-slate-400">
-                      HTTP {page.httpStatus ?? "n/a"}
+                    <span
+                      className={
+                        page.hasCrawlError
+                          ? "text-xs font-medium text-red-300"
+                          : "text-xs text-slate-400"
+                      }
+                    >
+                      {page.hasCrawlError ? "Crawl fehlgeschlagen" : `HTTP ${page.httpStatus ?? "n/a"}`}
                     </span>
                   </div>
 
-                  <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+                  <dl className="mt-3 grid gap-3 text-xs sm:grid-cols-3">
                     <div>
                       <dt className="text-slate-500">Title</dt>
                       <dd className="text-slate-200">
                         {page.title ?? "Fehlt"}
+                      </dd>
+                      <dd className="mt-1 text-slate-500">
+                        Länge: {page.titleLength ?? 0} Zeichen
                       </dd>
                     </div>
 
@@ -149,6 +190,9 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                       <dd className="text-slate-200">
                         {page.h1 ?? "Fehlt"}
                       </dd>
+                      <dd className="mt-1 text-slate-500">
+                        Anzahl: {page.h1Count}
+                      </dd>
                     </div>
 
                     <div>
@@ -156,20 +200,58 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                       <dd className="text-slate-200">
                         {page.metaDescription ?? "Fehlt"}
                       </dd>
+                      <dd className="mt-1 text-slate-500">
+                        Länge: {page.metaDescriptionLength ?? 0} Zeichen
+                      </dd>
                     </div>
                   </dl>
 
-                  {page.issues.length > 0 && (
+                  {!page.hasCrawlError && (
+                    <dl className="mt-3 grid gap-2 border-t border-slate-800 pt-3 text-xs sm:grid-cols-4">
+                      <div>
+                        <dt className="text-slate-500">Bilder</dt>
+                        <dd className="text-slate-200">{page.imageCount}</dd>
+                      </div>
+
+                      <div>
+                        <dt className="text-slate-500">Ohne alt</dt>
+                        <dd className={page.imagesWithoutAlt > 0 ? "text-amber-200" : "text-slate-200"}>
+                          {page.imagesWithoutAlt}
+                        </dd>
+                      </div>
+
+                      <div>
+                        <dt className="text-slate-500">Interne Links</dt>
+                        <dd className="text-slate-200">{page.internalLinksCount}</dd>
+                      </div>
+
+                      <div>
+                        <dt className="text-slate-500">Externe Links</dt>
+                        <dd className="text-slate-200">{page.externalLinksCount}</dd>
+                      </div>
+
+                      <div>
+                        <dt className="text-slate-500">HTML-Größe</dt>
+                        <dd className="text-slate-200">{formatBytes(page.htmlSizeBytes)}</dd>
+                      </div>
+                    </dl>
+                  )}
+
+                  {page.issues.length > 0 ? (
                     <ul className="mt-3 space-y-1 text-xs">
                       {page.issues.map((issue) => (
                         <li
                           key={`${page.id ?? page.url}-${issue.code}`}
-                          className="rounded border border-amber-900/60 bg-amber-950/40 px-2 py-1 text-amber-100"
+                          className={getIssueClassName(issue.severity)}
                         >
                           {issue.message}
                         </li>
                       ))}
                     </ul>
+                  ) : (
+                    <p className="mt-3 text-xs text-emerald-300">
+                      Keine Probleme erkannt.
+                    </p>
                   )}
                 </div>
               ))}

@@ -378,24 +378,51 @@ Das Dashboard kann einen Crawl über die bestehende REST API starten und den zur
 Status:
 ✅ Abgeschlossen
 
+---
+
+### Ziel
+
+Der ACD Analyzer soll nach einem Crawl erstmals echte, nutzbare Analyseergebnisse im internen Dashboard anzeigen.
+
+Der Fokus liegt auf einem vollständigen vertikalen Schnitt:
+
+```txt
+Crawler → Datenbank → Laravel Backend/API → typisiertes Frontend → Dashboard-Anzeige
+```
+
+---
+
 ### Backend
 
-* Neuer Endpoint `GET /api/crawl-runs/{crawlRun}/results`
+Umgesetzt:
+
+* Neuer Endpoint eingeführt:
+
+```txt
+GET /api/crawl-runs/{crawlRun}/results
+```
 
 * `CrawlResultsController` eingeführt
 
 * `CrawlResultsService` als zentrale Mapping- und Analyse-Schicht eingeführt
 
-* CrawlRun-, Website-, Page-, Heading-, Image-, Link- und CrawlError-Daten werden zu einer strukturierten Ergebnis-Response aufbereitet
+* CrawlRun-, Website-, Page-, Heading-, Image-, Link- und CrawlError-Daten werden backendseitig geladen und zu einer strukturierten Ergebnis-Response aufbereitet
 
-* Crawl-Fehler werden als eigene Ergebniszeilen mit `hasCrawlError`, `crawlError` und `crawl_error` Issue abgebildet
+* Crawl-Fehler werden in dieselbe Ergebnisstruktur integriert wie erfolgreich gecrawlte Seiten
 
-* Summary-Werte werden berechnet:
+* Crawl-Fehler werden als eigene Ergebniszeilen abgebildet mit:
+
+  * `hasCrawlError`
+  * `crawlError`
+  * `crawl_error` Issue
+
+* Summary-Werte werden backendseitig berechnet:
 
   * Seiten gesamt
   * erfolgreiche Seiten
   * fehlgeschlagene Seiten
   * Seiten mit Issues
+  * Issues gesamt
   * Errors
   * Warnings
   * Infos
@@ -409,51 +436,191 @@ Status:
   * Bilder ohne alt-Attribut
   * Crawl-Fehler
 
+* Issue-Ergebnisse werden normalisiert ausgegeben mit:
+
+  * `code`
+  * `severity`
+  * `message`
+
+---
+
 ### Frontend
 
-* TypeScript-Typen für Analyseergebnisse ergänzt
+Umgesetzt:
+
+* TypeScript-Typen für Crawl- und Analyseergebnisse ergänzt
 
 * API-Funktion `getCrawlResults` eingeführt
 
-* Analyseergebnisse werden nach einem Crawl geladen
+* Analyseergebnisse werden nach einem Crawl geladen und im Dashboard angezeigt
 
-* Ergebniszeilen unterstützen echte Pages und Crawl-Fehler-Zeilen
+* Ergebniszeilen unterstützen sowohl echte Pages als auch Crawl-Fehler-Zeilen
 
-* Dashboard zeigt eine erste Summary mit:
+* Dashboard zeigt eine Summary mit:
 
   * Seiten gesamt
-  * Seiten mit Issues
-  * Errors
-  * Warnings
+  * fehlgeschlagene Seiten
+  * Seiten mit Problemen
+  * Probleme gesamt
+  * Fehler
+  * Warnungen
+  * Hinweise
 
 * Dashboard zeigt pro Seite:
 
   * URL
   * HTTP-Status
   * Title
+  * Title-Länge
   * H1
+  * H1-Anzahl
   * Meta Description
+  * Meta-Description-Länge
+  * Bilder gesamt
+  * Bilder ohne alt-Attribut
+  * interne Links
+  * externe Links
+  * HTML-Größe
   * Issues
+
+* Issues werden abhängig von ihrer Severity visuell unterschieden:
+
+  * `error`
+  * `warning`
+  * `info`
+
+* Seiten ohne technische Crawl-Fehler werden als HTTP-Ergebnisse angezeigt
+
+* Crawl-Fehler werden als fehlgeschlagene Ergebniszeilen sichtbar gemacht
+
+---
 
 ### Architektur
 
-* Analyseergebnisse werden backendseitig berechnet und normalisiert
+* Analyseergebnisse werden backendseitig berechnet, normalisiert und als View Model für das Frontend bereitgestellt
+
 * Das Frontend analysiert kein rohes HTML
-* Controller bleibt schlank und delegiert Analyse-/Mapping-Logik an einen Service
-* Frontend nutzt typisierte API-Responses
+
+* Das Frontend rendert die vorbereiteten Ergebnisdaten und dupliziert keine Analyse-Logik
+
+* Der Controller bleibt schlank und delegiert Analyse- und Mapping-Logik an den `CrawlResultsService`
+
+* Die Frontend-Seite arbeitet mit typisierten API-Responses
+
+* Crawl-Fehler und erfolgreich gecrawlte Seiten werden in einem gemeinsamen Ergebnisformat dargestellt
+
 * Architekturentscheidung zu backendseitiger Analyse wurde in `ADR-0006: Backend-owned Analysis Results` dokumentiert
+
+---
+
+### Validierung / Tests
+
+Sprint 4.2 wurde mit mehreren echten Websites getestet.
+
+Bestätigt wurde:
+
+* HTTP-Status wird korrekt angezeigt
+
+* erfolgreiche Seiten werden nicht als fehlgeschlagen gezählt
+
+* Crawl- und Analyseergebnisse werden korrekt im Dashboard dargestellt
+
+* Summary-Werte zählen korrekt:
+
+  * Seiten gesamt
+  * fehlgeschlagene Seiten
+  * Seiten mit Problemen
+  * Probleme gesamt
+  * Errors
+  * Warnings
+  * Infos
+
+* Fehlende H1 wird als Issue erkannt
+
+* Fehlende Meta Description wird als Issue erkannt
+
+* Bilder ohne alt-Attribut werden als Issue erkannt
+
+* Title, H1, Meta Description, Linkzahlen, Bildzahlen und HTML-Größe werden im Dashboard sichtbar
+
+---
 
 ### Ergebnis
 
-Nach einem Crawl zeigt das Dashboard erstmals echte Analyseergebnisse aus gespeicherten Crawl-Daten an. Neben erfolgreichen Seiten werden auch Crawl-Fehler in derselben Ergebnisstruktur sichtbar gemacht. Damit steht ein vollständiger vertikaler Schnitt von Crawler über Datenbank und Backend-API bis zur Dashboard-Anzeige.
+Nach einem Crawl zeigt das Dashboard erstmals echte Analyseergebnisse aus gespeicherten Crawl-Daten an.
+
+Neben erfolgreich gecrawlten Seiten werden auch Crawl-Fehler in derselben Ergebnisstruktur sichtbar gemacht. Damit steht ein vollständiger vertikaler Schnitt von Crawler über Datenbank und Backend-API bis zur Dashboard-Anzeige.
+
+Sprint 4.2 liefert damit den ersten nutzbaren Analyse-Stand des ACD Analyzers.
+
+---
+
+### Bekannte Grenzen
+
+* Die Analyse-Regeln liegen aktuell noch direkt im `CrawlResultsService`
+
+* Die Severity-Semantik ist noch einfach gehalten
+
+* SEO-/Content-Probleme und technische Crawl-Probleme werden zwar unterschieden, aber noch nicht vollständig fachlich gewichtet
+
+* Es gibt noch keine Filterung nach Errors, Warnings oder Infos
+
+* Es gibt noch keine Detailansicht pro Seite
+
+* Die Ergebnisansicht ist für kleine Crawls nutzbar, aber noch nicht für größere Crawls optimiert
+
+* JavaScript-heavy Websites werden noch nicht gesondert erkannt oder behandelt
+
+* Es gibt noch keine automatisierten Tests für `CrawlResultsService`
 
 ---
 
 ### Offen / nächste Schritte
 
 * Analyse-Regeln weiter ausbauen
+
+* Analyse-Logik aus `CrawlResultsService` herauslösen
+
+* Eigenen Analyzer-Service oder einzelne Analyzer-Klassen einführen
+
+* Severity-Semantik fachlich schärfen
+
 * Ergebnisliste optisch und funktional verbessern
-* Filterung nach Errors/Warnings ergänzen
+
+* Filterung nach Errors, Warnings und Infos ergänzen
+
 * Detailansicht pro Seite vorbereiten
+
+* Tests für `CrawlResultsService` bzw. zukünftige Analyzer ergänzen
+
 * Designsystem weiter vereinheitlichen
-* Tests für `CrawlResultsService` ergänzen
+
+---
+
+### Nächster Sprint
+
+### Sprint 4.3 – Analyzer-Regeln strukturieren und erweitern
+
+Geplanter Fokus:
+
+Die Analyse-Logik soll aus dem `CrawlResultsService` herausgelöst und in eine besser erweiterbare Analyzer-Struktur überführt werden.
+
+Mögliche Deliverables:
+
+* `PageIssueAnalyzer` oder vergleichbare Analyse-Schicht einführen
+
+* bestehende Issue-Regeln aus `CrawlResultsService` auslagern
+
+* neue einfache Regeln ergänzen:
+
+  * Title zu kurz
+  * Title zu lang
+  * Meta Description zu kurz
+  * Meta Description zu lang
+  * auffällig große HTML-Datei
+  * sehr wenige interne Links
+  * hoher Anteil von Bildern ohne alt-Attribut
+
+* Issue-Severity fachlich klarer definieren
+
+* Grundlage für spätere Filter, Detailansichten und Reports schaffen

@@ -94,42 +94,42 @@ final class CrawlResultsService
     }
 
     private function mapCrawlError($crawlError): array
-        {
-            return [
-                'id' => null,
-                'url' => $crawlError->url,
-                'httpStatus' => null,
-                'crawledAt' => $crawlError->created_at?->toISOString(),
+    {
+        return [
+            'id' => null,
+            'url' => $crawlError->url,
+            'httpStatus' => null,
+            'crawledAt' => $crawlError->created_at?->toISOString(),
 
-                'title' => null,
-                'titleLength' => null,
+            'title' => null,
+            'titleLength' => null,
 
-                'metaDescription' => null,
-                'metaDescriptionLength' => null,
+            'metaDescription' => null,
+            'metaDescriptionLength' => null,
 
-                'h1' => null,
-                'h1Count' => 0,
+            'h1' => null,
+            'h1Count' => 0,
 
-                'imageCount' => 0,
-                'imagesWithoutAlt' => 0,
+            'imageCount' => 0,
+            'imagesWithoutAlt' => 0,
 
-                'internalLinksCount' => 0,
-                'externalLinksCount' => 0,
+            'internalLinksCount' => 0,
+            'externalLinksCount' => 0,
 
-                'htmlSizeBytes' => null,
+            'htmlSizeBytes' => null,
 
-                'hasCrawlError' => true,
-                'crawlError' => $crawlError->message,
+            'hasCrawlError' => true,
+            'crawlError' => $crawlError->message,
 
-                'issues' => [
-                    [
-                        'code' => 'crawl_error',
-                        'severity' => 'error',
-                        'message' => "Die Seite konnte nicht gecrawlt werden: {$crawlError->message}",
-                    ],
+            'issues' => [
+                [
+                    'code' => 'crawl_error',
+                    'severity' => 'error',
+                    'message' => "Die Seite konnte nicht gecrawlt werden: {$crawlError->message}",
                 ],
-            ];
-        }
+            ],
+        ];
+    }
 
     private function buildIssues(
         ?string $title,
@@ -183,36 +183,52 @@ final class CrawlResultsService
     }
 
     private function buildSummary(Collection $pages): array
-    {
-        $errors = $pages
-            ->flatMap(fn ($page) => $page['issues'])
-            ->where('severity', 'error')
-            ->count();
+        {
+            $issues = $pages
+                ->flatMap(fn ($page) => $page['issues']);
 
-        $warnings = $pages
-            ->flatMap(fn ($page) => $page['issues'])
-            ->where('severity', 'warning')
-            ->count();
+            $errors = $issues
+                ->where('severity', 'error')
+                ->count();
 
-        $infos = $pages
-            ->flatMap(fn ($page) => $page['issues'])
-            ->where('severity', 'info')
-            ->count();
+            $warnings = $issues
+                ->where('severity', 'warning')
+                ->count();
 
-        return [
-            'totalPages' => $pages->count(),
-            'successfulPages' => $pages
-                ->filter(fn ($page) => $page['httpStatus'] >= 200 && $page['httpStatus'] < 400)
-                ->count(),
-            'failedPages' => $pages
-                ->filter(fn ($page) => $page['httpStatus'] >= 400 || $page['httpStatus'] === null)
-                ->count(),
-            'pagesWithIssues' => $pages
-                ->filter(fn ($page) => count($page['issues']) > 0)
-                ->count(),
-            'errors' => $errors,
-            'warnings' => $warnings,
-            'infos' => $infos,
-        ];
-    }
+            $infos = $issues
+                ->where('severity', 'info')
+                ->count();
+
+            return [
+                'totalPages' => $pages->count(),
+
+                'successfulPages' => $pages
+                    ->filter(fn ($page) =>
+                        $page['hasCrawlError'] === false
+                        && $page['httpStatus'] !== null
+                        && $page['httpStatus'] >= 200
+                        && $page['httpStatus'] < 400
+                    )
+                    ->count(),
+
+                'failedPages' => $pages
+                    ->filter(fn ($page) =>
+                        $page['hasCrawlError'] === true
+                        || (
+                            $page['httpStatus'] !== null
+                            && $page['httpStatus'] >= 400
+                        )
+                    )
+                    ->count(),
+
+                'pagesWithIssues' => $pages
+                    ->filter(fn ($page) => count($page['issues']) > 0)
+                    ->count(),
+
+                'totalIssues' => $issues->count(),
+                'errors' => $errors,
+                'warnings' => $warnings,
+                'infos' => $infos,
+            ];
+        }
 }

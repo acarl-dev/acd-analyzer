@@ -25,6 +25,7 @@ export interface CrawlResultsSummary {
   successfulPages: number;
   failedPages: number;
   pagesWithIssues: number;
+  totalIssues: number;
   errors: number;
   warnings: number;
   infos: number;

@@ -1,5 +1,8 @@
 # Environment
 .env
+.env.*
+frontend/.env.local
+backend/.env
 
 # OS
 .DS_Store
@@ -22,8 +25,14 @@ frontend/node_modules/
 backend/vendor/
 backend/storage/*.key
 
-# Build
+# Laravel cache
+backend/bootstrap/cache/*.php
+
+# Next.js build
 frontend/.next/
 
-# Cache
-backend/bootstrap/cache/*.php
+# Optional build output
+frontend/out/
+
+# Optional coverage
+coverage/
