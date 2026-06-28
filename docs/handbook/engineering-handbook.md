@@ -107,6 +107,8 @@ Controller enthalten keine Geschäftslogik
 
 Form Requests werden für Validierung verwendet
 
+Analyse-Logik gehört backendseitig in Services, nicht ins Frontend.
+
 ---
 
 ## 7. Coding Standards
