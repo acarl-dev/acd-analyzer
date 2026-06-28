@@ -302,16 +302,53 @@ Aus der Intelligence Engine entstehen:
 ✅ Modularisierung des Crawlers
 
 * Downloader
-* Parser
+* HTML Parser
 * DTOs
-* Persister
-* REST API
+* CrawlResultPersister
+* Modularer CrawlerService
+* REST API (Grundlage)
 
 ---
 
-## Sprint 3 (laufend)
+## Sprint 3
 
-* Form Requests
-* API Resources
-* Dashboard-Anbindung
-* erstes funktionierendes Frontend
+✅ Erste REST API
+
+### Backend
+
+* API installiert
+* `POST /api/crawl`
+* CrawlController
+* Form Request (`StoreCrawlRequest`)
+* API Resource (`CrawlRunResource`)
+* JSON Responses
+* Fehlerbehandlung über Laravel Validation
+
+### Architektur
+
+* Controller enthalten keine Geschäftslogik
+* Validierung über Form Requests
+* API-Ausgaben über Resources
+* Crawler vollständig über HTTP ansteuerbar
+
+### Ergebnis
+
+Der Crawler kann jetzt über eine REST API gestartet werden und liefert strukturierte JSON-Antworten zurück.
+
+---
+
+Sprint 4 – Dashboard MVP
+
+Status:
+🟡 In Arbeit
+
+✔ Dashboard steht
+✔ API angebunden
+✔ End-to-End Workflow funktioniert
+
+Offen:
+
+- Komponenten aufteilen
+- useCrawler Hook
+- Designsystem beginnen
+- Dashboard-Struktur erweitern
