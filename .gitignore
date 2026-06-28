@@ -1,0 +1,29 @@
+# Environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Docker volumes
+postgres_data/
+
+# Node
+frontend/node_modules/
+
+# Laravel
+backend/vendor/
+backend/storage/*.key
+
+# Build
+frontend/.next/
+
+# Cache
+backend/bootstrap/cache/*.php
