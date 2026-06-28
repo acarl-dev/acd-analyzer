@@ -602,13 +602,13 @@ Sprint 4.2 liefert damit den ersten nutzbaren Analyse-Stand des ACD Analyzers.
 ### Sprint 4.3 – Analyzer-Regeln strukturieren und erweitern
 
 Status:
-🚧 Gestartet
+🚧 In Arbeit
 
 ---
 
 ### Ziel
 
-Die Analyse-Logik soll aus dem `CrawlResultsService` herausgelöst und in eine besser erweiterbare Analyzer-Struktur überführt werden.
+Die Analyse-Logik wird aus dem `CrawlResultsService` herausgelöst und in eine besser erweiterbare Analyzer-Struktur überführt.
 
 Der Sprint stärkt die Trennung zwischen:
 
@@ -644,7 +644,34 @@ Frontend            → zeigt normalisierte Issues an
   * sehr wenige interne Links
   * hoher Anteil von Bildern ohne alt-Attribut
 
-* Unit-Test-Grundlage für `PageIssueAnalyzer` ergänzt
+* Severity-Semantik fachlich geschärft:
+
+  * `error` für klare Basisprobleme
+  * `warning` für auffällige Qualitäts- oder Optimierungspotenziale
+  * `info` für technische Hinweise oder Kontextinformationen
+
+* `few_internal_links` von `info` auf `warning` geändert
+
+* Issue-Codes dokumentiert:
+
+  * `docs/analyzer/issue-codes.md`
+
+* Unit-Tests für `PageIssueAnalyzer` ergänzt:
+
+  * Issue-Codes werden geprüft
+  * Severities werden geprüft
+  * aktuell 4 grüne Tests
+
+* Frontend-Filter nach Issue-Schweregrad ergänzt:
+
+  * Alle
+  * Fehler
+  * Warnungen
+  * Hinweise
+
+* Ergebnisliste kann nach `error`, `warning` und `info` gefiltert werden
+
+* leerer Filterzustand wird verständlich angezeigt
 
 * Architekturentscheidung dokumentiert:
 
@@ -654,16 +681,14 @@ Frontend            → zeigt normalisierte Issues an
 
 ### Offene Sprint-4.3-Aufgaben
 
-* Severity-Semantik fachlich schärfen
-
 * Schwellwerte anhand echter Crawl-Ergebnisse prüfen
 
-* Issue-Codes dokumentieren
+* Ergebnisliste optisch/funktional für mehr Issues weiter verbessern
 
-* Ergebnisliste optisch/funktional für mehr Issues verbessern
-
-* Filterung nach `error`, `warning` und `info` vorbereiten
+* prüfen, ob innerhalb gefilterter Seiten nur passende Issues angezeigt werden sollen
 
 * Detailansicht pro Seite vorbereiten
 
-* Tests ausbauen, sobald die Analyse-Regeln stabiler sind
+* Tests für `CrawlResultsService` ergänzen, damit die Integration mit `PageIssueAnalyzer` abgesichert ist
+
+* Sprint-4.3-Abschlussreview durchführen

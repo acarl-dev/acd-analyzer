@@ -4,9 +4,15 @@ namespace App\Services;
 
 use App\Models\CrawlRun;
 use Illuminate\Support\Collection;
+use App\Services\Analyzer\PageIssueAnalyzer;
 
 final class CrawlResultsService
 {
+        public function __construct(
+        private readonly PageIssueAnalyzer $pageIssueAnalyzer,
+    ) {
+    }
+
     public function buildForCrawlRun(CrawlRun $crawlRun): array
     {
         $crawlRun->load([
@@ -54,12 +60,30 @@ final class CrawlResultsService
             ->where('is_internal', false)
             ->count();
 
-        $issues = $this->buildIssues(
-            title: $page->title,
-            metaDescription: $page->meta_description,
-            h1Count: $h1Headings->count(),
-            imagesWithoutAlt: $imagesWithoutAlt,
-        );
+                $issues = $this->pageIssueAnalyzer->analyze([
+                    'title' => $page->title,
+                    'meta_description' => $page->meta_description,
+                    'headings' => $page->headings
+                        ->map(fn ($heading) => [
+                            'level' => $heading->level,
+                            'text' => $heading->text,
+                        ])
+                        ->values()
+                        ->all(),
+                    'images' => $page->images
+                        ->map(fn ($image) => [
+                            'alt' => $image->alt,
+                        ])
+                        ->values()
+                        ->all(),
+                    'links' => $page->links
+                        ->map(fn ($link) => [
+                            'type' => $link->is_internal ? 'internal' : 'external',
+                        ])
+                        ->values()
+                        ->all(),
+                    'html_size_bytes' => $page->html !== null ? strlen($page->html) : 0,
+                ]);
 
         return [
             'id' => $page->id,
@@ -129,57 +153,6 @@ final class CrawlResultsService
                 ],
             ],
         ];
-    }
-
-    private function buildIssues(
-        ?string $title,
-        ?string $metaDescription,
-        int $h1Count,
-        int $imagesWithoutAlt,
-    ): array {
-        $issues = [];
-
-        if (blank($title)) {
-            $issues[] = [
-                'code' => 'missing_title',
-                'severity' => 'error',
-                'message' => 'Die Seite hat keinen Title.',
-            ];
-        }
-
-        if (blank($metaDescription)) {
-            $issues[] = [
-                'code' => 'missing_meta_description',
-                'severity' => 'warning',
-                'message' => 'Die Seite hat keine Meta Description.',
-            ];
-        }
-
-        if ($h1Count === 0) {
-            $issues[] = [
-                'code' => 'missing_h1',
-                'severity' => 'error',
-                'message' => 'Die Seite hat keine H1-Überschrift.',
-            ];
-        }
-
-        if ($h1Count > 1) {
-            $issues[] = [
-                'code' => 'multiple_h1',
-                'severity' => 'warning',
-                'message' => 'Die Seite enthält mehrere H1-Überschriften.',
-            ];
-        }
-
-        if ($imagesWithoutAlt > 0) {
-            $issues[] = [
-                'code' => 'images_without_alt',
-                'severity' => 'warning',
-                'message' => "{$imagesWithoutAlt} Bilder haben kein alt-Attribut.",
-            ];
-        }
-
-        return $issues;
     }
 
     private function buildSummary(Collection $pages): array

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { getCrawlResults } from "@/api/crawl";
 import type { CrawlResultsResponse, CrawlRun } from "@/types/crawl";
 
+type SeverityFilter = "all" | "error" | "warning" | "info";
+
 interface CrawlResultProps {
   crawlRun: CrawlRun;
 }
@@ -36,6 +38,16 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
   const [results, setResults] = useState<CrawlResultsResponse | null>(null);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [resultsError, setResultsError] = useState<string | null>(null);
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
+
+  const filteredPages =
+    results?.pages.filter((page) => {
+      if (severityFilter === "all") {
+        return true;
+      }
+
+      return page.issues.some((issue) => issue.severity === severityFilter);
+    }) ?? [];
 
   useEffect(() => {
     let isMounted = true;
@@ -49,6 +61,7 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
 
         if (isMounted) {
           setResults(crawlResults);
+          setSeverityFilter("all");
         }
       } catch (error) {
         if (isMounted) {
@@ -147,14 +160,42 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                   {results.summary.totalIssues}
                 </dd>
                 <dd className="mt-1 text-xs leading-relaxed text-slate-500">
-                  Fehler: {results.summary.errors} · Warnungen: {results.summary.warnings} · Hinweise:{" "}
-                  {results.summary.infos}
+                  Fehler: {results.summary.errors} · Warnungen:{" "}
+                  {results.summary.warnings} · Hinweise: {results.summary.infos}
                 </dd>
               </div>
             </dl>
 
+            <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-4">
+              {[
+                { value: "all", label: "Alle" },
+                { value: "error", label: "Fehler" },
+                { value: "warning", label: "Warnungen" },
+                { value: "info", label: "Hinweise" },
+              ].map((filter) => (
+                <button
+                  key={filter.value}
+                  type="button"
+                  onClick={() => setSeverityFilter(filter.value as SeverityFilter)}
+                  className={
+                    severityFilter === filter.value
+                      ? "rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-950"
+                      : "rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
+                  }
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+
             <div className="space-y-3">
-              {results.pages.map((page) => (
+              {filteredPages.length === 0 && (
+                <p className="rounded-lg border border-slate-800 bg-slate-900/60 p-3 text-sm text-slate-400">
+                  Für diesen Filter wurden keine Seiten gefunden.
+                </p>
+              )}
+
+              {filteredPages.map((page) => (
                 <div
                   key={page.id ?? page.url}
                   className="rounded-lg border border-slate-800 bg-slate-900/60 p-3"
@@ -163,6 +204,7 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                     <p className="break-all text-sm font-medium text-slate-100">
                       {page.url}
                     </p>
+
                     <span
                       className={
                         page.hasCrawlError
@@ -170,7 +212,9 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                           : "text-xs text-slate-400"
                       }
                     >
-                      {page.hasCrawlError ? "Crawl fehlgeschlagen" : `HTTP ${page.httpStatus ?? "n/a"}`}
+                      {page.hasCrawlError
+                        ? "Crawl fehlgeschlagen"
+                        : `HTTP ${page.httpStatus ?? "n/a"}`}
                     </span>
                   </div>
 
@@ -215,24 +259,36 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
 
                       <div>
                         <dt className="text-slate-500">Ohne alt</dt>
-                        <dd className={page.imagesWithoutAlt > 0 ? "text-amber-200" : "text-slate-200"}>
+                        <dd
+                          className={
+                            page.imagesWithoutAlt > 0
+                              ? "text-amber-200"
+                              : "text-slate-200"
+                          }
+                        >
                           {page.imagesWithoutAlt}
                         </dd>
                       </div>
 
                       <div>
                         <dt className="text-slate-500">Interne Links</dt>
-                        <dd className="text-slate-200">{page.internalLinksCount}</dd>
+                        <dd className="text-slate-200">
+                          {page.internalLinksCount}
+                        </dd>
                       </div>
 
                       <div>
                         <dt className="text-slate-500">Externe Links</dt>
-                        <dd className="text-slate-200">{page.externalLinksCount}</dd>
+                        <dd className="text-slate-200">
+                          {page.externalLinksCount}
+                        </dd>
                       </div>
 
                       <div>
                         <dt className="text-slate-500">HTML-Größe</dt>
-                        <dd className="text-slate-200">{formatBytes(page.htmlSizeBytes)}</dd>
+                        <dd className="text-slate-200">
+                          {formatBytes(page.htmlSizeBytes)}
+                        </dd>
                       </div>
                     </dl>
                   )}
