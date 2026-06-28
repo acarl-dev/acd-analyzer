@@ -31,7 +31,7 @@ export interface CrawlResultsSummary {
 }
 
 export interface PageAnalysisResult {
-  id: number;
+  id: number | null;
   url: string;
   httpStatus: number | null;
   crawledAt: string | null;

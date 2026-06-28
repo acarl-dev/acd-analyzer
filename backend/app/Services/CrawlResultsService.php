@@ -14,10 +14,17 @@ final class CrawlResultsService
             'pages.headings',
             'pages.images',
             'pages.links',
+            'errors',
         ]);
 
-        $pages = $crawlRun->pages
-            ->map(fn ($page) => $this->mapPage($page))
+        $pageResults = $crawlRun->pages
+            ->map(fn ($page) => $this->mapPage($page));
+
+        $errorResults = $crawlRun->errors
+            ->map(fn ($crawlError) => $this->mapCrawlError($crawlError));
+
+        $pages = $pageResults
+            ->concat($errorResults)
             ->values();
 
         return [
@@ -85,6 +92,44 @@ final class CrawlResultsService
             'issues' => $issues,
         ];
     }
+
+    private function mapCrawlError($crawlError): array
+        {
+            return [
+                'id' => null,
+                'url' => $crawlError->url,
+                'httpStatus' => null,
+                'crawledAt' => $crawlError->created_at?->toISOString(),
+
+                'title' => null,
+                'titleLength' => null,
+
+                'metaDescription' => null,
+                'metaDescriptionLength' => null,
+
+                'h1' => null,
+                'h1Count' => 0,
+
+                'imageCount' => 0,
+                'imagesWithoutAlt' => 0,
+
+                'internalLinksCount' => 0,
+                'externalLinksCount' => 0,
+
+                'htmlSizeBytes' => null,
+
+                'hasCrawlError' => true,
+                'crawlError' => $crawlError->message,
+
+                'issues' => [
+                    [
+                        'code' => 'crawl_error',
+                        'severity' => 'error',
+                        'message' => "Die Seite konnte nicht gecrawlt werden: {$crawlError->message}",
+                    ],
+                ],
+            ];
+        }
 
     private function buildIssues(
         ?string $title,

@@ -124,7 +124,7 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
             <div className="space-y-3">
               {results.pages.map((page) => (
                 <div
-                  key={page.id}
+                  key={page.id ?? page.url}
                   className="rounded-lg border border-slate-800 bg-slate-900/60 p-3"
                 >
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -163,7 +163,7 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                     <ul className="mt-3 space-y-1 text-xs">
                       {page.issues.map((issue) => (
                         <li
-                          key={`${page.id}-${issue.code}`}
+                          key={`${page.id ?? page.url}-${issue.code}`}
                           className="rounded border border-amber-900/60 bg-amber-950/40 px-2 py-1 text-amber-100"
                         >
                           {issue.message}
