@@ -1,64 +1,166 @@
 # ACD Engineering Handbook
 
-## 1. Ziel des Projekts
+## 1. Vision
 
-ACD Analyzer ist die interne Analyseplattform von Alan Carl Digital.
-Sie sammelt Website-Daten, analysiert wiederkehrende Probleme und dient als Grundlage für spätere digitale Produkte.
+Alan Carl Digital entwickelt keine klassische Agentursoftware.
 
-## 2. Grundprinzipien
+ACD entwickelt eine Intelligence Engine, die Unternehmenswebsites analysiert, wiederkehrende Probleme erkennt und daraus langfristig digitale Produkte entstehen lässt.
 
-- So einfach wie möglich, so modular wie nötig.
-- Keine Technologie zweimal entwickeln.
-- Interne Engine vor Kundenprodukt.
-- Datenqualität vor Funktionsumfang.
-- Jede Klasse hat genau eine klare Verantwortung.
-- Erst funktionierend, dann sauber erweitern.
+---
 
-## 3. Architektur
+## 2. Architekturprinzipien
 
-- Laravel Backend
-- Next.js internes Dashboard
-- PostgreSQL
-- Docker Compose
-- Nginx
-- Später: Redis, Queue Worker, Playwright, Lighthouse, axe-core
+### So einfach wie möglich.
 
-## 4. Module
+### So modular wie nötig.
+
+### Erst funktionierend.
+
+### Danach sauber.
+
+### Refactoring ist Teil der Entwicklung.
+
+---
+
+## 3. Grundprinzipien
+
+* Daten sind wertvoller als Features.
+* Eine Klasse hat genau eine Verantwortung.
+* Jede Entscheidung muss Version 3.0 einfacher machen.
+* Erst verstehen, dann abstrahieren.
+* Keine Architektur für Probleme bauen, die noch nicht existieren.
+* Wiederverwendbare Komponenten bevorzugen.
+
+---
+
+## 4. Projektstruktur
 
 ### Engine
 
-Crawler, Downloader, Parser, Persister, Analyzer.
+* Downloader
+* Parser
+* DTOs
+* Persister
+* Analyzer
 
 ### Dashboard
 
-Internes Command Center zur Visualisierung, Kontrolle und Fehleranalyse.
+Internes Command Center.
+
+Nicht für Kunden.
 
 ### Produkte
 
-Spätere Kundenprodukte auf Basis wiederkehrender Erkenntnisse.
+Spätere SaaS-Produkte und Werkzeuge.
 
-## 5. Coding-Regeln
+---
 
-- Businesslogik ins Backend.
-- Frontend zeigt Daten und löst Aktionen aus.
-- Keine Fat Controller.
-- Keine God Services.
-- DTOs für strukturierte Übergaben.
-- Services nach Verantwortung trennen.
+## 5. Technologiestack
 
-## 6. Definition of Done
+Backend
 
-Eine Funktion gilt erst als fertig, wenn:
+* Laravel
 
-- sie lokal in Docker läuft,
-- sie nachvollziehbar getestet wurde,
-- Fehlerfälle berücksichtigt sind,
-- sie keine unnötige Komplexität einführt,
-- sie zur Roadmap passt.
+Frontend
 
-## 7. Aktueller Sprint
+* Next.js
 
-Sprint 2: Crawler modularisieren.
+Datenbank
 
-Ziel:
-CrawlerService orchestriert nur noch Downloader, Parser und Persister.
+* PostgreSQL
+
+Container
+
+* Docker Compose
+
+Webserver
+
+* Nginx
+
+Später
+
+* Redis
+* Queue Worker
+* Playwright
+* Lighthouse
+* axe-core
+
+---
+
+## 6. Architekturregeln
+
+Businesslogik gehört ins Backend.
+
+Frontend visualisiert Daten.
+
+DTOs transportieren Daten.
+
+Services orchestrieren.
+
+Parser extrahieren Informationen.
+
+Persister speichern Ergebnisse.
+
+Der CrawlerService enthält keine Parserlogik.
+
+Controller enthalten keine Geschäftslogik
+
+Form Requests werden für Validierung verwendet
+
+---
+
+## 7. Coding Standards
+
+* PSR-12
+* TypeScript Strict Mode
+* SOLID
+* Kleine Klassen
+* Kleine Methoden
+* Aussagekräftige Namen
+
+---
+
+## 8. Definition of Done
+
+Eine Aufgabe ist erst abgeschlossen wenn
+
+* Docker läuft
+* Tests erfolgreich sind
+* Architektur sauber bleibt
+* ADR bei Bedarf erstellt wurde
+* Handbook aktualisiert wurde
+* Roadmap geprüft wurde
+
+---
+
+## 9. Sprint Workflow
+
+Jeder Sprint besitzt
+
+* Ziel
+* Aufgaben
+* Definition of Done
+* Architekturentscheidungen
+* Abschluss
+
+---
+
+## 10. Dokumentation
+
+ROADMAP beschreibt den Entwicklungsplan.
+
+Engineering Handbook beschreibt die Arbeitsweise.
+
+ADR beschreibt Architekturentscheidungen.
+
+README erklärt das Projekt.
+
+AGENTS.md enthält Regeln für KI-Assistenten.
+
+---
+
+## 11. Philosophie
+
+Wir entwickeln keine Software, die heute funktioniert.
+
+Wir entwickeln Software, die in fünf Jahren noch erweitert werden kann.
