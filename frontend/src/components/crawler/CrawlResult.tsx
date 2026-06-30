@@ -6,20 +6,44 @@ import type { CrawlResultsResponse, CrawlRun } from "@/types/crawl";
 
 type SeverityFilter = "all" | "error" | "warning" | "info";
 
+function getSeverityLabel(severity: "info" | "warning" | "error") {
+  if (severity === "error") {
+    return "Fehler";
+  }
+
+  if (severity === "warning") {
+    return "Warnung";
+  }
+
+  return "Hinweis";
+}
+
+function getSeverityBadgeClassName(severity: "info" | "warning" | "error") {
+  if (severity === "error") {
+    return "border-red-800 bg-red-950/70 text-red-200";
+  }
+
+  if (severity === "warning") {
+    return "border-amber-800 bg-amber-950/70 text-amber-200";
+  }
+
+  return "border-sky-800 bg-sky-950/70 text-sky-200";
+}
+
 interface CrawlResultProps {
   crawlRun: CrawlRun;
 }
 
 function getIssueClassName(severity: "info" | "warning" | "error") {
   if (severity === "error") {
-    return "rounded border border-red-900/60 bg-red-950/40 px-2 py-1 text-red-100";
+    return "rounded-lg border border-red-900/50 bg-red-950/25 px-3 py-2";
   }
 
   if (severity === "warning") {
-    return "rounded border border-amber-900/60 bg-amber-950/40 px-2 py-1 text-amber-100";
+    return "rounded-lg border border-amber-900/50 bg-amber-950/25 px-3 py-2";
   }
 
-  return "rounded border border-sky-900/60 bg-sky-950/40 px-2 py-1 text-sky-100";
+  return "rounded-lg border border-sky-900/50 bg-sky-950/25 px-3 py-2";
 }
 
 function formatBytes(bytes: number | null) {
@@ -323,7 +347,7 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                         <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/40 p-3">
                           <div className="mb-2 flex items-center justify-between gap-3">
                             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                              Gefundene Hinweise
+                              Gefundene Probleme
                             </p>
 
                             <span className="text-xs text-slate-500">
@@ -337,9 +361,19 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                                 key={`${page.id ?? page.url}-${issue.code}`}
                                 className={getIssueClassName(issue.severity)}
                               >
-                                <span className="font-medium">
-                                  {issue.message}
-                                </span>
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                                  <span
+                                    className={`w-fit rounded-full border px-2 py-0.5 font-medium ${getSeverityBadgeClassName(
+                                      issue.severity,
+                                    )}`}
+                                  >
+                                    {getSeverityLabel(issue.severity)}
+                                  </span>
+
+                                  <span className="font-medium leading-relaxed text-slate-100">
+                                    {issue.message}
+                                  </span>
+                                </div>
                               </li>
                             ))}
                           </ul>
