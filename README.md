@@ -33,9 +33,12 @@ Aktuell umgesetzt:
   - H1-H3-Überschriften
   - Links
   - Bildern und Alt-Texten
-- API-Endpunkt für Crawl-Ergebnisse
+- API-Endpunkte zum Starten von Crawls, Abrufen letzter Crawl-Läufe und Anzeigen von Crawl-Ergebnissen
+- Eigene Analyzer-Klasse für Page-Level-Issues (`PageIssueAnalyzer`)
 - Erste Analyse-Regeln für typische Seitenprobleme
 - Zusammenfassung der Ergebnisse im Dashboard
+- Filterung der Ergebnisse nach Severity (`error`, `warning`, `info`)
+- Backend-Tests für Analyzer-Regeln und Ergebnis-Mapping
 - Dokumentation von Architekturentscheidungen über ADRs
 
 Noch nicht umgesetzt bzw. geplant:
@@ -150,6 +153,14 @@ Beispiel-Body:
   "url": "https://example.com"
 }
 ```
+
+### Letzte Crawl-Läufe abrufen
+
+```http
+GET /api/crawl-runs
+```
+
+Dieser Endpunkt liefert die letzten Crawl-Läufe mit Website, Status, Seitenanzahl und Zeitstempeln.
 
 ### Crawl-Ergebnisse abrufen
 
@@ -315,7 +326,7 @@ Oder im Docker-Container:
 docker compose exec app php artisan test
 ```
 
-Aktuell gibt es unter anderem Tests für den `PageIssueAnalyzer`.
+Aktuell gibt es unter anderem Tests für den `PageIssueAnalyzer` und für das Mapping im `CrawlResultsService`.
 
 ---
 
@@ -326,6 +337,7 @@ Wichtige Projektdokumente:
 - `ROADMAP.md` – langfristige Produkt- und Entwicklungsplanung
 - `docs/handbook/engineering-handbook.md` – technische Arbeitsweise und Architekturprinzipien
 - `docs/adr/` – Architecture Decision Records
+- `docs/adr/0006-page-issue-analyzer.md` – Entscheidung zur Trennung der Analyzer-Regeln vom Ergebnis-Mapping
 - `docs/analyzer/issue-codes.md` – Dokumentation der Analyzer-Regeln
 
 Die Dokumentation ist Teil des Projekts und soll bei größeren technischen Entscheidungen mitgepflegt werden.
