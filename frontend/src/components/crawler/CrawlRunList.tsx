@@ -146,40 +146,77 @@ export function CrawlRunList({
               const isSelected = selectedCrawlRunId === crawlRun.id;
 
               return (
-                <button
+                <div
                   key={crawlRun.id}
-                  type="button"
-                  onClick={() => onSelect(crawlRun)}
                   className={
                     isSelected
-                      ? "grid gap-2 bg-slate-800/80 p-4 text-left transition hover:bg-slate-800 sm:grid-cols-[1fr_auto]"
-                      : "grid gap-2 bg-slate-950/60 p-4 text-left transition hover:bg-slate-800/70 sm:grid-cols-[1fr_auto]"
+                      ? "space-y-3 bg-slate-800/80 p-4"
+                      : "space-y-3 bg-slate-950/60 p-4 transition hover:bg-slate-800/50"
                   }
                 >
-                  <div>
-                    <p className="break-all text-sm font-medium text-slate-100">
-                      {crawlRun.siteUrl ?? "Unbekannte Website"}
-                    </p>
+                  <div className="min-w-0">
+                    {crawlRun.siteUrl ? (
+                      <a
+                        href={crawlRun.siteUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block truncate text-sm font-semibold text-slate-100 underline decoration-slate-600 underline-offset-4 transition hover:text-sky-200 hover:decoration-sky-400"
+                        title={crawlRun.siteUrl}
+                      >
+                        {crawlRun.siteUrl}
+                      </a>
+                    ) : (
+                      <p className="truncate text-sm font-semibold text-slate-100">
+                        Unbekannte Website
+                      </p>
+                    )}
 
                     <p className="mt-1 text-xs text-slate-500">
-                      Crawl ID {crawlRun.id} · Website ID {crawlRun.websiteId}
+                      Crawl ID {crawlRun.id} · Website ID {crawlRun.websiteId} ·{" "}
+                      {formatDate(crawlRun.createdAt)}
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs sm:justify-end">
+                  <div className="flex flex-wrap gap-2 text-xs">
                     <span className={getStatusClassName(crawlRun.status)}>
                       {crawlRun.status}
                     </span>
 
-                    <span className="text-slate-400">
-                      Seiten: {crawlRun.pagesCrawled}
+                    <span className="rounded-full bg-slate-900 px-2 py-1 text-slate-300">
+                      {crawlRun.pagesCrawled} Seite{crawlRun.pagesCrawled === 1 ? "" : "n"}
                     </span>
 
-                    <span className="text-slate-400">
-                      {formatDate(crawlRun.createdAt)}
+                    <span
+                      className={
+                        crawlRun.issueSummary.total > 0
+                          ? "rounded-full bg-amber-950/50 px-2 py-1 text-amber-200"
+                          : "rounded-full bg-emerald-950/40 px-2 py-1 text-emerald-200"
+                      }
+                    >
+                      {crawlRun.issueSummary.total} Probleme
                     </span>
                   </div>
-                </button>
+
+                  {crawlRun.issueSummary.total > 0 && (
+                    <p className="text-xs text-slate-500">
+                      Fehler: {crawlRun.issueSummary.errors} · Warnungen:{" "}
+                      {crawlRun.issueSummary.warnings} · Hinweise:{" "}
+                      {crawlRun.issueSummary.infos}
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => onSelect(crawlRun)}
+                    className={
+                      isSelected
+                        ? "rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-950 transition hover:bg-white"
+                        : "rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-200 transition hover:border-slate-500 hover:text-white"
+                    }
+                  >
+                    {isSelected ? "Ausblenden" : "Analyse anzeigen"}
+                  </button>
+                </div>
               );
             })}
           </div>

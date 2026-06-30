@@ -36,6 +36,7 @@ export function DashboardSummary({ refreshKey = 0 }: DashboardSummaryProps) {
   const [summary, setSummary] = useState<DashboardSummaryType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isTopIssuesOpen, setIsTopIssuesOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -136,8 +137,12 @@ export function DashboardSummary({ refreshKey = 0 }: DashboardSummaryProps) {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
-            <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <div className="rounded-xl border border-slate-800 bg-slate-950/60">
+            <button
+              type="button"
+              onClick={() => setIsTopIssuesOpen((current) => !current)}
+              className="flex w-full flex-col gap-2 p-4 text-left sm:flex-row sm:items-center sm:justify-between"
+            >
               <div>
                 <h3 className="font-semibold text-slate-100">
                   Häufigste Probleme
@@ -146,37 +151,45 @@ export function DashboardSummary({ refreshKey = 0 }: DashboardSummaryProps) {
                   Gruppiert nach Issue-Code über alle gespeicherten Analysen.
                 </p>
               </div>
-            </div>
 
-            {summary.topIssues.length === 0 ? (
-              <p className="text-sm text-slate-400">
-                Es wurden noch keine Probleme gespeichert.
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {summary.topIssues.map((issue) => (
-                  <li
-                    key={`${issue.code}-${issue.severity}`}
-                    className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/70 p-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-100">
-                        {issue.message}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        <span className={getSeverityClassName(issue.severity)}>
-                          {getSeverityLabel(issue.severity)}
-                        </span>{" "}
-                        · {issue.code}
-                      </p>
-                    </div>
+              <span className="rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300">
+                {isTopIssuesOpen ? "Einklappen" : "Ausklappen"}
+              </span>
+            </button>
 
-                    <span className="w-fit rounded-full bg-slate-800 px-3 py-1 text-sm font-semibold text-slate-100">
-                      {issue.count}×
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            {isTopIssuesOpen && (
+              <div className="border-t border-slate-800 p-4 pt-3">
+                {summary.topIssues.length === 0 ? (
+                  <p className="text-sm text-slate-400">
+                    Es wurden noch keine Probleme gespeichert.
+                  </p>
+                ) : (
+                  <ul className="space-y-2">
+                    {summary.topIssues.map((issue) => (
+                      <li
+                        key={`${issue.code}-${issue.severity}`}
+                        className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/70 p-3 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-slate-100">
+                            {issue.message}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            <span className={getSeverityClassName(issue.severity)}>
+                              {getSeverityLabel(issue.severity)}
+                            </span>{" "}
+                            · {issue.code}
+                          </p>
+                        </div>
+
+                        <span className="w-fit rounded-full bg-slate-800 px-3 py-1 text-sm font-semibold text-slate-100">
+                          {issue.count}×
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             )}
           </div>
         </div>

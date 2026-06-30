@@ -77,6 +77,12 @@ export interface CrawlRunListItem {
   startedAt: string | null;
   finishedAt: string | null;
   createdAt: string | null;
+  issueSummary: {
+    total: number;
+    errors: number;
+    warnings: number;
+    infos: number;
+  };
 }
 
 export interface CrawlRunListResponse {

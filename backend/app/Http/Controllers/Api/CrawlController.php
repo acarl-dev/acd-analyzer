@@ -16,6 +16,12 @@ class CrawlController extends Controller
     {
         $crawlRuns = CrawlRun::query()
             ->with('website')
+            ->withCount([
+                'issues as total_issues_count',
+                'issues as error_issues_count' => fn ($query) => $query->where('severity', 'error'),
+                'issues as warning_issues_count' => fn ($query) => $query->where('severity', 'warning'),
+                'issues as info_issues_count' => fn ($query) => $query->where('severity', 'info'),
+            ])
             ->latest()
             ->limit(20)
             ->get()
@@ -28,6 +34,12 @@ class CrawlController extends Controller
                 'startedAt' => $crawlRun->started_at?->toISOString(),
                 'finishedAt' => $crawlRun->finished_at?->toISOString(),
                 'createdAt' => $crawlRun->created_at?->toISOString(),
+                'issueSummary' => [
+                    'total' => $crawlRun->total_issues_count,
+                    'errors' => $crawlRun->error_issues_count,
+                    'warnings' => $crawlRun->warning_issues_count,
+                    'infos' => $crawlRun->info_issues_count,
+                ],
             ]);
 
         return response()->json([

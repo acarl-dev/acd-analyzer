@@ -202,9 +202,14 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                 >
                   <div className="flex flex-col gap-2 border-b border-slate-800 pb-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                      <p className="break-all text-sm font-semibold text-slate-100">
+                      <a
+                        href={page.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="break-all text-sm font-semibold text-slate-100 underline decoration-slate-600 underline-offset-4 transition hover:text-sky-200 hover:decoration-sky-400"
+                      >
                         {page.url}
-                      </p>
+                      </a>
 
                       <p className="mt-1 text-xs text-slate-500">
                         {page.hasCrawlError
