@@ -4,15 +4,8 @@ namespace App\Services;
 
 use App\Models\CrawlRun;
 use Illuminate\Support\Collection;
-use App\Services\Analyzer\PageIssueAnalyzer;
-
 final class CrawlResultsService
 {
-        public function __construct(
-        private readonly PageIssueAnalyzer $pageIssueAnalyzer,
-    ) {
-    }
-
     public function buildForCrawlRun(CrawlRun $crawlRun): array
     {
         $crawlRun->load([
@@ -20,7 +13,8 @@ final class CrawlResultsService
             'pages.headings',
             'pages.images',
             'pages.links',
-            'errors',
+            'pages.issues',
+            'errors.issues',
         ]);
 
         $pageResults = $crawlRun->pages
@@ -60,30 +54,14 @@ final class CrawlResultsService
             ->where('is_internal', false)
             ->count();
 
-                $issues = $this->pageIssueAnalyzer->analyze([
-                    'title' => $page->title,
-                    'meta_description' => $page->meta_description,
-                    'headings' => $page->headings
-                        ->map(fn ($heading) => [
-                            'level' => $heading->level,
-                            'text' => $heading->text,
-                        ])
-                        ->values()
-                        ->all(),
-                    'images' => $page->images
-                        ->map(fn ($image) => [
-                            'alt' => $image->alt,
-                        ])
-                        ->values()
-                        ->all(),
-                    'links' => $page->links
-                        ->map(fn ($link) => [
-                            'type' => $link->is_internal ? 'internal' : 'external',
-                        ])
-                        ->values()
-                        ->all(),
-                    'html_size_bytes' => $page->html !== null ? strlen($page->html) : 0,
-                ]);
+                $issues = $page->issues
+                    ->map(fn ($issue) => [
+                        'code' => $issue->code,
+                        'severity' => $issue->severity,
+                        'message' => $issue->message,
+                    ])
+                    ->values()
+                    ->all();
 
         return [
             'id' => $page->id,
@@ -145,13 +123,14 @@ final class CrawlResultsService
             'hasCrawlError' => true,
             'crawlError' => $crawlError->message,
 
-            'issues' => [
-                [
-                    'code' => 'crawl_error',
-                    'severity' => 'error',
-                    'message' => "Die Seite konnte nicht gecrawlt werden: {$crawlError->message}",
-                ],
-            ],
+            'issues' => $crawlError->issues
+                ->map(fn ($issue) => [
+                    'code' => $issue->code,
+                    'severity' => $issue->severity,
+                    'message' => $issue->message,
+                ])
+                ->values()
+                ->all(),
         ];
     }
 

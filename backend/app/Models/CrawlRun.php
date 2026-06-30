@@ -36,4 +36,9 @@ class CrawlRun extends Model
     {
         return $this->hasMany(CrawlError::class);
     }
+
+    public function issues(): HasMany
+    {
+        return $this->hasMany(PageIssue::class);
+    }
 }

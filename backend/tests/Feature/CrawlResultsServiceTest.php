@@ -12,6 +12,7 @@ use App\Models\Website;
 use App\Services\CrawlResultsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\PageIssue;
 
 class CrawlResultsServiceTest extends TestCase
 {
@@ -65,6 +66,50 @@ class CrawlResultsServiceTest extends TestCase
             'is_internal' => false,
         ]);
 
+        PageIssue::forceCreate([
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => $page->id,
+            'url' => $page->url,
+            'code' => 'images_without_alt',
+            'severity' => 'warning',
+            'message' => '2 Bilder haben kein alt-Attribut.',
+            'context' => null,
+            'analyzer_version' => 'page_issue_analyzer:v1',
+        ]);
+
+        PageIssue::forceCreate([
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => $page->id,
+            'url' => $page->url,
+            'code' => 'high_missing_alt_ratio',
+            'severity' => 'warning',
+            'message' => 'Ein hoher Anteil der Bilder hat kein alt-Attribut.',
+            'context' => null,
+            'analyzer_version' => 'page_issue_analyzer:v1',
+        ]);
+
+        PageIssue::forceCreate([
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => $page->id,
+            'url' => $page->url,
+            'code' => 'few_internal_links',
+            'severity' => 'warning',
+            'message' => 'Die Seite hat sehr wenige interne Links.',
+            'context' => null,
+            'analyzer_version' => 'page_issue_analyzer:v1',
+        ]);
+
+        PageIssue::forceCreate([
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => $page->id,
+            'url' => $page->url,
+            'code' => 'large_html_size',
+            'severity' => 'info',
+            'message' => 'Die gespeicherte HTML-Datei ist ungewöhnlich groß.',
+            'context' => null,
+            'analyzer_version' => 'page_issue_analyzer:v1',
+        ]);
+
         $results = app(CrawlResultsService::class)->buildForCrawlRun($crawlRun);
 
         $this->assertSame($crawlRun->id, $results['crawlRunId']);
@@ -104,10 +149,23 @@ class CrawlResultsServiceTest extends TestCase
             'pages_crawled' => 0,
         ]);
 
-        CrawlError::forceCreate([
+        $crawlError = CrawlError::forceCreate([
             'crawl_run_id' => $crawlRun->id,
             'url' => 'https://example.com/broken',
             'message' => 'Connection timeout',
+        ]);
+
+        PageIssue::forceCreate([
+            'crawl_run_id' => $crawlRun->id,
+            'crawl_error_id' => $crawlError->id,
+            'url' => $crawlError->url,
+            'code' => 'crawl_error',
+            'severity' => 'error',
+            'message' => 'Die Seite konnte nicht gecrawlt werden: Connection timeout',
+            'context' => [
+                'message' => 'Connection timeout',
+            ],
+            'analyzer_version' => 'page_issue_analyzer:v1',
         ]);
 
         $results = app(CrawlResultsService::class)->buildForCrawlRun($crawlRun);

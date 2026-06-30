@@ -19,6 +19,12 @@ class Page extends Model
         'response_time_ms',
     ];
 
+    
+    public function issues(): HasMany
+    {
+        return $this->hasMany(\App\Models\PageIssue::class);
+    }
+    
     public function website(): BelongsTo
     {
         return $this->belongsTo(Website::class);
