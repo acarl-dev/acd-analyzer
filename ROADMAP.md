@@ -157,6 +157,9 @@ Eigene Analyse-Engine entwickeln.
 
 * Aufteilung des HtmlParsers in einzelne Extractor-Klassen
 * Analyzer-Module
+* Persistente Analyseergebnisse über page_issues
+* Analyseausführung nach erfolgreicher Crawl-Persistierung
+* Results-Endpunkt liest gespeicherte Issues statt Live-Analyse auszuführen
 
 ---
 

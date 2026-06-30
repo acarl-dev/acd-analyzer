@@ -114,6 +114,16 @@ Analyse-Logik gehört backendseitig in Services, nicht ins Frontend
 
 Analyzer-Regeln gehören in Analyzer-Klassen, nicht direkt in Mapping- oder Controller-Klassen
 
+Analyseergebnisse werden persistiert und nicht beim Abruf der Results live berechnet.
+
+CrawlResultsService liest gespeicherte Crawl-Daten und gespeicherte Issues.
+
+CrawlAnalysisService orchestriert die Analyse eines CrawlRuns und speichert Issues.
+
+Ein CrawlRun gilt erst als completed, wenn Crawl-Daten persistiert und die Analyse erfolgreich abgeschlossen wurden.
+
+Controller starten Anwendungsfälle, führen aber keine Analyse- oder Mappinglogik selbst aus.
+
 ---
 
 ## 7. Coding Standards
