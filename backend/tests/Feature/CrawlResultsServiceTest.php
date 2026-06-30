@@ -188,4 +188,76 @@ class CrawlResultsServiceTest extends TestCase
         $this->assertSame(0, $results['summary']['warnings']);
         $this->assertSame(0, $results['summary']['infos']);
     }
+
+    public function test_it_returns_persisted_issues_sorted_by_severity(): void
+    {
+        $website = Website::create([
+            'url' => 'https://example.com',
+            'host' => 'example.com',
+        ]);
+
+        $crawlRun = CrawlRun::create([
+            'website_id' => $website->id,
+            'status' => 'completed',
+            'started_at' => now(),
+            'finished_at' => now(),
+            'pages_crawled' => 1,
+        ]);
+
+        $page = Page::create([
+            'website_id' => $website->id,
+            'crawl_run_id' => $crawlRun->id,
+            'url' => 'https://example.com',
+            'status_code' => 200,
+            'title' => 'Example',
+            'meta_description' => 'Example meta description',
+            'html' => '<html><body><h1>Example</h1></body></html>',
+        ]);
+
+        PageIssue::create([
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => $page->id,
+            'crawl_error_id' => null,
+            'url' => $page->url,
+            'code' => 'info_issue',
+            'severity' => 'info',
+            'message' => 'Info issue',
+        ]);
+
+        PageIssue::create([
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => $page->id,
+            'crawl_error_id' => null,
+            'url' => $page->url,
+            'code' => 'error_issue',
+            'severity' => 'error',
+            'message' => 'Error issue',
+        ]);
+
+        PageIssue::create([
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => $page->id,
+            'crawl_error_id' => null,
+            'url' => $page->url,
+            'code' => 'warning_issue',
+            'severity' => 'warning',
+            'message' => 'Warning issue',
+        ]);
+
+        $result = app(CrawlResultsService::class)->buildForCrawlRun($crawlRun);
+
+        $issues = $result['pages'][0]['issues'];
+
+        $this->assertSame([
+            'error',
+            'warning',
+            'info',
+        ], array_column($issues, 'severity'));
+
+        $this->assertSame([
+            'error_issue',
+            'warning_issue',
+            'info_issue',
+        ], array_column($issues, 'code'));
+    }
 }

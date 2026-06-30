@@ -20,16 +20,16 @@ function getSeverityLabel(severity: "error" | "warning" | "info") {
   return "Hinweis";
 }
 
-function getSeverityClassName(severity: "error" | "warning" | "info") {
+function getSeverityBadgeClassName(severity: "error" | "warning" | "info") {
   if (severity === "error") {
-    return "text-red-300";
+    return "border-red-800 bg-red-950/70 text-red-200";
   }
 
   if (severity === "warning") {
-    return "text-amber-300";
+    return "border-amber-800 bg-amber-950/70 text-amber-200";
   }
 
-  return "text-sky-300";
+  return "border-sky-800 bg-sky-950/70 text-sky-200";
 }
 
 export function DashboardSummary({ refreshKey = 0 }: DashboardSummaryProps) {
@@ -174,15 +174,20 @@ export function DashboardSummary({ refreshKey = 0 }: DashboardSummaryProps) {
                           <p className="text-sm font-medium text-slate-100">
                             {issue.message}
                           </p>
-                          <p className="mt-1 text-xs text-slate-500">
-                            <span className={getSeverityClassName(issue.severity)}>
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                            <span
+                              className={`rounded-full border px-2 py-0.5 font-medium ${getSeverityBadgeClassName(
+                                issue.severity,
+                              )}`}
+                            >
                               {getSeverityLabel(issue.severity)}
-                            </span>{" "}
-                            · {issue.code}
-                          </p>
+                            </span>
+
+                            <span className="font-mono text-slate-500">{issue.code}</span>
+                          </div>
                         </div>
 
-                        <span className="w-fit rounded-full bg-slate-800 px-3 py-1 text-sm font-semibold text-slate-100">
+                        <span className="w-fit rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-sm font-semibold text-slate-100">
                           {issue.count}×
                         </span>
                       </li>
