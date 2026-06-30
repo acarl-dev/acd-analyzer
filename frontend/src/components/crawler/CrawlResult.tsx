@@ -293,22 +293,41 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                     </dl>
                   )}
 
-                  {page.issues.length > 0 ? (
-                    <ul className="mt-3 space-y-1 text-xs">
-                      {page.issues.map((issue) => (
-                        <li
-                          key={`${page.id ?? page.url}-${issue.code}`}
-                          className={getIssueClassName(issue.severity)}
-                        >
-                          {issue.message}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="mt-3 text-xs text-emerald-300">
-                      Keine Probleme erkannt.
-                    </p>
-                  )}
+                  {(() => {
+                    const visibleIssues =
+                      severityFilter === "all"
+                        ? page.issues
+                        : page.issues.filter((issue) => issue.severity === severityFilter);
+
+                    if (visibleIssues.length > 0) {
+                      return (
+                        <ul className="mt-3 space-y-1 text-xs">
+                          {visibleIssues.map((issue) => (
+                            <li
+                              key={`${page.id ?? page.url}-${issue.code}`}
+                              className={getIssueClassName(issue.severity)}
+                            >
+                              {issue.message}
+                            </li>
+                          ))}
+                        </ul>
+                      );
+                    }
+
+                    if (page.issues.length > 0) {
+                      return (
+                        <p className="mt-3 text-xs text-slate-400">
+                          Für diesen Filter gibt es auf dieser Seite keine passenden Issues.
+                        </p>
+                      );
+                    }
+
+                    return (
+                      <p className="mt-3 text-xs text-emerald-300">
+                        Keine Probleme erkannt.
+                      </p>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
