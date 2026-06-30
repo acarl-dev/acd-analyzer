@@ -8,7 +8,6 @@ use App\Http\Resources\CrawlRunResource;
 use App\Models\CrawlRun;
 use App\Services\Crawler\CrawlerService;
 use Illuminate\Http\JsonResponse;
-use App\Services\CrawlAnalysisService;
 
 class CrawlController extends Controller
 {
@@ -50,11 +49,8 @@ class CrawlController extends Controller
     public function store(
         StoreCrawlRequest $request,
         CrawlerService $crawler,
-        CrawlAnalysisService $crawlAnalysisService,
     ): CrawlRunResource {
         $crawlRun = $crawler->crawl($request->url());
-
-        $crawlAnalysisService->analyze($crawlRun);
 
         return new CrawlRunResource($crawlRun);
     }

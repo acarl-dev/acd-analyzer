@@ -8,6 +8,7 @@ use App\Services\Crawler\Download\PageDownloader;
 use App\Services\Crawler\Parsing\HtmlParser;
 use App\Services\Crawler\Persistence\CrawlResultPersister;
 use Illuminate\Support\Str;
+use App\Services\CrawlAnalysisService;
 
 class CrawlerService
 {
@@ -15,6 +16,7 @@ class CrawlerService
         private readonly PageDownloader $downloader,
         private readonly HtmlParser $parser,
         private readonly CrawlResultPersister $persister,
+        private readonly CrawlAnalysisService $crawlAnalysisService,
     ) {
     }
 
@@ -44,6 +46,13 @@ class CrawlerService
                 crawlRun: $crawlRun,
                 page: $parsedPage
             );
+
+            $this->crawlAnalysisService->analyze($crawlRun);
+
+            $crawlRun->update([
+                'status' => 'completed',
+                'finished_at' => now(),
+            ]);
         } catch (\Throwable $exception) {
             $crawlRun->errors()->create([
                 'url' => $normalizedUrl,

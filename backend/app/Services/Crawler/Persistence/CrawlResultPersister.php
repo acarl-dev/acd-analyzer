@@ -37,8 +37,6 @@ class CrawlResultPersister
         }
 
         $crawlRun->update([
-            'status' => 'completed',
-            'finished_at' => now(),
             'pages_crawled' => 1,
         ]);
     }

@@ -36,6 +36,28 @@ final class CrawlResultsService
         ];
     }
 
+    private function mapIssues(Collection $issues): array
+    {
+        $severityOrder = [
+            'error' => 0,
+            'warning' => 1,
+            'info' => 2,
+        ];
+
+        return $issues
+            ->sortBy([
+                fn ($a, $b) => ($severityOrder[$a->severity] ?? 99) <=> ($severityOrder[$b->severity] ?? 99),
+                fn ($a, $b) => $a->code <=> $b->code,
+            ])
+            ->map(fn ($issue) => [
+                'code' => $issue->code,
+                'severity' => $issue->severity,
+                'message' => $issue->message,
+            ])
+            ->values()
+            ->all();
+    }
+
     private function mapPage($page): array
     {
         $h1Headings = $page->headings->where('level', 1);
@@ -91,7 +113,7 @@ final class CrawlResultsService
             'hasCrawlError' => false,
             'crawlError' => null,
 
-            'issues' => $issues,
+            'issues' => $this->mapIssues($page->issues),
         ];
     }
 
@@ -123,14 +145,7 @@ final class CrawlResultsService
             'hasCrawlError' => true,
             'crawlError' => $crawlError->message,
 
-            'issues' => $crawlError->issues
-                ->map(fn ($issue) => [
-                    'code' => $issue->code,
-                    'severity' => $issue->severity,
-                    'message' => $issue->message,
-                ])
-                ->values()
-                ->all(),
+            'issues' => $this->mapIssues($crawlError->issues),
         ];
     }
 
