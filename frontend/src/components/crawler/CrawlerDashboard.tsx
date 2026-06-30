@@ -5,6 +5,7 @@ import { CrawlForm } from "@/components/crawler/CrawlForm";
 import { CrawlResult } from "@/components/crawler/CrawlResult";
 import { CrawlRunList } from "@/components/crawler/CrawlRunList";
 import type { CrawlRun, CrawlRunListItem } from "@/types/crawl";
+import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 
 function mapListItemToCrawlRun(crawlRun: CrawlRunListItem): CrawlRun {
   return {
@@ -41,6 +42,8 @@ export function CrawlerDashboard() {
 
   return (
     <div className="space-y-6">
+      <DashboardSummary refreshKey={refreshKey} />
+      
       <CrawlForm onCrawlCreated={handleCrawlCreated} />
 
       <div className="grid gap-6 xl:grid-cols-[420px_1fr] xl:items-start">

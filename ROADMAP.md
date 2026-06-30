@@ -676,19 +676,56 @@ Frontend            → zeigt normalisierte Issues an
 * Architekturentscheidung dokumentiert:
 
   * `ADR-0007: Page Issue Analyzer`
+* * Persistente Analyzer-Issues eingeführt:
+
+  * neue Tabelle `page_issues`
+  * neues Model `PageIssue`
+  * Issues werden nach Crawl-Läufen gespeichert
+  * alte Issues eines CrawlRuns werden bei erneuter Analyse ersetzt
+
+* `CrawlAnalysisService` eingeführt:
+
+  * lädt gespeicherte Crawl-Daten
+  * ruft `PageIssueAnalyzer` auf
+  * speichert erkannte Issues persistent
+  * mappt Crawl-Fehler als `crawl_error`
+
+* `CrawlResultsService` auf gespeicherte Issues umgestellt:
+
+  * Analyseergebnisse werden nicht mehr live beim Anzeigen erzeugt
+  * Dashboard liest persistente Issues aus der Datenbank
+
+* Dashboard-Gesamtübersicht ergänzt:
+
+  * Websites gesamt
+  * Crawls gesamt
+  * Websites mit Problemen
+  * Probleme gesamt
+  * Probleme nach Severity
+  * häufigste Probleme
+
+* Re-Analyze-Command ergänzt:
+
+  * `php artisan acd:analyze-crawl-runs`
+  * `php artisan acd:analyze-crawl-runs --id=...`
+
+* Tests erweitert:
+
+  * `CrawlAnalysisServiceTest`
+  * `DashboardSummaryServiceTest`
 
 ---
 
 ### Offene Sprint-4.3-Aufgaben
 
-* Schwellwerte anhand echter Crawl-Ergebnisse prüfen
+* URLs in Crawl-Liste und Ergebnisdetails klickbar machen
 
-* Ergebnisliste optisch/funktional für mehr Issues weiter verbessern
+* Problemzahlen in der Crawl-Liste anzeigen
 
-* prüfen, ob innerhalb gefilterter Seiten nur passende Issues angezeigt werden sollen
+* Detailroute für einzelne CrawlRuns vorbereiten:
 
-* Detailansicht pro Seite vorbereiten
+  * `/crawl-runs/{id}`
 
-* Tests für `CrawlResultsService` ergänzen, damit die Integration mit `PageIssueAnalyzer` abgesichert ist
+* Dashboard-Layout mit wachsender Datenmenge weiter verbessern
 
-* Sprint-4.3-Abschlussreview durchführen
+* Strategie für Analyzer-Versionierung weiter ausarbeiten
