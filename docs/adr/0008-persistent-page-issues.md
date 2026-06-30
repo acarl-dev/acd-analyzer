@@ -65,3 +65,49 @@ CrawlResultsService
 DashboardSummaryService
 → reads stored issues
 → builds global dashboard overview
+
+Consequences
+Positive
+Crawl results become historically stable.
+Dashboard summaries can query stored issues directly.
+Issue counts across websites and crawl runs become easier to calculate.
+Reports can be generated from persisted analyzer results.
+Analyzer results become a first-class domain concept.
+Future analyzer versions can be tracked.
+Negative
+Additional database table and model are required.
+Analyzer execution becomes a separate application step.
+Existing result mapping must be changed from live analysis to persisted issues.
+Re-running analysis needs a clear strategy to avoid duplicate issues.
+Implementation Strategy
+
+The first implementation will persist page-level issues after a crawl run has completed.
+
+Existing page-level analyzer output keeps the current format:
+
+code
+severity
+message
+
+The persistence layer will add:
+
+crawl_run_id
+page_id
+url
+context
+analyzer_version
+
+Crawl errors may also be mapped into the issue model so that global summaries can count them together with page issues.
+
+To avoid duplicate issues, the first implementation should delete existing issues for a crawl run before storing newly generated issues.
+
+Follow-up Work
+Add page_issues table.
+Add PageIssue model.
+Add relationships on CrawlRun, Page and CrawlError.
+Add CrawlAnalysisService.
+Run analysis after a successful crawl.
+Change CrawlResultsService to read persisted issues.
+Add dashboard summary based on stored issues.
+Add analyzer versioning strategy.
+Consider separate analyzer result tables if the issue model grows significantly.
