@@ -67,3 +67,18 @@ export interface CrawlResultsResponse {
   summary: CrawlResultsSummary;
   pages: PageAnalysisResult[];
 }
+
+export interface CrawlRunListItem {
+  id: number;
+  websiteId: number;
+  siteUrl: string | null;
+  status: string;
+  pagesCrawled: number;
+  startedAt: string | null;
+  finishedAt: string | null;
+  createdAt: string | null;
+}
+
+export interface CrawlRunListResponse {
+  data: CrawlRunListItem[];
+}

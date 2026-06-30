@@ -86,7 +86,7 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
   }, [crawlRun.id]);
 
   return (
-    <div className="mt-6 space-y-4">
+    <div className="space-y-4">
       <div className="rounded-xl border border-emerald-900 bg-emerald-950/50 p-4">
         <h3 className="mb-3 font-semibold text-emerald-200">
           Crawl-Lauf
@@ -198,99 +198,113 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
               {filteredPages.map((page) => (
                 <div
                   key={page.id ?? page.url}
-                  className="rounded-lg border border-slate-800 bg-slate-900/60 p-3"
+                  className="rounded-xl border border-slate-800 bg-slate-900/70 p-4"
                 >
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="break-all text-sm font-medium text-slate-100">
-                      {page.url}
-                    </p>
+                  <div className="flex flex-col gap-2 border-b border-slate-800 pb-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="break-all text-sm font-semibold text-slate-100">
+                        {page.url}
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        {page.hasCrawlError
+                          ? "Dieser Crawl konnte für die Seite nicht abgeschlossen werden."
+                          : "Erkannte Seitendaten und Analysehinweise."}
+                      </p>
+                    </div>
 
                     <span
                       className={
                         page.hasCrawlError
-                          ? "text-xs font-medium text-red-300"
-                          : "text-xs text-slate-400"
+                          ? "inline-flex w-fit rounded-full border border-red-900/60 bg-red-950/40 px-2.5 py-1 text-xs font-medium text-red-200"
+                          : "inline-flex w-fit rounded-full border border-emerald-900/60 bg-emerald-950/40 px-2.5 py-1 text-xs font-medium text-emerald-200"
                       }
                     >
-                      {page.hasCrawlError
-                        ? "Crawl fehlgeschlagen"
-                        : `HTTP ${page.httpStatus ?? "n/a"}`}
+                      {page.hasCrawlError ? "Crawl fehlgeschlagen" : `HTTP ${page.httpStatus ?? "n/a"}`}
                     </span>
                   </div>
 
-                  <dl className="mt-3 grid gap-3 text-xs sm:grid-cols-3">
-                    <div>
-                      <dt className="text-slate-500">Title</dt>
-                      <dd className="text-slate-200">
+                  <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                    <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        Title
+                      </p>
+                      <p className="mt-2 text-sm font-medium leading-relaxed text-slate-100">
                         {page.title ?? "Fehlt"}
-                      </dd>
-                      <dd className="mt-1 text-slate-500">
+                      </p>
+                      <p className="mt-2 text-xs text-slate-500">
                         Länge: {page.titleLength ?? 0} Zeichen
-                      </dd>
+                      </p>
                     </div>
 
-                    <div>
-                      <dt className="text-slate-500">H1</dt>
-                      <dd className="text-slate-200">
+                    <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        H1
+                      </p>
+                      <p className="mt-2 text-sm font-medium leading-relaxed text-slate-100">
                         {page.h1 ?? "Fehlt"}
-                      </dd>
-                      <dd className="mt-1 text-slate-500">
+                      </p>
+                      <p className="mt-2 text-xs text-slate-500">
                         Anzahl: {page.h1Count}
-                      </dd>
+                      </p>
                     </div>
 
-                    <div>
-                      <dt className="text-slate-500">Meta Description</dt>
-                      <dd className="text-slate-200">
+                    <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        Meta Description
+                      </p>
+                      <p className="mt-2 text-sm font-medium leading-relaxed text-slate-100">
                         {page.metaDescription ?? "Fehlt"}
-                      </dd>
-                      <dd className="mt-1 text-slate-500">
+                      </p>
+                      <p className="mt-2 text-xs text-slate-500">
                         Länge: {page.metaDescriptionLength ?? 0} Zeichen
-                      </dd>
+                      </p>
                     </div>
-                  </dl>
+                  </div>
 
                   {!page.hasCrawlError && (
-                    <dl className="mt-3 grid gap-2 border-t border-slate-800 pt-3 text-xs sm:grid-cols-4">
-                      <div>
-                        <dt className="text-slate-500">Bilder</dt>
-                        <dd className="text-slate-200">{page.imageCount}</dd>
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+                      <div className="rounded-lg bg-slate-950/50 p-3">
+                        <p className="text-xs text-slate-500">Bilder</p>
+                        <p className="mt-1 text-lg font-semibold text-slate-100">
+                          {page.imageCount}
+                        </p>
                       </div>
 
-                      <div>
-                        <dt className="text-slate-500">Ohne alt</dt>
-                        <dd
+                      <div className="rounded-lg bg-slate-950/50 p-3">
+                        <p className="text-xs text-slate-500">Ohne alt</p>
+                        <p
                           className={
                             page.imagesWithoutAlt > 0
-                              ? "text-amber-200"
-                              : "text-slate-200"
+                              ? "mt-1 text-lg font-semibold text-amber-200"
+                              : "mt-1 text-lg font-semibold text-slate-100"
                           }
                         >
                           {page.imagesWithoutAlt}
-                        </dd>
+                        </p>
                       </div>
 
-                      <div>
-                        <dt className="text-slate-500">Interne Links</dt>
-                        <dd className="text-slate-200">
+                      <div className="rounded-lg bg-slate-950/50 p-3">
+                        <p className="text-xs text-slate-500">Interne Links</p>
+                        <p className="mt-1 text-lg font-semibold text-slate-100">
                           {page.internalLinksCount}
-                        </dd>
+                        </p>
                       </div>
 
-                      <div>
-                        <dt className="text-slate-500">Externe Links</dt>
-                        <dd className="text-slate-200">
+                      <div className="rounded-lg bg-slate-950/50 p-3">
+                        <p className="text-xs text-slate-500">Externe Links</p>
+                        <p className="mt-1 text-lg font-semibold text-slate-100">
                           {page.externalLinksCount}
-                        </dd>
+                        </p>
                       </div>
 
-                      <div>
-                        <dt className="text-slate-500">HTML-Größe</dt>
-                        <dd className="text-slate-200">
+                      <div className="rounded-lg bg-slate-950/50 p-3">
+                        <p className="text-xs text-slate-500">HTML-Größe</p>
+                        <p className="mt-1 text-lg font-semibold text-slate-100">
                           {formatBytes(page.htmlSizeBytes)}
-                        </dd>
+                        </p>
                       </div>
-                    </dl>
+                    </div>
                   )}
 
                   {(() => {
@@ -301,29 +315,43 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
 
                     if (visibleIssues.length > 0) {
                       return (
-                        <ul className="mt-3 space-y-1 text-xs">
-                          {visibleIssues.map((issue) => (
-                            <li
-                              key={`${page.id ?? page.url}-${issue.code}`}
-                              className={getIssueClassName(issue.severity)}
-                            >
-                              {issue.message}
-                            </li>
-                          ))}
-                        </ul>
+                        <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/40 p-3">
+                          <div className="mb-2 flex items-center justify-between gap-3">
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                              Gefundene Hinweise
+                            </p>
+
+                            <span className="text-xs text-slate-500">
+                              {visibleIssues.length} angezeigt
+                            </span>
+                          </div>
+
+                          <ul className="space-y-2 text-xs">
+                            {visibleIssues.map((issue) => (
+                              <li
+                                key={`${page.id ?? page.url}-${issue.code}`}
+                                className={getIssueClassName(issue.severity)}
+                              >
+                                <span className="font-medium">
+                                  {issue.message}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       );
                     }
 
                     if (page.issues.length > 0) {
                       return (
-                        <p className="mt-3 text-xs text-slate-400">
+                        <p className="mt-4 rounded-lg border border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-400">
                           Für diesen Filter gibt es auf dieser Seite keine passenden Issues.
                         </p>
                       );
                     }
 
                     return (
-                      <p className="mt-3 text-xs text-emerald-300">
+                      <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 p-3 text-xs text-emerald-300">
                         Keine Probleme erkannt.
                       </p>
                     );

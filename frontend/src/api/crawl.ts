@@ -1,11 +1,19 @@
 import { apiFetch } from "./client";
-import { CrawlResponse, CrawlResultsResponse } from "@/types/crawl";
+import {
+  CrawlResponse,
+  CrawlResultsResponse,
+  CrawlRunListResponse,
+} from "@/types/crawl";
 
 export async function startCrawl(url: string): Promise<CrawlResponse> {
   return apiFetch<CrawlResponse>("/crawl", {
     method: "POST",
     body: JSON.stringify({ url }),
   });
+}
+
+export async function listCrawlRuns(): Promise<CrawlRunListResponse> {
+  return apiFetch<CrawlRunListResponse>("/crawl-runs");
 }
 
 export async function getCrawlResults(

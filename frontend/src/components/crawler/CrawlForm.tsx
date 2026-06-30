@@ -2,11 +2,15 @@
 
 import { FormEvent, useState } from "react";
 import { useCrawler } from "@/hooks/useCrawler";
-import { CrawlResult } from "@/components/crawler/CrawlResult";
+import type { CrawlRun } from "@/types/crawl";
 
-export function CrawlForm() {
+interface CrawlFormProps {
+  onCrawlCreated: (crawlRun: CrawlRun) => void;
+}
+
+export function CrawlForm({ onCrawlCreated }: CrawlFormProps) {
   const [url, setUrl] = useState("");
-  const { result, error, isLoading, crawl } = useCrawler();
+  const { error, isLoading, crawl } = useCrawler();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -14,6 +18,7 @@ export function CrawlForm() {
     const response = await crawl(url);
 
     if (response) {
+      onCrawlCreated(response.data);
       setUrl("");
     }
   }
@@ -46,8 +51,6 @@ export function CrawlForm() {
           {error}
         </div>
       )}
-
-      {result && <CrawlResult crawlRun={result.data} />}
     </section>
   );
 }
