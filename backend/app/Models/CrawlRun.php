@@ -14,6 +14,8 @@ class CrawlRun extends Model
         'started_at',
         'finished_at',
         'pages_crawled',
+        'max_pages',
+        'max_depth',
         'error_message',
     ];
 

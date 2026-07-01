@@ -93,4 +93,28 @@ class UrlNormalizerTest extends TestCase
 
         $this->assertFalse($result);
     }
+
+    public function test_it_normalizes_internal_http_links_to_the_start_url_scheme(): void
+    {
+        $normalizer = new UrlNormalizer();
+
+        $result = $normalizer->normalizeLink(
+            'http://example.com/kontakt',
+            'https://example.com'
+        );
+
+        $this->assertSame('https://example.com/kontakt', $result);
+    }
+
+    public function test_it_ignores_email_like_links_without_mailto_scheme(): void
+    {
+        $normalizer = new UrlNormalizer();
+
+        $result = $normalizer->normalizeLink(
+            'info@example.com',
+            'https://example.com'
+        );
+
+        $this->assertNull($result);
+    }
 }

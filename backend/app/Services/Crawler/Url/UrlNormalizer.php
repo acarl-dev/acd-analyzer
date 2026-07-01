@@ -29,6 +29,10 @@ class UrlNormalizer
             return null;
         }
 
+        if (filter_var($href, FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
         if (Str::startsWith($href, '#')) {
             return null;
         }
@@ -51,7 +55,17 @@ class UrlNormalizer
         }
 
         if (Str::startsWith($href, ['http://', 'https://'])) {
-            return $this->normalizeAbsoluteUrl($href);
+            $normalizedUrl = $this->normalizeAbsoluteUrl($href);
+
+            $baseScheme = parse_url($baseUrl, PHP_URL_SCHEME);
+            $baseHost = parse_url($baseUrl, PHP_URL_HOST);
+            $targetHost = parse_url($normalizedUrl, PHP_URL_HOST);
+
+            if ($baseScheme && $baseHost && $targetHost && $baseHost === $targetHost) {
+                return preg_replace('/^https?:\/\//', $baseScheme . '://', $normalizedUrl);
+            }
+
+            return $normalizedUrl;
         }
 
         $base = rtrim($baseUrl, '/');

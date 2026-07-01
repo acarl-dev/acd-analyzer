@@ -8,6 +8,7 @@ use App\Http\Resources\CrawlRunResource;
 use App\Models\CrawlRun;
 use App\Services\Crawler\CrawlerService;
 use Illuminate\Http\JsonResponse;
+use App\Services\Crawler\DTO\CrawlOptions;
 
 class CrawlController extends Controller
 {
@@ -50,7 +51,15 @@ class CrawlController extends Controller
         StoreCrawlRequest $request,
         CrawlerService $crawler,
     ): CrawlRunResource {
-        $crawlRun = $crawler->crawl($request->url());
+        $options = new CrawlOptions(
+            maxPages: $request->maxPages(),
+            maxDepth: $request->maxDepth(),
+        );
+
+        $crawlRun = $crawler->crawl(
+            url: $request->url(),
+            options: $options,
+        );
 
         return new CrawlRunResource($crawlRun);
     }

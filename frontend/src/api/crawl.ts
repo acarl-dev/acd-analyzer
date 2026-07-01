@@ -5,10 +5,18 @@ import {
   CrawlRunListResponse,
 } from "@/types/crawl";
 
-export async function startCrawl(url: string): Promise<CrawlResponse> {
+export async function startCrawl(
+  url: string,
+  maxPages: number,
+  maxDepth: number,
+): Promise<CrawlResponse> {
   return apiFetch<CrawlResponse>("/crawl", {
     method: "POST",
-    body: JSON.stringify({ url }),
+    body: JSON.stringify({
+      url,
+      maxPages,
+      maxDepth,
+    }),
   });
 }
 

@@ -9,11 +9,10 @@ use App\Services\Crawler\Parsing\HtmlParser;
 use App\Services\Crawler\Persistence\CrawlResultPersister;
 use App\Services\CrawlAnalysisService;
 use App\Services\Crawler\Url\UrlNormalizer;
+use App\Services\Crawler\DTO\CrawlOptions;
 
 class CrawlerService
 {
-    private const MAX_PAGES = 10;
-    private const MAX_DEPTH = 1;
 
     public function __construct(
         private readonly PageDownloader $downloader,
@@ -24,8 +23,9 @@ class CrawlerService
     ) {
     }
 
-    public function crawl(string $url): CrawlRun
+    public function crawl(string $url, ?CrawlOptions $options = null): CrawlRun
     {
+        $options ??= new CrawlOptions();
         $normalizedUrl = $this->urlNormalizer->normalizeStartUrl($url);
         $host = parse_url($normalizedUrl, PHP_URL_HOST);
 
@@ -38,6 +38,8 @@ class CrawlerService
             'website_id' => $website->id,
             'status' => 'running',
             'started_at' => now(),
+            'max_pages' => $options->maxPages,
+            'max_depth' => $options->maxDepth,
         ]);
 
         try {
@@ -47,7 +49,7 @@ class CrawlerService
 
             $visited = [];
 
-            while ($queue !== [] && count($visited) < self::MAX_PAGES) {
+            while ($queue !== [] && count($visited) < $options->maxPages) {
                 $next = array_shift($queue);
 
                 $currentUrl = $next['url'];
@@ -70,7 +72,7 @@ class CrawlerService
                         depth: $currentDepth,
                     );
 
-                    if ($currentDepth >= self::MAX_DEPTH) {
+                    if ($currentDepth >= $options->maxDepth) {
                         continue;
                     }
 
