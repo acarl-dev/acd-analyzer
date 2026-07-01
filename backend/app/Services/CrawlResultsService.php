@@ -88,6 +88,7 @@ final class CrawlResultsService
         return [
             'id' => $page->id,
             'url' => $page->url,
+            'depth' => $page->depth,
             'httpStatus' => $page->status_code,
             'crawledAt' => $page->created_at?->toISOString(),
 

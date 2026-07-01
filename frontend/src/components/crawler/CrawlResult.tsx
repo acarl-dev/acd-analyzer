@@ -226,14 +226,20 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                 >
                   <div className="flex flex-col gap-2 border-b border-slate-800 pb-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                      <a
-                        href={page.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="break-all text-sm font-semibold text-slate-100 underline decoration-slate-600 underline-offset-4 transition hover:text-sky-200 hover:decoration-sky-400"
-                      >
-                        {page.url}
-                      </a>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <a
+                          href={page.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="break-all text-sm font-semibold text-slate-100 underline decoration-slate-600 underline-offset-4 transition hover:text-sky-200 hover:decoration-sky-400"
+                        >
+                          {page.url}
+                        </a>
+
+                        <span className="rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-xs font-medium text-slate-400">
+                          {page.depth === 0 ? "Startseite" : `Tiefe ${page.depth}`}
+                        </span>
+                      </div>
 
                       <p className="mt-1 text-xs text-slate-500">
                         {page.hasCrawlError

@@ -17,6 +17,7 @@ class Page extends Model
         'meta_description',
         'html',
         'response_time_ms',
+        'depth',
     ];
 
     
