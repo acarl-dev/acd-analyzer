@@ -719,16 +719,52 @@ Frontend            → zeigt normalisierte Issues an
 
 ---
 
-### Offene Sprint-4.3-Aufgaben
+## Sprint 4.4: Limited Multi-Page Crawling
 
-* URLs in Crawl-Liste und Ergebnisdetails klickbar machen
+Status: Completed
 
-* Problemzahlen in der Crawl-Liste anzeigen
+Goal: Extend the crawler from single-page crawling to a limited synchronous multi-page crawl.
 
-* Detailroute für einzelne CrawlRuns vorbereiten:
+Completed:
 
-  * `/crawl-runs/{id}`
+- Added `UrlNormalizer` for start URL normalization, relative link normalization, fragment removal and internal/external host checks.
+- Added `depth` to persisted pages.
+- Extended `CrawlerService` with an in-memory crawl queue.
+- Added synchronous crawl limits:
+  - maximum pages: 10
+  - maximum depth: 1
+- Start URL is crawled at depth 0.
+- Directly discovered internal links are crawled at depth 1.
+- External links are persisted as discovered links but are not crawled.
+- Duplicate internal URLs are not crawled multiple times.
+- Subpage crawl failures are persisted as crawl errors without failing the entire CrawlRun.
+- Start URL failures still fail the CrawlRun.
+- `CrawlAnalysisService` runs after the full crawl loop has completed.
+- `pages_crawled` is calculated after the crawl loop.
+- Crawl result API includes page depth.
+- Dashboard result view shows whether a page is the start page or a depth-1 page.
+- Added unit tests for URL normalization.
+- Added feature tests for internal link crawling, external link filtering and duplicate prevention.
+- Added ADR-0009 for synchronous limited multi-page crawling.
+- Updated Engineering Handbook with Sprint 4.4 crawler architecture rules.
 
-* Dashboard-Layout mit wachsender Datenmenge weiter verbessern
+Definition of Done:
 
-* Strategie für Analyzer-Versionierung weiter ausarbeiten
+- Multi-page crawl works for direct internal links.
+- Crawl limits prevent uncontrolled crawling.
+- Persisted crawl data remains the source of truth.
+- Analysis still runs only after persistence.
+- Backend tests pass.
+- Frontend lint passes.
+- ADR and Engineering Handbook are updated.
+
+## Next: Sprint 4.5
+
+Potential focus:
+
+- Improve crawl result overview for multiple pages.
+- Add sorting or grouping by severity.
+- Improve page list readability.
+- Add simple crawl configuration for page limit and depth.
+- Improve URL canonicalization and queued URL de-duplication.
+- Consider whether failed subpages need clearer UI representation.

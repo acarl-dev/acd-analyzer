@@ -104,15 +104,33 @@ Parser extrahieren Informationen.
 
 Persister speichern Ergebnisse.
 
-Der CrawlerService enthält keine Parserlogik.
+Der CrawlerService orchestriert den Crawl-Ablauf.
 
-Controller enthalten keine Geschäftslogik
+Seit Sprint 4.4 unterstützt der CrawlerService synchrones, limitiertes Multi-Page-Crawling.
 
-Form Requests werden für Validierung verwendet
+Die Start-URL wird mit Tiefe 0 gecrawlt.
 
-Analyse-Logik gehört backendseitig in Services, nicht ins Frontend
+Direkt gefundene interne Links können mit Tiefe 1 gecrawlt werden.
 
-Analyzer-Regeln gehören in Analyzer-Klassen, nicht direkt in Mapping- oder Controller-Klassen
+Die aktuellen Crawl-Limits sind 10 Seiten und Tiefe 1.
+
+Externe Links werden gespeichert, aber nicht weiter gecrawlt.
+
+URL-Normalisierung gehört in den UrlNormalizer, nicht in Parser, Persister oder Controller.
+
+Der CrawlResultPersister speichert einzelne Pages und ihre zugehörigen Daten, berechnet aber nicht die Gesamtzahl gecrawlter Seiten.
+
+pages_crawled wird nach Abschluss des Crawl-Loops im CrawlerService berechnet.
+
+CrawlAnalysisService läuft erst nach Abschluss des vollständigen Crawl-Loops.
+
+Controller enthalten keine Geschäftslogik.
+
+Form Requests werden für Validierung verwendet.
+
+Analyse-Logik gehört backendseitig in Services, nicht ins Frontend.
+
+Analyzer-Regeln gehören in Analyzer-Klassen, nicht direkt in Mapping- oder Controller-Klassen.
 
 Analyseergebnisse werden persistiert und nicht beim Abruf der Results live berechnet.
 
