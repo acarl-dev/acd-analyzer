@@ -106,8 +106,8 @@ class CrawlerService
 
                     $crawlRun->errors()->create([
                         'url' => $currentUrl,
-                        'error_type' => $exception::class,
                         'message' => $exception->getMessage(),
+                        'depth' => $currentDepth,
                     ]);
                 }
             }
@@ -120,12 +120,13 @@ class CrawlerService
 
             $crawlRun->update([
                 'status' => 'completed',
-                'completed_at' => now(),
+                'finished_at' => now(),
             ]);
+
         } catch (\Throwable $exception) {
             $crawlRun->update([
                 'status' => 'failed',
-                'completed_at' => now(),
+                'finished_at' => now(),
                 'error_message' => $exception->getMessage(),
             ]);
         }

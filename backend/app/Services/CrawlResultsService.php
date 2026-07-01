@@ -123,6 +123,7 @@ final class CrawlResultsService
         return [
             'id' => null,
             'url' => $crawlError->url,
+            'depth' => $crawlError->depth,
             'httpStatus' => null,
             'crawledAt' => $crawlError->created_at?->toISOString(),
 

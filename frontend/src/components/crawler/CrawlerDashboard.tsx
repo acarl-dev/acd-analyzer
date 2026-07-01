@@ -16,8 +16,6 @@ function mapListItemToCrawlRun(crawlRun: CrawlRunListItem): CrawlRun {
     error_message: null,
     started_at: crawlRun.startedAt,
     finished_at: crawlRun.finishedAt,
-    created_at: crawlRun.createdAt,
-    updated_at: crawlRun.createdAt,
   };
 }
 

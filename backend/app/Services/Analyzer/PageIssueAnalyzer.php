@@ -98,7 +98,7 @@ class PageIssueAnalyzer
                     'images_without_alt',
                     'warning',
                     sprintf(
-                        '%d Bild(er) haben keinen Alt-Text.',
+                        '%d Bild-Element(e) haben keinen Alt-Text.',
                         $missingAltCount
                     )
                 );

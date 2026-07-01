@@ -64,14 +64,46 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
   const [resultsError, setResultsError] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
 
-  const filteredPages =
-    results?.pages.filter((page) => {
-      if (severityFilter === "all") {
-        return true;
+  const sortedPages =
+    results?.pages.toSorted((a, b) => {
+      if (a.hasCrawlError !== b.hasCrawlError) {
+        return a.hasCrawlError ? -1 : 1;
       }
 
-      return page.issues.some((issue) => issue.severity === severityFilter);
+      const severityRank = {
+        error: 3,
+        warning: 2,
+        info: 1,
+      };
+
+      const highestSeverityA = Math.max(
+        0,
+        ...a.issues.map((issue) => severityRank[issue.severity]),
+      );
+
+      const highestSeverityB = Math.max(
+        0,
+        ...b.issues.map((issue) => severityRank[issue.severity]),
+      );
+
+      if (highestSeverityA !== highestSeverityB) {
+        return highestSeverityB - highestSeverityA;
+      }
+
+      if (a.issues.length !== b.issues.length) {
+        return b.issues.length - a.issues.length;
+      }
+
+      return a.depth - b.depth;
     }) ?? [];
+
+  const filteredPages = sortedPages.filter((page) => {
+    if (severityFilter === "all") {
+      return true;
+    }
+
+    return page.issues.some((issue) => issue.severity === severityFilter);
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -342,14 +374,14 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                     {!page.hasCrawlError && (
                       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
                         <div className="rounded-lg bg-slate-950/50 p-3">
-                          <p className="text-xs text-slate-500">Bilder</p>
+                          <p className="text-xs text-slate-500">Bild-Elemente</p>
                           <p className="mt-1 text-lg font-semibold text-slate-100">
                             {page.imageCount}
                           </p>
                         </div>
 
                         <div className="rounded-lg bg-slate-950/50 p-3">
-                          <p className="text-xs text-slate-500">Ohne alt</p>
+                          <p className="text-xs text-slate-500">Ohne Alt-Text</p>
                           <p
                             className={
                               page.imagesWithoutAlt > 0

@@ -4,7 +4,7 @@ export interface CrawlRun {
   status: string;
   pages_crawled: number;
   error_message: string | null;
-  started_at: string;
+  started_at: string | null;
   finished_at: string | null;
 }
 

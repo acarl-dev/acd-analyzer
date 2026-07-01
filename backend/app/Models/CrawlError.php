@@ -12,6 +12,7 @@ class CrawlError extends Model
         'crawl_run_id',
         'url',
         'message',
+        'depth',
     ];
 
     public function crawlRun(): BelongsTo

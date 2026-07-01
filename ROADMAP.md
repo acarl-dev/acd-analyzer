@@ -758,13 +758,14 @@ Definition of Done:
 - Frontend lint passes.
 - ADR and Engineering Handbook are updated.
 
-## Next: Sprint 4.5
+### Sprint 4.5 – Multi-Page Crawl Usability
 
-Potential focus:
+Status: Completed
 
-- Improve crawl result overview for multiple pages.
-- Add sorting or grouping by severity.
-- Improve page list readability.
-- Add simple crawl configuration for page limit and depth.
-- Improve URL canonicalization and queued URL de-duplication.
-- Consider whether failed subpages need clearer UI representation.
+Completed:
+- Added configurable crawl limits for maximum pages and crawl depth.
+- Persisted selected crawl limits on crawl runs.
+- Extended the crawl form with max pages and max depth controls.
+- Stabilized crawl result data for multi-page runs, including depth information for crawl errors.
+- Improved result ordering so failed and more severe pages appear first.
+- Clarified image metrics in the UI as technical image elements rather than visually unique images.

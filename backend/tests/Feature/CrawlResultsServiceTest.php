@@ -153,6 +153,7 @@ class CrawlResultsServiceTest extends TestCase
             'crawl_run_id' => $crawlRun->id,
             'url' => 'https://example.com/broken',
             'message' => 'Connection timeout',
+            'depth' => 1,
         ]);
 
         PageIssue::forceCreate([
@@ -175,6 +176,7 @@ class CrawlResultsServiceTest extends TestCase
         $errorResult = $results['pages'][0];
 
         $this->assertTrue($errorResult['hasCrawlError']);
+        $this->assertSame(1, $errorResult['depth']);
         $this->assertSame('Connection timeout', $errorResult['crawlError']);
         $this->assertSame('crawl_error', $errorResult['issues'][0]['code']);
         $this->assertSame('error', $errorResult['issues'][0]['severity']);

@@ -139,3 +139,9 @@ Consider separate analysis_status if crawl and analysis failure handling should 
 Improve user-facing crawl error messages.
 Add re-analysis action for existing crawl runs.
 Consider separate analyzer result tables if the issue model grows significantly.
+
+## Update: Crawl Limits and Multi-Page Result Contract
+
+Sprint 4.5 extended the crawl architecture with configurable crawl limits. `CrawlerService` now receives crawl options instead of relying on hard-coded limits. The selected limits are persisted on the crawl run for traceability.
+
+The result contract was also stabilized for multi-page usability. Crawl errors now include depth information and are rendered alongside successful pages. This allows the frontend to sort and display failed pages, severe issues, and deeper crawl results consistently.
