@@ -43,6 +43,7 @@ Die Severity ist keine endgültige SEO-Wahrheit, sondern eine erste interne Prio
 | `high_missing_alt_ratio`     | `warning` | Images           |
 | `few_internal_links`         | `warning` | Links            |
 | `empty_link_href`            | `warning` | Links            |
+| `empty_link_text`            | `warning` | Links            |
 | `insecure_external_links`    | `warning` | Links            |
 | `many_external_links`        | `warning` | Links            |
 | `missing_html_lang`          | `warning` | Technical SEO    |

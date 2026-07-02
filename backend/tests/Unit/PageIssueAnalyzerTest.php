@@ -75,8 +75,16 @@ class PageIssueAnalyzerTest extends TestCase
                 ['alt' => 'Useful image description'],
             ],
             'links' => [
-                ['type' => 'internal', 'href' => 'https://example.com'],
-                ['type' => 'internal', 'href' => 'https://example.com/about'],
+                [
+                    'type' => 'internal',
+                    'href' => 'https://example.com',
+                    'text' => 'Startseite',
+                ],
+                [
+                    'type' => 'internal',
+                    'href' => 'https://example.com/about',
+                    'text' => 'Über uns',
+                ],
             ],
             'html_size_bytes' => 120000,
         ]);
@@ -242,6 +250,34 @@ class PageIssueAnalyzerTest extends TestCase
 
         $this->assertNotNull($emptyLinkIssue);
         $this->assertSame('warning', $emptyLinkIssue['severity']);
+    }
+
+    public function test_it_detects_empty_link_text(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => 'https://example.com', 'text' => 'Startseite'],
+                ['type' => 'internal', 'href' => 'https://example.com/about', 'text' => 'Über uns'],
+                ['type' => 'external', 'href' => 'https://external-example.com', 'text' => ''],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $emptyLinkTextIssue = collect($issues)->firstWhere('code', 'empty_link_text');
+
+        $this->assertNotNull($emptyLinkTextIssue);
+        $this->assertSame('warning', $emptyLinkTextIssue['severity']);
+        $this->assertSame(
+            '1 Link(s) haben keinen sichtbaren Linktext.',
+            $emptyLinkTextIssue['message']
+        );
     }
 
     public function test_it_detects_insecure_external_links(): void

@@ -266,6 +266,21 @@ class PageIssueAnalyzer
             );
         }
 
+        $emptyTextLinks = array_filter($links, static function (array $link): bool {
+            return trim((string) ($link['text'] ?? '')) === '';
+        });
+
+        if (count($emptyTextLinks) > 0) {
+            $issues[] = $this->issue(
+                'empty_link_text',
+                'warning',
+                sprintf(
+                    '%d Link(s) haben keinen sichtbaren Linktext.',
+                    count($emptyTextLinks)
+                )
+            );
+        }
+
         if (count($externalLinks) > self::MANY_EXTERNAL_LINKS) {
             $issues[] = $this->issue(
                 'many_external_links',
