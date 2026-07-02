@@ -6,6 +6,7 @@ use App\Models\CrawlRun;
 use App\Models\PageIssue;
 use App\Models\Website;
 use Illuminate\Support\Facades\DB;
+use App\Models\DetectedTechnology;
 
 final class DashboardSummaryService
 {
@@ -51,6 +52,27 @@ final class DashboardSummaryService
             ])
             ->values()
             ->all();
+        
+        $topTechnologies = DetectedTechnology::query()
+            ->select([
+                'type',
+                'name',
+                DB::raw('MAX(confidence) as confidence'),
+                DB::raw('COUNT(DISTINCT crawl_run_id) as count'),
+            ])
+            ->groupBy('type', 'name')
+            ->orderByDesc('count')
+            ->orderBy('name')
+            ->limit(10)
+            ->get()
+            ->map(fn ($technology) => [
+                'type' => $technology->type,
+                'name' => $technology->name,
+                'confidence' => (float) $technology->confidence,
+                'count' => (int) $technology->count,
+            ])
+            ->values()
+            ->all();
 
         return [
             'totalWebsites' => $totalWebsites,
@@ -59,6 +81,7 @@ final class DashboardSummaryService
             'totalIssues' => $totalIssues,
             'issuesBySeverity' => $issuesBySeverity,
             'topIssues' => $topIssues,
+            'topTechnologies' => $topTechnologies,
         ];
     }
 }

@@ -16,4 +16,12 @@ export interface DashboardSummary {
     infos: number;
   };
   topIssues: DashboardTopIssue[];
+  topTechnologies: DashboardTopTechnology[];
+}
+
+export interface DashboardTopTechnology {
+  type: string;
+  name: string;
+  confidence: number;
+  count: number;
 }

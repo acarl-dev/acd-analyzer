@@ -32,11 +32,28 @@ function getSeverityBadgeClassName(severity: "error" | "warning" | "info") {
   return "border-sky-800 bg-sky-950/70 text-sky-200";
 }
 
+function getTechnologyTypeLabel(type: string) {
+  if (type === "cms") {
+    return "CMS";
+  }
+
+  if (type === "frontend") {
+    return "Frontend";
+  }
+
+  if (type === "rendering") {
+    return "Rendering";
+  }
+
+  return type;
+}
+
 export function DashboardSummary({ refreshKey = 0 }: DashboardSummaryProps) {
   const [summary, setSummary] = useState<DashboardSummaryType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isTopIssuesOpen, setIsTopIssuesOpen] = useState(false);
+  const [isTopTechnologiesOpen, setIsTopTechnologiesOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -76,7 +93,8 @@ export function DashboardSummary({ refreshKey = 0 }: DashboardSummaryProps) {
       <div className="mb-5">
         <h2 className="text-xl font-semibold">Gesamtübersicht</h2>
         <p className="mt-1 text-sm text-slate-400">
-          Überblick über gespeicherte Websites, Crawls und erkannte Probleme.
+          Überblick über gespeicherte Websites, Crawls, erkannte Probleme und
+          Technologien.
         </p>
       </div>
 
@@ -183,12 +201,77 @@ export function DashboardSummary({ refreshKey = 0 }: DashboardSummaryProps) {
                               {getSeverityLabel(issue.severity)}
                             </span>
 
-                            <span className="font-mono text-slate-500">{issue.code}</span>
+                            <span className="font-mono text-slate-500">
+                              {issue.code}
+                            </span>
                           </div>
                         </div>
 
                         <span className="w-fit rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-sm font-semibold text-slate-100">
                           {issue.count}×
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-slate-800 bg-slate-950/60">
+            <button
+              type="button"
+              onClick={() =>
+                setIsTopTechnologiesOpen((current) => !current)
+              }
+              className="flex w-full flex-col gap-2 p-4 text-left sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <h3 className="font-semibold text-slate-100">
+                  Häufigste Technologien
+                </h3>
+                <p className="text-sm text-slate-500">
+                  Gruppiert nach Technologie über alle gespeicherten Crawls.
+                </p>
+              </div>
+
+              <span className="rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300">
+                {isTopTechnologiesOpen ? "Einklappen" : "Ausklappen"}
+              </span>
+            </button>
+
+            {isTopTechnologiesOpen && (
+              <div className="border-t border-slate-800 p-4 pt-3">
+                {summary.topTechnologies.length === 0 ? (
+                  <p className="text-sm text-slate-400">
+                    Es wurden noch keine Technologien erkannt.
+                  </p>
+                ) : (
+                  <ul className="space-y-2">
+                    {summary.topTechnologies.map((technology) => (
+                      <li
+                        key={`${technology.type}-${technology.name}`}
+                        className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/70 p-3 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-slate-100">
+                            {technology.name}
+                          </p>
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                            <span className="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 font-medium text-slate-300">
+                              {getTechnologyTypeLabel(technology.type)}
+                            </span>
+
+                            <span className="text-slate-500">
+                              Sicherheit:{" "}
+                              {Math.round(technology.confidence * 100)}%
+                            </span>
+                          </div>
+                        </div>
+
+                        <span className="w-fit rounded-full border border-slate-700 bg-slate-800 px-3 py-1 text-sm font-semibold text-slate-100">
+                          {technology.count}{" "}
+                          {technology.count === 1 ? "Crawl" : "Crawls"}
                         </span>
                       </li>
                     ))}
