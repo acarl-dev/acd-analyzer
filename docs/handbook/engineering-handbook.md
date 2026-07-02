@@ -217,7 +217,162 @@ Der aktuelle Ablauf ist:
 
 Diese Trennung ist wichtig, damit Analyseergebnisse nachvollziehbar, testbar und reproduzierbar bleiben.
 
+### Page Issues vs. Crawl Errors
+
+Der Analyzer unterscheidet zwischen erfolgreich gespeicherten Pages und Crawl Errors.
+
+**Page Issues** beschreiben fachliche, technische oder strukturelle Auffälligkeiten auf einer gespeicherten Page. Beispiele sind fehlende Titles, fehlende H1-Überschriften, Bilder ohne Alt-Text, technische SEO-Probleme, sehr wenig sichtbarer Text, langsame HTTP-Antwortzeiten oder problematische HTTP-Statuscodes.
+
+Page Issues werden aus gespeicherten Page-Daten erzeugt. Dazu gehören unter anderem:
+
+* Title
+* Meta Description
+* Headings
+* Images
+* Links
+* HTML
+* Response Time
+* HTTP Status Code
+
+**Crawl Errors** beschreiben dagegen URLs, die beim Crawling nicht erfolgreich verarbeitet werden konnten. Das kann zum Beispiel passieren, wenn eine URL nicht erreichbar ist, ein Request fehlschlägt oder ein technischer Fehler beim Crawlen auftritt.
+
+Crawl Errors werden ebenfalls in die Analyseergebnisse integriert, damit fehlgeschlagene URLs nicht außerhalb der Bewertung stehen. In der einheitlichen Ergebnisstruktur erscheinen sie neben erfolgreich gecrawlten Pages als eigene Result-Einträge.
+
+Für die Auswertung bedeutet das:
+
+* Eine gespeicherte Page mit HTTP `404` kann ein `http_error_status`-Page-Issue erhalten.
+* Eine URL, die gar nicht erfolgreich gecrawlt werden konnte, erscheint als Crawl Error.
+* Beide Fälle können den Crawl Health Score beeinflussen.
+* Die UI behandelt beide Fälle gemeinsam, zeigt aber an, ob es sich um eine gespeicherte Page oder einen fehlgeschlagenen Crawl handelt.
+
+Diese Unterscheidung ist wichtig, weil nicht jede problematische URL ein Crawl Error ist. Manche URLs werden technisch erfolgreich gespeichert, liefern aber dennoch problematische Seitensignale.
+
 Crawl-Fehler enthalten ebenfalls eine Tiefe, damit Multi-Page-Ergebnisse korrekt sortiert und verständlich angezeigt werden können.
+
+### Crawl Health Score
+
+Der Crawl Health Score ist eine vereinfachte Orientierung zur Gesamtqualität eines CrawlRuns.
+
+Der Score wird nicht global über alle Issues summiert. Stattdessen wird jeder Page Result einzeln bewertet und anschließend über alle Page Results gemittelt.
+
+Der Ablauf ist:
+
+1. Jede gespeicherte Page oder jeder Crawl Error startet mit `100` Punkten.
+2. Issues reduzieren den Page Score anhand ihrer Severity.
+3. Der Page Score kann nicht unter `0` fallen.
+4. Der Crawl Health Score ist der Durchschnitt aller Page Scores.
+5. Das Ergebnis wird als Wert von `0` bis `100` ausgegeben.
+
+Aktuelle Penalties:
+
+* `error` → `-30`
+* `warning` → `-10`
+* `info` → `-2`
+
+Crawl Errors fließen über die einheitliche Page/Error-Struktur ebenfalls in den Score ein. Dadurch werden fehlgeschlagene URLs nicht ignoriert.
+
+Der Health Score ist bewusst kein wissenschaftlich exakter SEO- oder Performance-Score. Er ist eine kompakte Orientierung für die UI, damit Crawls schnell miteinander verglichen und besonders problematische Crawls schneller erkannt werden können.
+
+Die fachliche Score-Berechnung gehört ins Backend, aktuell in `CrawlHealthScoreService`. Das Frontend darf den Score anzeigen, labeln und visuell hervorheben, aber nicht eigenständig fachliche Score-Regeln berechnen.
+
+### Frontend-Auswertung
+
+Das Frontend liest Analyseergebnisse über die API und visualisiert persistierte Backend-Daten.
+
+Die wichtigsten UI-Bereiche sind:
+
+* Dashboard-Gesamtübersicht
+* Letzte Crawls
+* Crawl Detail
+* Crawl Detail Page-Karten
+* Issue- und Technologie-Zusammenfassungen
+
+Das Frontend darf aus vorhandenen API-Daten abgeleitete UI-Strukturen berechnen, zum Beispiel:
+
+* Top-Probleme für eine kompakte Übersicht
+* Gruppierte Technologien nach Kategorie
+* Gefilterte Page-Listen nach Severity
+* Ein- und ausgeklappte Page-Karten
+* Labels für Health Scores
+
+Das Frontend soll aber keine fachlichen Analyzer-Regeln enthalten. Regeln wie `missing_h1`, `slow_response_time` oder `http_error_status` gehören ins Backend und müssen dort getestet werden.
+
+Diese Trennung hält die Architektur klar:
+
+* Backend: Crawling, Analyse, Persistenz, fachliche Bewertung
+* Frontend: Darstellung, Filterung, Gruppierung und Interaktion
+
+### Neue Analyzer-Regeln ergänzen
+
+Neue Analyzer-Regeln sollen klein, testbar und nachvollziehbar ergänzt werden.
+
+Für page-bezogene Regeln gilt aktuell dieser Ablauf:
+
+1. Prüfen, ob die benötigten Rohdaten bereits gespeichert werden.
+2. Falls nötig, Crawler oder Persistierung erweitern.
+3. Analyzer-Input in `CrawlAnalysisService` ergänzen.
+4. Regel im passenden Analyzer ergänzen, aktuell meist `PageIssueAnalyzer`.
+5. Unit-Test für die Regel schreiben.
+6. Falls die Regel Daten aus der Datenbank benötigt, zusätzlich einen Integrationstest über `CrawlAnalysisService` schreiben.
+7. Issue-Code in `docs/analyzer/issue-codes.md` dokumentieren.
+8. Backend-Tests ausführen.
+9. Frontend-Lint ausführen, falls UI oder TypeScript-Typen betroffen sind.
+
+Eine neue Regel sollte immer einen stabilen Issue-Code, eine Severity, eine verständliche Message und bei Bedarf Context-Daten liefern.
+
+Beispielstruktur eines Issues:
+
+```php
+[
+    'code' => 'example_issue_code',
+    'severity' => 'warning',
+    'message' => 'Verständliche Beschreibung des Problems.',
+    'context' => [
+        'example_value' => 123,
+    ],
+]
+```
+
+Die Severity soll bewusst gewählt werden:
+
+error für klare technische oder fachliche Fehler, die die Nutzbarkeit oder Auswertbarkeit stark beeinträchtigen.
+warning für relevante Qualitätsprobleme, die überprüft oder verbessert werden sollten.
+info für Hinweise, die interessant sind, aber nicht zwingend ein direktes Problem darstellen.
+
+Wichtig ist, dass Analyzer-Regeln nicht im Frontend implementiert werden. Das Frontend darf Issues sortieren, gruppieren und filtern, aber nicht entscheiden, ob eine Page fachlich problematisch ist.
+
+Wenn eine neue Regel nicht mehr nur eine einzelne Page betrachtet, sondern mehrere Pages eines CrawlRuns vergleichen muss, sollte vorher bewusst entschieden werden, ob ein eigener crawl-weiter Analyzer-Service eingeführt wird. Beispiele dafür wären Duplicate Titles, Duplicate Meta Descriptions oder andere crawl-weite Muster.
+
+### Dokumentationspflege
+
+Bei Änderungen am Analyzer oder an der Auswertungsarchitektur muss geprüft werden, welche Dokumentation angepasst werden sollte.
+
+`docs/analyzer/issue-codes.md` wird aktualisiert, wenn:
+
+* ein neuer Issue-Code eingeführt wird
+* eine Severity geändert wird
+* eine Issue-Message fachlich anders interpretiert werden muss
+* Context-Daten ergänzt oder geändert werden
+
+Das Engineering Handbook wird aktualisiert, wenn:
+
+* sich der Analysefluss ändert
+* neue Services eingeführt werden
+* Verantwortlichkeiten zwischen Crawler, Analyzer, Result Services und Frontend verschoben werden
+* neue Muster für Analyzer-Regeln entstehen
+* UI-Auswertungen eine neue fachliche Struktur bekommen
+
+Ein ADR wird erstellt, wenn eine langfristig relevante Architekturentscheidung getroffen wird. Beispiele:
+
+* Einführung eines crawl-weiten Analyzer-Services
+* Änderung der Health-Score-Berechnung
+* Änderung des Persistenzmodells für Issues
+* Trennung oder Zusammenführung größerer Services
+* Einführung eines Workers oder Queue-basierten Analyseflusses
+
+Die ROADMAP wird aktualisiert, wenn sich Prioritäten, größere Meilensteine oder der geplante Produktumfang ändern.
+
+Dokumentation ist Teil der Definition of Done, sobald eine Änderung Architektur, Analyzer-Regeln oder Produktverhalten dauerhaft beeinflusst.
 
 ---
 
