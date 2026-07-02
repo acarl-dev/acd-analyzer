@@ -10,6 +10,7 @@ use App\Services\Crawler\Persistence\CrawlResultPersister;
 use App\Services\CrawlAnalysisService;
 use App\Services\Crawler\Url\UrlNormalizer;
 use App\Services\Crawler\DTO\CrawlOptions;
+use App\Services\Analyzer\TechnologyDetectionService;
 
 class CrawlerService
 {
@@ -20,6 +21,7 @@ class CrawlerService
         private readonly CrawlResultPersister $persister,
         private readonly CrawlAnalysisService $crawlAnalysisService,
         private readonly UrlNormalizer $urlNormalizer,
+        private readonly TechnologyDetectionService $technologyDetectionService,
     ) {
     }
 
@@ -117,6 +119,8 @@ class CrawlerService
             ]);
 
             $this->crawlAnalysisService->analyze($crawlRun);
+
+            $this->technologyDetectionService->analyze($crawlRun);
 
             $crawlRun->update([
                 'status' => 'completed',

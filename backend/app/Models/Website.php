@@ -21,4 +21,9 @@ class Website extends Model
     {
         return $this->hasMany(Page::class);
     }
+
+    public function detectedTechnologies(): HasMany
+    {
+        return $this->hasMany(DetectedTechnology::class);
+    }
 }

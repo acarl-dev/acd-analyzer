@@ -222,6 +222,29 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
               </div>
             </dl>
 
+            {results.technologies.length > 0 && (
+              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Erkannte Technologien
+                </p>
+
+                <div className="flex flex-wrap gap-2">
+                  {results.technologies.map((technology) => (
+                    <span
+                      key={technology.id}
+                      title={`${technology.evidence} Sicherheit: ${Math.round(
+                        technology.confidence * 100,
+                      )}%`}
+                      className="rounded-full border border-slate-700 bg-slate-950 px-2.5 py-1 text-xs font-medium text-slate-300"
+                    >
+                      {technology.name} · {technology.type} ·{" "}
+                      {Math.round(technology.confidence * 100)}%
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-4">
               {[
                 { value: "all", label: "Alle" },

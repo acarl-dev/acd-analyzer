@@ -15,6 +15,7 @@ final class CrawlResultsService
             'pages.links',
             'pages.issues',
             'errors.issues',
+            'detectedTechnologies',
         ]);
 
         $pageResults = $crawlRun->pages
@@ -32,6 +33,7 @@ final class CrawlResultsService
             'websiteId' => $crawlRun->website_id,
             'siteUrl' => $crawlRun->website?->url,
             'summary' => $this->buildSummary($pages),
+            'technologies' => $this->mapTechnologies($crawlRun->detectedTechnologies),
             'pages' => $pages,
         ];
     }
@@ -152,52 +154,67 @@ final class CrawlResultsService
     }
 
     private function buildSummary(Collection $pages): array
-        {
-            $issues = $pages
-                ->flatMap(fn ($page) => $page['issues']);
+    {
+        $issues = $pages
+            ->flatMap(fn ($page) => $page['issues']);
 
-            $errors = $issues
-                ->where('severity', 'error')
-                ->count();
+        $errors = $issues
+            ->where('severity', 'error')
+            ->count();
 
-            $warnings = $issues
-                ->where('severity', 'warning')
-                ->count();
+        $warnings = $issues
+            ->where('severity', 'warning')
+            ->count();
 
-            $infos = $issues
-                ->where('severity', 'info')
-                ->count();
+        $infos = $issues
+            ->where('severity', 'info')
+            ->count();
 
-            return [
-                'totalPages' => $pages->count(),
+        return [
+            'totalPages' => $pages->count(),
 
-                'successfulPages' => $pages
-                    ->filter(fn ($page) =>
-                        $page['hasCrawlError'] === false
-                        && $page['httpStatus'] !== null
-                        && $page['httpStatus'] >= 200
-                        && $page['httpStatus'] < 400
+            'successfulPages' => $pages
+                ->filter(fn ($page) =>
+                    $page['hasCrawlError'] === false
+                    && $page['httpStatus'] !== null
+                    && $page['httpStatus'] >= 200
+                    && $page['httpStatus'] < 400
+                )
+                ->count(),
+
+            'failedPages' => $pages
+                ->filter(fn ($page) =>
+                    $page['hasCrawlError'] === true
+                    || (
+                        $page['httpStatus'] !== null
+                        && $page['httpStatus'] >= 400
                     )
-                    ->count(),
+                )
+                ->count(),
 
-                'failedPages' => $pages
-                    ->filter(fn ($page) =>
-                        $page['hasCrawlError'] === true
-                        || (
-                            $page['httpStatus'] !== null
-                            && $page['httpStatus'] >= 400
-                        )
-                    )
-                    ->count(),
+            'pagesWithIssues' => $pages
+                ->filter(fn ($page) => count($page['issues']) > 0)
+                ->count(),
 
-                'pagesWithIssues' => $pages
-                    ->filter(fn ($page) => count($page['issues']) > 0)
-                    ->count(),
-
-                'totalIssues' => $issues->count(),
-                'errors' => $errors,
-                'warnings' => $warnings,
-                'infos' => $infos,
-            ];
-        }
+            'totalIssues' => $issues->count(),
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'infos' => $infos,
+        ];
+    }
+    
+    private function mapTechnologies($technologies): array
+    {
+        return $technologies
+            ->map(fn ($technology) => [
+                'id' => $technology->id,
+                'type' => $technology->type,
+                'name' => $technology->name,
+                'confidence' => $technology->confidence,
+                'evidence' => $technology->evidence,
+                'pageId' => $technology->page_id,
+            ])
+            ->values()
+            ->all();
+    }   
 }

@@ -43,4 +43,9 @@ class CrawlRun extends Model
     {
         return $this->hasMany(PageIssue::class);
     }
+
+    public function detectedTechnologies(): HasMany
+    {
+        return $this->hasMany(DetectedTechnology::class);
+    }
 }

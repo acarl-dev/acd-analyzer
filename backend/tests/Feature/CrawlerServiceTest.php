@@ -21,6 +21,7 @@ class CrawlerServiceTest extends TestCase
                     <head>
                         <title>Startseite</title>
                         <meta name="description" content="Das ist die Startseite.">
+                        <link rel="stylesheet" href="/wp-content/themes/theme/style.css">
                     </head>
                     <body>
                         <h1>Startseite</h1>
@@ -58,6 +59,12 @@ class CrawlerServiceTest extends TestCase
             'crawl_run_id' => $crawlRun->id,
             'url' => 'https://example.com/kontakt',
             'depth' => 1,
+        ]);
+
+        $this->assertDatabaseHas('detected_technologies', [
+            'crawl_run_id' => $crawlRun->id,
+            'type' => 'cms',
+            'name' => 'WordPress',
         ]);
 
         $this->assertCount(2, Page::where('crawl_run_id', $crawlRun->id)->get());

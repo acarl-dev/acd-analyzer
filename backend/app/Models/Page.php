@@ -20,7 +20,6 @@ class Page extends Model
         'depth',
     ];
 
-    
     public function issues(): HasMany
     {
         return $this->hasMany(\App\Models\PageIssue::class);
@@ -49,5 +48,10 @@ class Page extends Model
     public function headings(): HasMany
     {
         return $this->hasMany(Heading::class);
+    }
+
+    public function detectedTechnologies(): HasMany
+    {
+        return $this->hasMany(DetectedTechnology::class);
     }
 }

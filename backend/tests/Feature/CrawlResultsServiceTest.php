@@ -13,6 +13,7 @@ use App\Services\CrawlResultsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\PageIssue;
+use App\Models\DetectedTechnology;
 
 class CrawlResultsServiceTest extends TestCase
 {
@@ -261,5 +262,50 @@ class CrawlResultsServiceTest extends TestCase
             'warning_issue',
             'info_issue',
         ], array_column($issues, 'code'));
+    }
+
+    public function test_it_includes_detected_technologies_in_results(): void
+    {
+        $website = Website::forceCreate([
+            'url' => 'https://example.com',
+            'host' => 'example.com',
+        ]);
+
+        $crawlRun = CrawlRun::forceCreate([
+            'website_id' => $website->id,
+            'status' => 'completed',
+            'pages_crawled' => 1,
+        ]);
+
+        $page = Page::forceCreate([
+            'website_id' => $website->id,
+            'crawl_run_id' => $crawlRun->id,
+            'url' => 'https://example.com',
+            'status_code' => 200,
+            'title' => 'Example',
+            'meta_description' => null,
+            'html' => '<html></html>',
+            'response_time_ms' => 100,
+            'depth' => 0,
+        ]);
+
+        DetectedTechnology::query()->create([
+            'website_id' => $website->id,
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => $page->id,
+            'type' => 'cms',
+            'name' => 'WordPress',
+            'confidence' => 0.95,
+            'evidence' => 'Found WordPress asset path in HTML.',
+        ]);
+
+        $result = app(CrawlResultsService::class)->buildForCrawlRun($crawlRun);
+
+        $this->assertCount(1, $result['technologies']);
+        $this->assertSame('WordPress', $result['technologies'][0]['name']);
+        $this->assertSame('cms', $result['technologies'][0]['type']);
+        $this->assertSame(0.95, $result['technologies'][0]['confidence']);
+        $this->assertSame('Found WordPress asset path in HTML.', $result['technologies'][0]['evidence']);
+        $this->assertSame($page->id, $result['technologies'][0]['pageId']);
     }
 }

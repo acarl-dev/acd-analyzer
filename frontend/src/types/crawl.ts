@@ -61,11 +61,32 @@ export interface PageAnalysisResult {
   issues: PageAnalysisIssue[];
 }
 
+export interface DetectedTechnology {
+  id: number;
+  type: string;
+  name: string;
+  confidence: number;
+  evidence: string;
+  pageId: number | null;
+}
+
+export interface CrawlSummary {
+  totalPages: number;
+  successfulPages: number;
+  failedPages: number;
+  pagesWithIssues: number;
+  totalIssues: number;
+  errors: number;
+  warnings: number;
+  infos: number;
+}
+
 export interface CrawlResultsResponse {
   crawlRunId: number;
   websiteId: number;
-  siteUrl: string | null;
-  summary: CrawlResultsSummary;
+  siteUrl: string;
+  summary: CrawlSummary;
+  technologies: DetectedTechnology[];
   pages: PageAnalysisResult[];
 }
 
