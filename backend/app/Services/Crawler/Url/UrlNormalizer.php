@@ -61,7 +61,12 @@ class UrlNormalizer
             $baseHost = parse_url($baseUrl, PHP_URL_HOST);
             $targetHost = parse_url($normalizedUrl, PHP_URL_HOST);
 
-            if ($baseScheme && $baseHost && $targetHost && $baseHost === $targetHost) {
+            if (
+                $baseScheme
+                && $baseHost
+                && $targetHost
+                && $this->normalizeHost($baseHost) === $this->normalizeHost($targetHost)
+            ) {
                 return preg_replace('/^https?:\/\//', $baseScheme . '://', $normalizedUrl);
             }
 
@@ -80,7 +85,31 @@ class UrlNormalizer
 
     public function isInternal(string $url, string $startUrl): bool
     {
-        return parse_url($url, PHP_URL_HOST) === parse_url($startUrl, PHP_URL_HOST);
+        $scheme = parse_url($url, PHP_URL_SCHEME);
+
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            return false;
+        }
+
+        $urlHost = parse_url($url, PHP_URL_HOST);
+        $startHost = parse_url($startUrl, PHP_URL_HOST);
+
+        if ($urlHost === null || $startHost === null) {
+            return false;
+        }
+
+        return $this->normalizeHost($urlHost) === $this->normalizeHost($startHost);
+    }
+
+    private function normalizeHost(string $host): string
+    {
+        $host = strtolower($host);
+
+        if (str_starts_with($host, 'www.')) {
+            return substr($host, 4);
+        }
+
+        return $host;
     }
 
     private function normalizeAbsoluteUrl(string $url): string

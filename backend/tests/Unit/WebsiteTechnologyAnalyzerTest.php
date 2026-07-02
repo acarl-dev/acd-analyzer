@@ -64,4 +64,15 @@ class WebsiteTechnologyAnalyzerTest extends TestCase
             "Failed asserting that detection {$type}:{$name} exists."
         );
     }
+
+    public function test_it_detects_wix_from_platform_markers(): void
+    {
+        $analyzer = new WebsiteTechnologyAnalyzer();
+
+        $detections = $analyzer->analyze(
+            '<html><head><script src="https://static.wixstatic.com/services/wix-thunderbolt/app.js"></script></head></html>'
+        );
+
+        $this->assertDetectionExists($detections, 'cms', 'Wix');
+    }
 }

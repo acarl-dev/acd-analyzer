@@ -299,9 +299,35 @@ class CrawlResultsServiceTest extends TestCase
             'evidence' => 'Found WordPress asset path in HTML.',
         ]);
 
+        DetectedTechnology::query()->create([
+            'website_id' => $website->id,
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => null,
+            'type' => 'cms',
+            'name' => 'WordPress',
+            'confidence' => 0.90,
+            'evidence' => 'Found another WordPress marker.',
+        ]);
+
+        DetectedTechnology::query()->create([
+            'website_id' => $website->id,
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => null,
+            'type' => 'cms',
+            'name' => 'Wix',
+            'confidence' => 0.95,
+            'evidence' => 'Found Wix asset or platform marker in HTML.',
+        ]);
+
         $result = app(CrawlResultsService::class)->buildForCrawlRun($crawlRun);
 
-        $this->assertCount(1, $result['technologies']);
+        $this->assertCount(2, $result['technologies']);
+
+        $this->assertSame(
+            ['WordPress', 'Wix'],
+            array_column($result['technologies'], 'name')
+        );
+
         $this->assertSame('WordPress', $result['technologies'][0]['name']);
         $this->assertSame('cms', $result['technologies'][0]['type']);
         $this->assertSame(0.95, $result['technologies'][0]['confidence']);

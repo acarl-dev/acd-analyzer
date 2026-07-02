@@ -60,6 +60,21 @@ class WebsiteTechnologyAnalyzer
             );
         }
 
+        if (
+            str_contains($lowerHtml, 'wixstatic.com')
+            || str_contains($lowerHtml, 'wix.com')
+            || str_contains($lowerHtml, '_parastorage_')
+            || str_contains($lowerHtml, 'wix-thunderbolt')
+            || str_contains($lowerHtml, 'wix-code')
+        ) {
+            $detections[] = new DetectedTechnologyData(
+                type: 'cms',
+                name: 'Wix',
+                confidence: 0.95,
+                evidence: 'Found Wix asset or platform marker in HTML.',
+            );
+        }
+
         return $detections;
     }
 

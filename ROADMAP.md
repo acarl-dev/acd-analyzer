@@ -769,3 +769,18 @@ Completed:
 - Stabilized crawl result data for multi-page runs, including depth information for crawl errors.
 - Improved result ordering so failed and more severe pages appear first.
 - Clarified image metrics in the UI as technical image elements rather than visually unique images.
+
+### Sprint 4.6 – Basic Technology Detection
+
+Status: In progress / mostly completed
+
+Completed:
+- Added persistent `detected_technologies` storage.
+- Added a website technology analyzer for basic CMS, frontend framework and rendering detection.
+- Detects WordPress, TYPO3, Wix, Next.js, Nuxt and JS-heavy pages from initial HTML signals.
+- Runs technology detection automatically after crawl data and page issues are persisted.
+- Exposes detected technologies in the crawl results API.
+- Displays detected technologies in the frontend.
+- Deduplicates repeated technology detections in result output.
+- Improved internal link detection by treating `www` and non-`www` hosts as the same website.
+- Prevents non-crawlable schemes such as `mailto:` from being treated as internal crawl targets.

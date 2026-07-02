@@ -206,6 +206,8 @@ final class CrawlResultsService
     private function mapTechnologies($technologies): array
     {
         return $technologies
+            ->sortByDesc('confidence')
+            ->unique(fn ($technology) => $technology->type . ':' . $technology->name)
             ->map(fn ($technology) => [
                 'id' => $technology->id,
                 'type' => $technology->type,
@@ -216,5 +218,5 @@ final class CrawlResultsService
             ])
             ->values()
             ->all();
-    }   
+    }
 }

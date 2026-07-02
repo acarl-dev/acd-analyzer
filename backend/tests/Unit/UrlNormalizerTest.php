@@ -117,4 +117,35 @@ class UrlNormalizerTest extends TestCase
 
         $this->assertNull($result);
     }
+
+    public function test_it_treats_www_and_non_www_hosts_as_internal(): void
+    {
+        $normalizer = new UrlNormalizer();
+
+        $this->assertTrue(
+            $normalizer->isInternal(
+                'https://www.example.com/kontakt',
+                'https://example.com'
+            )
+        );
+
+        $this->assertTrue(
+            $normalizer->isInternal(
+                'https://example.com/kontakt',
+                'https://www.example.com'
+            )
+        );
+    }
+
+    public function test_it_does_not_treat_mailto_links_as_internal(): void
+    {
+        $normalizer = new UrlNormalizer();
+
+        $this->assertFalse(
+            $normalizer->isInternal(
+                'mailto:test@example.com',
+                'https://example.com'
+            )
+        );
+    }
 }
