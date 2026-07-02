@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { getCrawlResults } from "@/api/crawl";
 import type { CrawlResultsResponse, CrawlRun } from "@/types/crawl";
-import { getHealthScoreLabel } from "@/lib/healthScore";
+import { CrawlTechnologySummary } from "./CrawlTechnologySummary";
+import { CrawlPageResultCard } from "./CrawlPageResultCard";
+import { CrawlResultOverview } from "./CrawlResultOverview";
+import { CrawlIssueSummary } from "./CrawlIssueSummary";
+
 
 type SeverityFilter = "all" | "error" | "warning" | "info";
 
@@ -14,88 +18,8 @@ type IssueSummaryItem = {
   count: number;
 };
 
-function getSeverityLabel(severity: "info" | "warning" | "error") {
-  if (severity === "error") {
-    return "Fehler";
-  }
-
-  if (severity === "warning") {
-    return "Warnung";
-  }
-
-  return "Hinweis";
-}
-
-function getSeverityBadgeClassName(severity: "info" | "warning" | "error") {
-  if (severity === "error") {
-    return "border-red-800 bg-red-950/70 text-red-200";
-  }
-
-  if (severity === "warning") {
-    return "border-amber-800 bg-amber-950/70 text-amber-200";
-  }
-
-  return "border-sky-800 bg-sky-950/70 text-sky-200";
-}
-
 interface CrawlResultProps {
   crawlRun: CrawlRun;
-}
-
-function getIssueClassName(severity: "info" | "warning" | "error") {
-  if (severity === "error") {
-    return "rounded-lg border border-red-900/50 bg-red-950/25 px-3 py-2";
-  }
-
-  if (severity === "warning") {
-    return "rounded-lg border border-amber-900/50 bg-amber-950/25 px-3 py-2";
-  }
-
-  return "rounded-lg border border-sky-900/50 bg-sky-950/25 px-3 py-2";
-}
-
-function formatBytes(bytes: number | null) {
-  if (bytes === null) {
-    return "n/a";
-  }
-
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
-
-  return `${(bytes / 1024).toFixed(1)} KB`;
-}
-
-function getTechnologyTypeLabel(type: string): string {
-  if (type === "cms") {
-    return "CMS";
-  }
-
-  if (type === "frontend") {
-    return "Frontend";
-  }
-
-  if (type === "rendering") {
-    return "Rendering";
-  }
-
-  return "Sonstige";
-}
-
-function getTechnologyGroupOrder(type: string): number {
-  if (type === "cms") {
-    return 1;
-  }
-
-  if (type === "frontend") {
-    return 2;
-  }
-
-  if (type === "rendering") {
-    return 3;
-  }
-
-  return 99;
 }
 
 export function CrawlResult({ crawlRun }: CrawlResultProps) {
@@ -184,23 +108,6 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
 
   const technologies = results?.technologies ?? [];
 
-  const technologyGroups = technologies.reduce<Record<string, typeof technologies>>(
-    (groups, technology) => {
-      const type = technology.type;
-
-      return {
-        ...groups,
-        [type]: [...(groups[type] ?? []), technology],
-      };
-    },
-    {},
-  );
-
-  const sortedTechnologyGroups = Object.entries(technologyGroups).sort(
-    ([firstType], [secondType]) =>
-      getTechnologyGroupOrder(firstType) - getTechnologyGroupOrder(secondType),
-  );
-
   useEffect(() => {
     let isMounted = true;
 
@@ -286,143 +193,11 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
 
         {results && (
           <div className="space-y-4">
-            <div className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Health Score
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-slate-100">
-                  {results.healthScore}/100
-                </p>
-                <p className="mt-1 text-sm text-slate-400">
-                  {getHealthScoreLabel(results.healthScore)}
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Crawl-Zusammenfassung
-                </p>
-
-                <dl className="grid gap-3 text-sm sm:grid-cols-2">
-                  <div>
-                    <dt className="text-slate-400">Seiten gesamt</dt>
-                    <dd className="font-medium">{results.summary.totalPages}</dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-slate-400">Fehlgeschlagen</dt>
-                    <dd className="font-medium text-red-300">
-                      {results.summary.failedPages}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-slate-400">Seiten mit Problemen</dt>
-                    <dd className="font-medium">
-                      {results.summary.pagesWithIssues}
-                    </dd>
-                  </div>
-
-                  <div>
-                    <dt className="text-slate-400">Probleme gesamt</dt>
-                    <dd className="font-medium">
-                      {results.summary.totalIssues}
-                    </dd>
-                    <dd className="mt-1 text-xs leading-relaxed text-slate-500">
-                      Fehler: {results.summary.errors} · Warnungen:{" "}
-                      {results.summary.warnings} · Hinweise: {results.summary.infos}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
+            <CrawlResultOverview results={results} />
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-                <div className="mb-3">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                    Erkannte Technologien
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Gruppiert nach Technologie-Kategorie mit Erkennungssicherheit und
-                    Hinweis zur Erkennung.
-                  </p>
-                </div>
-
-                {technologies.length === 0 ? (
-                  <p className="text-sm text-slate-400">
-                    Für diesen Crawl wurden keine Technologien erkannt.
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {sortedTechnologyGroups.map(([type, groupedTechnologies]) => (
-                      <div key={type}>
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                          {getTechnologyTypeLabel(type)}
-                        </p>
-
-                        <div className="flex flex-wrap gap-2">
-                          {groupedTechnologies.map((technology) => (
-                            <span
-                              key={technology.id}
-                              title={technology.evidence}
-                              className="rounded-full border border-slate-700 bg-slate-950 px-2.5 py-1 text-xs font-medium text-slate-300"
-                            >
-                              {technology.name} ·{" "}
-                              {Math.round(technology.confidence * 100)}%
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-                <div className="mb-3">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                    Häufigste Probleme
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Gruppiert nach Problemtext über alle analysierten Seiten dieses Crawls.
-                  </p>
-                </div>
-
-                {topIssueSummaryItems.length === 0 ? (
-                  <p className="text-sm text-emerald-300">
-                    Für diesen Crawl wurden keine Probleme erkannt.
-                  </p>
-                ) : (
-                  <ul className="space-y-2 text-xs">
-                    {topIssueSummaryItems.map((item) => (
-                      <li
-                        key={item.key}
-                        className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 sm:flex-row sm:items-start sm:justify-between"
-                      >
-                        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start">
-                          <span
-                            className={`w-fit rounded-full border px-2 py-0.5 font-medium ${getSeverityBadgeClassName(
-                              item.severity,
-                            )}`}
-                          >
-                            {getSeverityLabel(item.severity)}
-                          </span>
-
-                          <span className="leading-relaxed text-slate-100">
-                            {item.message}
-                          </span>
-                        </div>
-
-                        <span className="w-fit rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 font-semibold text-slate-200">
-                          {item.count}×
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <CrawlTechnologySummary technologies={technologies} />
+              <CrawlIssueSummary items={topIssueSummaryItems} />
             </div>
                         <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-4">
               {[
@@ -455,256 +230,15 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
 
               {filteredPages.map((page) => {
                 const pageKey = String(page.id ?? page.url);
-                const isExpanded = expandedPageKeys.has(pageKey);
-
-                const errorCount = page.issues.filter(
-                  (issue) => issue.severity === "error",
-                ).length;
-                const warningCount = page.issues.filter(
-                  (issue) => issue.severity === "warning",
-                ).length;
-                const infoCount = page.issues.filter(
-                  (issue) => issue.severity === "info",
-                ).length;
-                const totalIssues = page.issues.length;
-                const primaryIssue = page.issues[0] ?? null;
 
                 return (
-                  <div
+                  <CrawlPageResultCard
                     key={pageKey}
-                    className="rounded-xl border border-slate-800 bg-slate-900/70 p-4"
-                  >
-                    <div className="flex flex-col gap-2 border-b border-slate-800 pb-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <a
-                            href={page.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="break-all text-sm font-semibold text-slate-100 underline decoration-slate-600 underline-offset-4 transition hover:text-sky-200 hover:decoration-sky-400"
-                          >
-                            {page.url}
-                          </a>
-
-                          <span className="rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-xs font-medium text-slate-400">
-                            {page.depth === 0 ? "Startseite" : `Tiefe ${page.depth}`}
-                          </span>
-                        </div>
-
-                        <p className="mt-1 text-xs text-slate-500">
-                          {page.hasCrawlError
-                            ? "Dieser Crawl konnte für die Seite nicht abgeschlossen werden."
-                            : "Erkannte Seitendaten und Analysehinweise."}
-                        </p>
-
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {totalIssues === 0 ? (
-                            <span className="rounded-full border border-emerald-900/60 bg-emerald-950/30 px-2 py-0.5 text-xs font-medium text-emerald-300">
-                              Keine Probleme
-                            </span>
-                          ) : (
-                            <>
-                              {errorCount > 0 && (
-                                <span className="rounded-full border border-red-900/60 bg-red-950/40 px-2 py-0.5 text-xs font-medium text-red-200">
-                                  {errorCount} Fehler
-                                </span>
-                              )}
-
-                              {warningCount > 0 && (
-                                <span className="rounded-full border border-amber-900/60 bg-amber-950/40 px-2 py-0.5 text-xs font-medium text-amber-200">
-                                  {warningCount} Warnungen
-                                </span>
-                              )}
-
-                              {infoCount > 0 && (
-                                <span className="rounded-full border border-sky-900/60 bg-sky-950/40 px-2 py-0.5 text-xs font-medium text-sky-200">
-                                  {infoCount} Hinweise
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </div>
-
-                        {primaryIssue && (
-                          <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                            Wichtigstes Problem:{" "}
-                            <span className="text-slate-200">{primaryIssue.message}</span>
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col items-start gap-2 sm:items-end">
-                        <span
-                          className={
-                            page.hasCrawlError
-                              ? "inline-flex w-fit rounded-full border border-red-900/60 bg-red-950/40 px-2.5 py-1 text-xs font-medium text-red-200"
-                              : "inline-flex w-fit rounded-full border border-emerald-900/60 bg-emerald-950/40 px-2.5 py-1 text-xs font-medium text-emerald-200"
-                          }
-                        >
-                          {page.hasCrawlError
-                            ? "Crawl fehlgeschlagen"
-                            : `HTTP ${page.httpStatus ?? "n/a"}`}
-                        </span>
-
-                        <button
-                          type="button"
-                          onClick={() => togglePageDetails(pageKey)}
-                          className="rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:text-slate-100"
-                        >
-                          {isExpanded ? "Details ausblenden" : "Details anzeigen"}
-                        </button>
-                      </div>
-                    </div>
-
-                    {isExpanded && (
-                      <>
-                        <div className="mt-4 grid gap-3 lg:grid-cols-3">
-                          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                              Title
-                            </p>
-                            <p className="mt-2 text-sm font-medium leading-relaxed text-slate-100">
-                              {page.title ?? "Fehlt"}
-                            </p>
-                            <p className="mt-2 text-xs text-slate-500">
-                              Länge: {page.titleLength ?? 0} Zeichen
-                            </p>
-                          </div>
-
-                          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                              H1
-                            </p>
-                            <p className="mt-2 text-sm font-medium leading-relaxed text-slate-100">
-                              {page.h1 ?? "Fehlt"}
-                            </p>
-                            <p className="mt-2 text-xs text-slate-500">
-                              Anzahl: {page.h1Count}
-                            </p>
-                          </div>
-
-                          <div className="rounded-lg border border-slate-800 bg-slate-950/50 p-3">
-                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                              Meta Description
-                            </p>
-                            <p className="mt-2 text-sm font-medium leading-relaxed text-slate-100">
-                              {page.metaDescription ?? "Fehlt"}
-                            </p>
-                            <p className="mt-2 text-xs text-slate-500">
-                              Länge: {page.metaDescriptionLength ?? 0} Zeichen
-                            </p>
-                          </div>
-                        </div>
-
-                        {!page.hasCrawlError && (
-                          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-                            <div className="rounded-lg bg-slate-950/50 p-3">
-                              <p className="text-xs text-slate-500">Bild-Elemente</p>
-                              <p className="mt-1 text-lg font-semibold text-slate-100">
-                                {page.imageCount}
-                              </p>
-                            </div>
-
-                            <div className="rounded-lg bg-slate-950/50 p-3">
-                              <p className="text-xs text-slate-500">Ohne Alt-Text</p>
-                              <p
-                                className={
-                                  page.imagesWithoutAlt > 0
-                                    ? "mt-1 text-lg font-semibold text-amber-200"
-                                    : "mt-1 text-lg font-semibold text-slate-100"
-                                }
-                              >
-                                {page.imagesWithoutAlt}
-                              </p>
-                            </div>
-
-                            <div className="rounded-lg bg-slate-950/50 p-3">
-                              <p className="text-xs text-slate-500">Interne Links</p>
-                              <p className="mt-1 text-lg font-semibold text-slate-100">
-                                {page.internalLinksCount}
-                              </p>
-                            </div>
-
-                            <div className="rounded-lg bg-slate-950/50 p-3">
-                              <p className="text-xs text-slate-500">Externe Links</p>
-                              <p className="mt-1 text-lg font-semibold text-slate-100">
-                                {page.externalLinksCount}
-                              </p>
-                            </div>
-
-                            <div className="rounded-lg bg-slate-950/50 p-3">
-                              <p className="text-xs text-slate-500">HTML-Größe</p>
-                              <p className="mt-1 text-lg font-semibold text-slate-100">
-                                {formatBytes(page.htmlSizeBytes)}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        {(() => {
-                          const visibleIssues =
-                            severityFilter === "all"
-                              ? page.issues
-                              : page.issues.filter(
-                                  (issue) => issue.severity === severityFilter,
-                                );
-
-                          if (visibleIssues.length > 0) {
-                            return (
-                              <div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/40 p-3">
-                                <div className="mb-2 flex items-center justify-between gap-3">
-                                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                    Gefundene Probleme
-                                  </p>
-
-                                  <span className="text-xs text-slate-500">
-                                    {visibleIssues.length} angezeigt
-                                  </span>
-                                </div>
-
-                                <ul className="space-y-2 text-xs">
-                                  {visibleIssues.map((issue) => (
-                                    <li
-                                      key={`${page.id ?? page.url}-${issue.code}`}
-                                      className={getIssueClassName(issue.severity)}
-                                    >
-                                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-                                        <span
-                                          className={`w-fit rounded-full border px-2 py-0.5 font-medium ${getSeverityBadgeClassName(
-                                            issue.severity,
-                                          )}`}
-                                        >
-                                          {getSeverityLabel(issue.severity)}
-                                        </span>
-
-                                        <span className="font-medium leading-relaxed text-slate-100">
-                                          {issue.message}
-                                        </span>
-                                      </div>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            );
-                          }
-
-                          if (page.issues.length > 0) {
-                            return (
-                              <p className="mt-4 rounded-lg border border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-400">
-                                Für diesen Filter gibt es auf dieser Seite keine passenden Issues.
-                              </p>
-                            );
-                          }
-
-                          return (
-                            <p className="mt-4 rounded-lg border border-emerald-900/50 bg-emerald-950/30 p-3 text-xs text-emerald-300">
-                              Keine Probleme erkannt.
-                            </p>
-                          );
-                        })()}
-                      </>
-                    )}
-                  </div>
+                    page={page}
+                    severityFilter={severityFilter}
+                    isExpanded={expandedPageKeys.has(pageKey)}
+                    onToggleDetails={() => togglePageDetails(pageKey)}
+                  />
                 );
               })}
             </div>
