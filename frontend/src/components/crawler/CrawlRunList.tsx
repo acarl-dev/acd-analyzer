@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { listCrawlRuns } from "@/api/crawl";
 import type { CrawlRunListItem } from "@/types/crawl";
+import { getHealthScoreLabel } from "@/lib/healthScore";
 
 interface CrawlRunListProps {
   onSelect: (crawlRun: CrawlRunListItem) => void;
@@ -187,7 +188,7 @@ export function CrawlRunList({
                     </span>
 
                     <span className="rounded-full border border-slate-700 bg-slate-950 px-2 py-0.5">
-                      Health Score: {crawlRun.healthScore}/100
+                      Health Score: {crawlRun.healthScore}/100 · {getHealthScoreLabel(crawlRun.healthScore)}
                     </span>
 
                     <span

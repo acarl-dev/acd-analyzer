@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getCrawlResults } from "@/api/crawl";
 import type { CrawlResultsResponse, CrawlRun } from "@/types/crawl";
+import { getHealthScoreLabel } from "@/lib/healthScore";
 
 type SeverityFilter = "all" | "error" | "warning" | "info";
 
@@ -28,22 +29,6 @@ function getSeverityBadgeClassName(severity: "info" | "warning" | "error") {
   }
 
   return "border-sky-800 bg-sky-950/70 text-sky-200";
-}
-
-function getHealthScoreLabel(score: number): string {
-  if (score >= 80) {
-    return "Gut";
-  }
-
-  if (score >= 60) {
-    return "Okay";
-  }
-
-  if (score >= 40) {
-    return "Schwach";
-  }
-
-  return "Kritisch";
 }
 
 interface CrawlResultProps {

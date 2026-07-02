@@ -363,3 +363,35 @@ Ein Crawl-Fehler wurde gespeichert und als Ergebnis in die Analyseansicht gemapp
 * Redirect-Probleme gesondert behandeln
 * Timeout, DNS, SSL und Robots-Regeln differenzieren
 * Retry-Strategie vorbereiten
+* 
+## Crawl Health Score
+
+Der Crawl Health Score ist eine erste, vereinfachte Bewertung eines Crawl-Laufs auf einer Skala von `0` bis `100`.
+
+Der Score wird nicht als globale Summe aller Issues berechnet. Stattdessen wird zuerst für jede gecrawlte Seite beziehungsweise jeden Crawl-Fehler ein eigener Page Score berechnet. Der Crawl Health Score ist anschließend der gerundete Durchschnitt dieser Page Scores.
+
+Jede Page startet mit `100` Punkten. Issues reduzieren den Page Score abhängig von ihrer Severity:
+
+| Severity  | Abzug |
+| --------- | ----: |
+| `error`   |  `30` |
+| `warning` |  `10` |
+| `info`    |   `2` |
+
+Ein Page Score kann nicht unter `0` fallen.
+
+Crawl-Fehler werden wie eigene fehlerhafte Page Results behandelt und fließen dadurch ebenfalls in den Durchschnitt ein.
+
+Beispiel:
+
+```text
+Page 1:
+1 warning, 1 info
+100 - 10 - 2 = 88
+
+Crawl Error:
+1 error
+100 - 30 = 70
+
+Crawl Health Score:
+(88 + 70) / 2 = 79
