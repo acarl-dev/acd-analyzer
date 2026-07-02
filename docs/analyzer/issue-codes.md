@@ -37,9 +37,19 @@ Die Severity ist keine endgültige SEO-Wahrheit, sondern eine erste interne Prio
 | `meta_description_too_long`  | `warning` | Meta Description |
 | `missing_h1`                 |   `error` | Headings         |
 | `multiple_h1`                | `warning` | Headings         |
+| `missing_h2_structure`       | `warning` | Headings         |
+| `duplicate_heading_text`     |    `info` | Headings         |
 | `images_without_alt`         | `warning` | Images           |
 | `high_missing_alt_ratio`     | `warning` | Images           |
 | `few_internal_links`         | `warning` | Links            |
+| `empty_link_href`            | `warning` | Links            |
+| `insecure_external_links`    | `warning` | Links            |
+| `many_external_links`        | `warning` | Links            |
+| `missing_html_lang`          | `warning` | Technical SEO    |
+| `missing_viewport_meta`      | `warning` | Technical SEO    |
+| `robots_noindex`             |   `error` | Technical SEO    |
+| `missing_canonical`          |    `info` | Technical SEO    |
+| `very_low_text_content`      | `warning` | Content          |
 | `large_html_size`            |    `info` | HTML             |
 | `crawl_error`                |   `error` | Crawl            |
 
@@ -282,7 +292,7 @@ Mindestens 50 Prozent der Bilder haben keinen oder einen leeren alt-Wert.
 
 ### `few_internal_links`
 
-**Severity:** `info`
+**Severity:** `warning`
 
 **Bedeutung:**
 Die Seite hat sehr wenige interne Links.
