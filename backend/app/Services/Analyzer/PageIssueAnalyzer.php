@@ -84,6 +84,40 @@ class PageIssueAnalyzer
             );
         }
 
+        $h2Headings = array_filter($headings, static function (array $heading): bool {
+            return (int) ($heading['level'] ?? 0) === 2;
+        });
+
+        if ($h1Count > 0 && count($h2Headings) === 0) {
+            $issues[] = $this->issue(
+                'missing_h2_structure',
+                'warning',
+                'Die Seite hat keine H2-Überschriften und wirkt dadurch wenig strukturiert.'
+            );
+        }
+
+        $headingTexts = array_map(
+            static fn (array $heading): string => mb_strtolower(trim((string) ($heading['text'] ?? ''))),
+            $headings
+        );
+
+        $headingTexts = array_filter($headingTexts, static function (string $text): bool {
+            return $text !== '';
+        });
+
+        $duplicateHeadingTexts = array_filter(
+            array_count_values($headingTexts),
+            static fn (int $count): bool => $count > 1
+        );
+
+        if (count($duplicateHeadingTexts) > 0) {
+            $issues[] = $this->issue(
+                'duplicate_heading_text',
+                'info',
+                'Mehrere Überschriften verwenden denselben Text.'
+            );
+        }
+
         $images = $page['images'] ?? [];
         $imageCount = count($images);
 

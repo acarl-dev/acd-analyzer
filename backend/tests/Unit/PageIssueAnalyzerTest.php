@@ -300,4 +300,52 @@ class PageIssueAnalyzerTest extends TestCase
         $this->assertNotNull($manyExternalLinksIssue);
         $this->assertSame('warning', $manyExternalLinksIssue['severity']);
     }
+    
+    public function test_it_detects_missing_h2_structure(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => 'https://example.com'],
+                ['type' => 'internal', 'href' => 'https://example.com/about'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $missingH2Issue = collect($issues)->firstWhere('code', 'missing_h2_structure');
+
+        $this->assertNotNull($missingH2Issue);
+        $this->assertSame('warning', $missingH2Issue['severity']);
+    }
+
+    public function test_it_detects_duplicate_heading_text(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+                ['level' => 2, 'text' => 'Leistungen'],
+                ['level' => 3, 'text' => 'Leistungen'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => 'https://example.com'],
+                ['type' => 'internal', 'href' => 'https://example.com/about'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1><h2>Leistungen</h2><h3>Leistungen</h3></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $duplicateHeadingIssue = collect($issues)->firstWhere('code', 'duplicate_heading_text');
+
+        $this->assertNotNull($duplicateHeadingIssue);
+        $this->assertSame('info', $duplicateHeadingIssue['severity']);
+    }
 }
