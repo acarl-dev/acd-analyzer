@@ -126,6 +126,42 @@ class PageIssueAnalyzer
             );
         }
 
+        $html = (string) ($page['html'] ?? '');
+
+        if ($html !== '') {
+            if (! preg_match('/<html\b[^>]*\blang\s*=/i', $html)) {
+                $issues[] = $this->issue(
+                    'missing_html_lang',
+                    'warning',
+                    'Das HTML-Dokument hat kein lang-Attribut am html-Element.'
+                );
+            }
+
+            if (! preg_match('/<meta\b[^>]*\bname\s*=\s*["\']viewport["\'][^>]*>/i', $html)) {
+                $issues[] = $this->issue(
+                    'missing_viewport_meta',
+                    'warning',
+                    'Die Seite hat kein Viewport-Meta-Tag.'
+                );
+            }
+
+            if (preg_match('/<meta\b[^>]*\bname\s*=\s*["\']robots["\'][^>]*\bcontent\s*=\s*["\'][^"\']*\bnoindex\b[^"\']*["\'][^>]*>/i', $html)) {
+                $issues[] = $this->issue(
+                    'robots_noindex',
+                    'error',
+                    'Die Seite ist per Robots-Meta-Tag auf noindex gesetzt.'
+                );
+            }
+
+            if (! preg_match('/<link\b[^>]*\brel\s*=\s*["\']canonical["\'][^>]*>/i', $html)) {
+                $issues[] = $this->issue(
+                    'missing_canonical',
+                    'info',
+                    'Die Seite hat keinen Canonical-Link.'
+                );
+            }
+        }
+
         $htmlSizeBytes = (int) ($page['html_size_bytes'] ?? 0);
 
         if ($htmlSizeBytes > self::LARGE_HTML_SIZE_BYTES) {

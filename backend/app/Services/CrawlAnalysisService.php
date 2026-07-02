@@ -69,6 +69,7 @@ final class CrawlAnalysisService
                 ])
                 ->values()
                 ->all(),
+            'html' => $page->html,
             'html_size_bytes' => $page->html !== null ? strlen($page->html) : 0,
         ]);
 

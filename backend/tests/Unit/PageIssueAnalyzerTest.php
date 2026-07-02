@@ -146,4 +146,77 @@ class PageIssueAnalyzerTest extends TestCase
             $this->findIssueByCode($issues, 'large_html_size')['severity'] ?? null
         );
     }
+
+    public function test_it_detects_missing_technical_seo_basics(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal'],
+                ['type' => 'internal'],
+            ],
+            'html' => '<html><head></head><body><h1>Hauptüberschrift</h1></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $codes = array_column($issues, 'code');
+
+        $this->assertContains('missing_html_lang', $codes);
+        $this->assertContains('missing_viewport_meta', $codes);
+        $this->assertContains('missing_canonical', $codes);
+        $this->assertNotContains('robots_noindex', $codes);
+    }
+
+    public function test_it_does_not_report_technical_seo_basics_when_present(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal'],
+                ['type' => 'internal'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $codes = array_column($issues, 'code');
+
+        $this->assertNotContains('missing_html_lang', $codes);
+        $this->assertNotContains('missing_viewport_meta', $codes);
+        $this->assertNotContains('missing_canonical', $codes);
+        $this->assertNotContains('robots_noindex', $codes);
+    }
+
+    public function test_it_detects_robots_noindex(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal'],
+                ['type' => 'internal'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,follow"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $robotsNoindexIssue = collect($issues)->firstWhere('code', 'robots_noindex');
+
+        $this->assertNotNull($robotsNoindexIssue);
+        $this->assertSame('error', $robotsNoindexIssue['severity']);
+    }
 }
