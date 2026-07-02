@@ -103,6 +103,69 @@ class CrawlAnalysisServiceTest extends TestCase
         );
     }
 
+    public function test_it_persists_slow_response_time_issue_for_a_crawl_run(): void
+    {
+        $website = Website::forceCreate([
+            'url' => 'https://example.com',
+            'host' => 'example.com',
+        ]);
+
+        $crawlRun = CrawlRun::forceCreate([
+            'website_id' => $website->id,
+            'status' => 'completed',
+            'pages_crawled' => 1,
+        ]);
+
+        $page = Page::forceCreate([
+            'website_id' => $website->id,
+            'crawl_run_id' => $crawlRun->id,
+            'url' => 'https://example.com/slow',
+            'status_code' => 200,
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page content.',
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com/slow"></head><body>' . str_repeat('word ', 120) . '</body></html>',
+            'response_time_ms' => 2500,
+        ]);
+
+        Heading::forceCreate([
+            'page_id' => $page->id,
+            'level' => 1,
+            'text' => 'Main heading',
+        ]);
+
+        Heading::forceCreate([
+            'page_id' => $page->id,
+            'level' => 2,
+            'text' => 'Section heading',
+        ]);
+
+        Link::forceCreate([
+            'page_id' => $page->id,
+            'href' => 'https://example.com/about',
+            'text' => 'About',
+            'is_internal' => true,
+        ]);
+
+        Link::forceCreate([
+            'page_id' => $page->id,
+            'href' => 'https://example.com/contact',
+            'text' => 'Contact',
+            'is_internal' => true,
+        ]);
+
+        app(CrawlAnalysisService::class)->analyze($crawlRun);
+
+        $this->assertDatabaseHas('page_issues', [
+            'crawl_run_id' => $crawlRun->id,
+            'page_id' => $page->id,
+            'url' => $page->url,
+            'code' => 'slow_response_time',
+            'severity' => 'warning',
+            'message' => 'Die Seite hat eine langsame Server-Antwortzeit.',
+            'analyzer_version' => 'page_issue_analyzer:v1',
+        ]);
+    }
+
     public function test_it_persists_crawl_error_issues_for_a_crawl_run(): void
     {
         $website = Website::forceCreate([

@@ -15,6 +15,8 @@ class PageIssueAnalyzer
 
     private const MIN_VISIBLE_WORDS = 80;
 
+    private const SLOW_RESPONSE_TIME_MS = 2000;
+
     private const LARGE_HTML_SIZE_BYTES = 500000;
 
     public function analyze(array $page): array
@@ -51,6 +53,11 @@ class PageIssueAnalyzer
         $issues = [
             ...$issues,
             ...$this->analyzeContent($page),
+        ];
+
+        $issues = [
+            ...$issues,
+            ...$this->analyzePerformance($page),
         ];
 
         $issues = [
@@ -380,5 +387,22 @@ class PageIssueAnalyzer
             'severity' => $severity,
             'message' => $message,
         ];
+    }
+
+    private function analyzePerformance(array $page): array
+    {
+        $issues = [];
+
+        $responseTimeMs = $page['response_time_ms'] ?? null;
+
+        if ($responseTimeMs !== null && $responseTimeMs > self::SLOW_RESPONSE_TIME_MS) {
+            $issues[] = $this->issue(
+                'slow_response_time',
+                'warning',
+                'Die Seite hat eine langsame Server-Antwortzeit.'
+            );
+        }
+
+        return $issues;
     }
 }

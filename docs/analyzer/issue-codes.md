@@ -50,8 +50,10 @@ Die Severity ist keine endgültige SEO-Wahrheit, sondern eine erste interne Prio
 | `robots_noindex`             |   `error` | Technical SEO    |
 | `missing_canonical`          |    `info` | Technical SEO    |
 | `very_low_text_content`      | `warning` | Content          |
+| `slow_response_time`         | `warning` | Performance      |
 | `large_html_size`            |    `info` | HTML             |
 | `crawl_error`                |   `error` | Crawl            |
+
 
 ---
 
@@ -339,6 +341,23 @@ Die gespeicherte HTML-Größe überschreitet den aktuellen Schwellwert im `PageI
 * Verhältnis von sichtbarem Text zu HTML-Größe prüfen
 * JavaScript-heavy Seiten gesondert erkennen
 * später Performance-Checks ergänzen
+
+### `slow_response_time`
+
+**Severity:** `warning`
+
+Die Seite hatte beim Crawl eine langsame Server-Antwortzeit.
+
+Aktuelle Regel:
+
+- Die gespeicherte `response_time_ms` ist größer als `2000` ms.
+
+Mögliche spätere Verbesserungen:
+
+- Schwellwert konfigurierbar machen.
+- Durchschnittswerte über mehrere Crawls berücksichtigen.
+- Unterschied zwischen Server-Antwortzeit und vollständiger Ladezeit klarer im UI erklären.
+- Optional nach Seitentyp oder Crawl-Tiefe gewichten.
 
 ---
 

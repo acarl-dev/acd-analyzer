@@ -72,6 +72,7 @@ final class CrawlAnalysisService
                 ->all(),
             'html' => $page->html,
             'html_size_bytes' => $page->html !== null ? strlen($page->html) : 0,
+            'response_time_ms' => $page->response_time_ms,
         ]);
 
         foreach ($issues as $issue) {

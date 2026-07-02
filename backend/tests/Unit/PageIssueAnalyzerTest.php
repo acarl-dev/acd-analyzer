@@ -400,4 +400,50 @@ class PageIssueAnalyzerTest extends TestCase
 
         $this->assertNotContains('very_low_text_content', $codes);
     }
+
+    public function test_it_detects_slow_response_time(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Main heading'],
+                ['level' => 2, 'text' => 'Section heading'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => '/about'],
+                ['type' => 'internal', 'href' => '/contact'],
+            ],
+            'html' => str_repeat('word ', 120),
+            'html_size_bytes' => 1000,
+            'response_time_ms' => 2500,
+        ]);
+
+        $this->assertContains('slow_response_time', array_column($issues, 'code'));
+    }
+
+    public function test_it_does_not_detect_slow_response_time_for_fast_pages(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Main heading'],
+                ['level' => 2, 'text' => 'Section heading'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => '/about'],
+                ['type' => 'internal', 'href' => '/contact'],
+            ],
+            'html' => str_repeat('word ', 120),
+            'html_size_bytes' => 1000,
+            'response_time_ms' => 500,
+        ]);
+
+        $this->assertNotContains('slow_response_time', array_column($issues, 'code'));
+    }
+
+
 }
