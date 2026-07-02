@@ -17,6 +17,47 @@ class PageIssueAnalyzer
 
     public function analyze(array $page): array
     {
+        $issues = [
+            ...$this->analyzeTitle($page),
+        ];
+
+        $issues = [
+            ...$issues,
+            ...$this->analyzeMetaDescription($page),
+        ];
+
+        $issues = [
+            ...$issues,
+            ...$this->analyzeHeadings($page),
+        ];
+
+        $issues = [
+            ...$issues,
+            ...$this->analyzeImages($page),
+        ];
+
+        $issues = [
+            ...$issues,
+            ...$this->analyzeLinks($page),
+        ];
+
+        
+
+        $issues = [
+            ...$issues,
+            ...$this->analyzeTechnicalSeo($page),
+        ];
+
+        $issues = [
+            ...$issues,
+            ...$this->analyzeHtmlSize($page),
+        ];
+
+        return $issues;
+    }
+
+    private function analyzeTitle(array $page): array
+    {
         $issues = [];
 
         $title = trim((string) ($page['title'] ?? ''));
@@ -41,6 +82,13 @@ class PageIssueAnalyzer
             );
         }
 
+        return $issues;
+    }
+
+    private function analyzeMetaDescription(array $page): array
+    {
+        $issues = [];
+
         $metaDescription = trim((string) ($page['meta_description'] ?? ''));
 
         if ($metaDescription === '') {
@@ -62,6 +110,13 @@ class PageIssueAnalyzer
                 'Die Meta Description der Seite ist sehr lang.'
             );
         }
+
+        return $issues;
+    }
+
+    private function analyzeHeadings(array $page): array
+    {
+        $issues = [];
 
         $headings = $page['headings'] ?? [];
         $h1Headings = array_filter($headings, static function (array $heading): bool {
@@ -118,6 +173,13 @@ class PageIssueAnalyzer
             );
         }
 
+        return $issues;
+    }
+
+    private function analyzeImages(array $page): array
+    {
+        $issues = [];
+
         $images = $page['images'] ?? [];
         $imageCount = count($images);
 
@@ -147,6 +209,13 @@ class PageIssueAnalyzer
                 );
             }
         }
+
+        return $issues;
+    }
+
+    private function analyzeLinks(array $page): array
+    {
+        $issues = [];
 
         $links = $page['links'] ?? [];
         $internalLinks = array_filter($links, static function (array $link): bool {
@@ -203,6 +272,13 @@ class PageIssueAnalyzer
             );
         }
 
+        return $issues;
+    }
+
+    private function analyzeTechnicalSeo(array $page): array
+    {
+        $issues = [];
+
         $html = (string) ($page['html'] ?? '');
 
         if ($html !== '') {
@@ -238,6 +314,13 @@ class PageIssueAnalyzer
                 );
             }
         }
+
+        return $issues;
+    }
+
+    private function analyzeHtmlSize(array $page): array
+    {
+        $issues = [];
 
         $htmlSizeBytes = (int) ($page['html_size_bytes'] ?? 0);
 
