@@ -7,6 +7,13 @@ import { getHealthScoreLabel } from "@/lib/healthScore";
 
 type SeverityFilter = "all" | "error" | "warning" | "info";
 
+type IssueSummaryItem = {
+  key: string;
+  message: string;
+  severity: "info" | "warning" | "error";
+  count: number;
+};
+
 function getSeverityLabel(severity: "info" | "warning" | "error") {
   if (severity === "error") {
     return "Fehler";
@@ -153,6 +160,28 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
     return page.issues.some((issue) => issue.severity === severityFilter);
   });
 
+  const issueSummaryItems =
+    results?.pages
+      .flatMap((page) => page.issues)
+      .reduce<Record<string, IssueSummaryItem>>((items, issue) => {
+        const key = `${issue.severity}:${issue.message}`;
+        const existingItem = items[key];
+
+        return {
+          ...items,
+          [key]: {
+            key,
+            message: issue.message,
+            severity: issue.severity,
+            count: (existingItem?.count ?? 0) + 1,
+          },
+        };
+      }, {}) ?? {};
+
+  const topIssueSummaryItems = Object.values(issueSummaryItems)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
   const technologies = results?.technologies ?? [];
 
   const technologyGroups = technologies.reduce<Record<string, typeof technologies>>(
@@ -257,91 +286,145 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
 
         {results && (
           <div className="space-y-4">
-            <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Health Score
-              </p>
-              <p className="mt-2 text-3xl font-semibold text-slate-100">
-                {results.healthScore}/100
-              </p>
-              <p className="mt-1 text-sm text-slate-400">
-                {getHealthScoreLabel(results.healthScore)}
-              </p>
-            </div>
-            <dl className="grid gap-3 text-sm sm:grid-cols-4">
-              <div>
-                <dt className="text-slate-400">Seiten gesamt</dt>
-                <dd className="font-medium">{results.summary.totalPages}</dd>
-              </div>
-
-              <div>
-                <dt className="text-slate-400">Fehlgeschlagen</dt>
-                <dd className="font-medium text-red-300">
-                  {results.summary.failedPages}
-                </dd>
-              </div>
-
-              <div>
-                <dt className="text-slate-400">Seiten mit Problemen</dt>
-                <dd className="font-medium">
-                  {results.summary.pagesWithIssues}
-                </dd>
-              </div>
-
-              <div>
-                <dt className="text-slate-400">Probleme gesamt</dt>
-                <dd className="font-medium">
-                  {results.summary.totalIssues}
-                </dd>
-                <dd className="mt-1 text-xs leading-relaxed text-slate-500">
-                  Fehler: {results.summary.errors} · Warnungen:{" "}
-                  {results.summary.warnings} · Hinweise: {results.summary.infos}
-                </dd>
-              </div>
-            </dl>
-
-            <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-              <div className="mb-3">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
                 <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Erkannte Technologien
+                  Health Score
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  Gruppiert nach Technologie-Kategorie mit Erkennungssicherheit und
-                  Hinweis zur Erkennung.
+                <p className="mt-2 text-3xl font-semibold text-slate-100">
+                  {results.healthScore}/100
+                </p>
+                <p className="mt-1 text-sm text-slate-400">
+                  {getHealthScoreLabel(results.healthScore)}
                 </p>
               </div>
 
-              {technologies.length === 0 ? (
-                <p className="text-sm text-slate-400">
-                  Für diesen Crawl wurden keine Technologien erkannt.
+              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Crawl-Zusammenfassung
                 </p>
-              ) : (
-                <div className="space-y-4">
-                  {sortedTechnologyGroups.map(([type, groupedTechnologies]) => (
-                    <div key={type}>
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        {getTechnologyTypeLabel(type)}
-                      </p>
 
-                      <div className="flex flex-wrap gap-2">
-                        {groupedTechnologies.map((technology) => (
-                          <span
-                            key={technology.id}
-                            title={technology.evidence}
-                            className="rounded-full border border-slate-700 bg-slate-950 px-2.5 py-1 text-xs font-medium text-slate-300"
-                          >
-                            {technology.name} ·{" "}
-                            {Math.round(technology.confidence * 100)}%
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                  <div>
+                    <dt className="text-slate-400">Seiten gesamt</dt>
+                    <dd className="font-medium">{results.summary.totalPages}</dd>
+                  </div>
+
+                  <div>
+                    <dt className="text-slate-400">Fehlgeschlagen</dt>
+                    <dd className="font-medium text-red-300">
+                      {results.summary.failedPages}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt className="text-slate-400">Seiten mit Problemen</dt>
+                    <dd className="font-medium">
+                      {results.summary.pagesWithIssues}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt className="text-slate-400">Probleme gesamt</dt>
+                    <dd className="font-medium">
+                      {results.summary.totalIssues}
+                    </dd>
+                    <dd className="mt-1 text-xs leading-relaxed text-slate-500">
+                      Fehler: {results.summary.errors} · Warnungen:{" "}
+                      {results.summary.warnings} · Hinweise: {results.summary.infos}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-4">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+                <div className="mb-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Erkannte Technologien
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Gruppiert nach Technologie-Kategorie mit Erkennungssicherheit und
+                    Hinweis zur Erkennung.
+                  </p>
+                </div>
+
+                {technologies.length === 0 ? (
+                  <p className="text-sm text-slate-400">
+                    Für diesen Crawl wurden keine Technologien erkannt.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {sortedTechnologyGroups.map(([type, groupedTechnologies]) => (
+                      <div key={type}>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                          {getTechnologyTypeLabel(type)}
+                        </p>
+
+                        <div className="flex flex-wrap gap-2">
+                          {groupedTechnologies.map((technology) => (
+                            <span
+                              key={technology.id}
+                              title={technology.evidence}
+                              className="rounded-full border border-slate-700 bg-slate-950 px-2.5 py-1 text-xs font-medium text-slate-300"
+                            >
+                              {technology.name} ·{" "}
+                              {Math.round(technology.confidence * 100)}%
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+                <div className="mb-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Häufigste Probleme
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Gruppiert nach Problemtext über alle analysierten Seiten dieses Crawls.
+                  </p>
+                </div>
+
+                {topIssueSummaryItems.length === 0 ? (
+                  <p className="text-sm text-emerald-300">
+                    Für diesen Crawl wurden keine Probleme erkannt.
+                  </p>
+                ) : (
+                  <ul className="space-y-2 text-xs">
+                    {topIssueSummaryItems.map((item) => (
+                      <li
+                        key={item.key}
+                        className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-950/50 px-3 py-2 sm:flex-row sm:items-start sm:justify-between"
+                      >
+                        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start">
+                          <span
+                            className={`w-fit rounded-full border px-2 py-0.5 font-medium ${getSeverityBadgeClassName(
+                              item.severity,
+                            )}`}
+                          >
+                            {getSeverityLabel(item.severity)}
+                          </span>
+
+                          <span className="leading-relaxed text-slate-100">
+                            {item.message}
+                          </span>
+                        </div>
+
+                        <span className="w-fit rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 font-semibold text-slate-200">
+                          {item.count}×
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+                        <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-4">
               {[
                 { value: "all", label: "Alle" },
                 { value: "error", label: "Fehler" },
@@ -472,7 +555,7 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                         </button>
                       </div>
                     </div>
-                    
+
                     {isExpanded && (
                       <>
                         <div className="mt-4 grid gap-3 lg:grid-cols-3">
@@ -512,7 +595,6 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                             </p>
                           </div>
                         </div>
-                      
 
                         {!page.hasCrawlError && (
                           <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
@@ -621,7 +703,7 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
                           );
                         })()}
                       </>
-                    )}  
+                    )}
                   </div>
                 );
               })}
