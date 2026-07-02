@@ -334,4 +334,75 @@ class CrawlResultsServiceTest extends TestCase
         $this->assertSame('Found WordPress asset path in HTML.', $result['technologies'][0]['evidence']);
         $this->assertSame($page->id, $result['technologies'][0]['pageId']);
     }
+
+    public function test_it_includes_health_score_based_on_page_and_crawl_error_issues(): void
+    {
+    $website = Website::forceCreate([
+    'url' => 'https://example.com',
+    'host' => 'example.com',
+    ]);
+
+    $crawlRun = CrawlRun::forceCreate([
+        'website_id' => $website->id,
+        'status' => 'completed',
+        'pages_crawled' => 1,
+    ]);
+
+    $page = Page::forceCreate([
+        'website_id' => $website->id,
+        'crawl_run_id' => $crawlRun->id,
+        'url' => 'https://example.com',
+        'status_code' => 200,
+        'title' => 'Example',
+        'meta_description' => 'Example meta description',
+        'html' => '<html><body><h1>Example</h1></body></html>',
+    ]);
+
+    $crawlError = CrawlError::forceCreate([
+        'crawl_run_id' => $crawlRun->id,
+        'url' => 'https://example.com/broken',
+        'message' => 'Connection timeout',
+        'depth' => 1,
+    ]);
+
+    PageIssue::forceCreate([
+        'crawl_run_id' => $crawlRun->id,
+        'page_id' => $page->id,
+        'crawl_error_id' => null,
+        'url' => $page->url,
+        'code' => 'missing_canonical',
+        'severity' => 'info',
+        'message' => 'Die Seite enthält keinen Canonical-Link.',
+        'context' => null,
+        'analyzer_version' => 'page_issue_analyzer:v1',
+    ]);
+
+    PageIssue::forceCreate([
+        'crawl_run_id' => $crawlRun->id,
+        'page_id' => $page->id,
+        'crawl_error_id' => null,
+        'url' => $page->url,
+        'code' => 'few_internal_links',
+        'severity' => 'warning',
+        'message' => 'Die Seite hat sehr wenige interne Links.',
+        'context' => null,
+        'analyzer_version' => 'page_issue_analyzer:v1',
+    ]);
+
+    PageIssue::forceCreate([
+        'crawl_run_id' => $crawlRun->id,
+        'page_id' => null,
+        'crawl_error_id' => $crawlError->id,
+        'url' => $crawlError->url,
+        'code' => 'crawl_error',
+        'severity' => 'error',
+        'message' => 'Die Seite konnte nicht gecrawlt werden: Connection timeout',
+        'context' => null,
+        'analyzer_version' => 'page_issue_analyzer:v1',
+    ]);
+
+    $results = app(CrawlResultsService::class)->buildForCrawlRun($crawlRun);
+
+    $this->assertSame(79, $results['healthScore']);
+    }
 }

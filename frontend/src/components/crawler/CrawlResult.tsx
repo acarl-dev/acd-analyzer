@@ -30,6 +30,22 @@ function getSeverityBadgeClassName(severity: "info" | "warning" | "error") {
   return "border-sky-800 bg-sky-950/70 text-sky-200";
 }
 
+function getHealthScoreLabel(score: number): string {
+  if (score >= 80) {
+    return "Gut";
+  }
+
+  if (score >= 60) {
+    return "Okay";
+  }
+
+  if (score >= 40) {
+    return "Schwach";
+  }
+
+  return "Kritisch";
+}
+
 interface CrawlResultProps {
   crawlRun: CrawlRun;
 }
@@ -241,6 +257,17 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
 
         {results && (
           <div className="space-y-4">
+            <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                Health Score
+              </p>
+              <p className="mt-2 text-3xl font-semibold text-slate-100">
+                {results.healthScore}/100
+              </p>
+              <p className="mt-1 text-sm text-slate-400">
+                {getHealthScoreLabel(results.healthScore)}
+              </p>
+            </div>
             <dl className="grid gap-3 text-sm sm:grid-cols-4">
               <div>
                 <dt className="text-slate-400">Seiten gesamt</dt>

@@ -85,6 +85,7 @@ export interface CrawlResultsResponse {
   crawlRunId: number;
   websiteId: number;
   siteUrl: string;
+  healthScore: number;
   summary: CrawlSummary;
   technologies: DetectedTechnology[];
   pages: PageAnalysisResult[];

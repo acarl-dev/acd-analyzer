@@ -4,8 +4,15 @@ namespace App\Services;
 
 use App\Models\CrawlRun;
 use Illuminate\Support\Collection;
+use App\Services\Analyzer\CrawlHealthScoreService;
+
 final class CrawlResultsService
 {
+    public function __construct(
+        private readonly CrawlHealthScoreService $crawlHealthScoreService,
+    ) {
+    }
+
     public function buildForCrawlRun(CrawlRun $crawlRun): array
     {
         $crawlRun->load([
@@ -32,6 +39,7 @@ final class CrawlResultsService
             'crawlRunId' => $crawlRun->id,
             'websiteId' => $crawlRun->website_id,
             'siteUrl' => $crawlRun->website?->url,
+            'healthScore' => $this->crawlHealthScoreService->calculate($pages),
             'summary' => $this->buildSummary($pages),
             'technologies' => $this->mapTechnologies($crawlRun->detectedTechnologies),
             'pages' => $pages,
@@ -77,15 +85,6 @@ final class CrawlResultsService
         $externalLinksCount = $page->links
             ->where('is_internal', false)
             ->count();
-
-                $issues = $page->issues
-                    ->map(fn ($issue) => [
-                        'code' => $issue->code,
-                        'severity' => $issue->severity,
-                        'message' => $issue->message,
-                    ])
-                    ->values()
-                    ->all();
 
         return [
             'id' => $page->id,
