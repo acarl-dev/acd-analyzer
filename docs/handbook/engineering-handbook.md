@@ -200,6 +200,23 @@ Mindestens erforderlich sind:
 * Issues
 * Crawl-Error-Informationen, falls vorhanden
 
+### Persistenter Analysefluss
+
+Der ACD Analyzer berechnet Analyseergebnisse nicht live beim Abruf der Detailansicht.
+
+Der aktuelle Ablauf ist:
+
+1. `CrawlerService` crawlt eine oder mehrere URLs innerhalb der gesetzten Limits.
+2. `CrawlResultPersister` speichert Pages, Headings, Images, Links und Crawl Errors.
+3. `CrawlAnalysisService` lädt den vollständigen CrawlRun mit seinen gespeicherten Daten.
+4. Analyzer-Klassen wie `PageIssueAnalyzer` erzeugen normalisierte Issues.
+5. Die Issues werden in `page_issues` persistiert.
+6. `TechnologyDetectionService` erkennt Technologien und speichert sie in `detected_technologies`.
+7. `CrawlResultsService` liest nur noch persistierte Daten und mapped sie in eine stabile API-Response.
+8. Das Frontend visualisiert die API-Response, berechnet aber keine fachlichen Analyzer-Ergebnisse.
+
+Diese Trennung ist wichtig, damit Analyseergebnisse nachvollziehbar, testbar und reproduzierbar bleiben.
+
 Crawl-Fehler enthalten ebenfalls eine Tiefe, damit Multi-Page-Ergebnisse korrekt sortiert und verständlich angezeigt werden können.
 
 ---
