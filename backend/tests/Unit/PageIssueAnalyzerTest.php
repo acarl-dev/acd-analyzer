@@ -348,4 +348,56 @@ class PageIssueAnalyzerTest extends TestCase
         $this->assertNotNull($duplicateHeadingIssue);
         $this->assertSame('info', $duplicateHeadingIssue['severity']);
     }
+
+    public function test_it_detects_very_low_text_content(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+                ['level' => 2, 'text' => 'Abschnitt'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => 'https://example.com'],
+                ['type' => 'internal', 'href' => 'https://example.com/about'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"><style>.hidden { display: none; }</style><script>console.log("not visible content");</script></head><body><h1>Hauptüberschrift</h1><h2>Abschnitt</h2><p>Sehr kurzer Inhalt.</p></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $veryLowTextContentIssue = collect($issues)->firstWhere('code', 'very_low_text_content');
+
+        $this->assertNotNull($veryLowTextContentIssue);
+        $this->assertSame('warning', $veryLowTextContentIssue['severity']);
+    }
+
+    public function test_it_does_not_report_very_low_text_content_when_page_has_enough_text(): void
+    {
+        $content = str_repeat(
+            'Dies ist ein sinnvoller sichtbarer Beispieltext mit mehreren Wörtern für die Inhaltsanalyse. ',
+            12
+        );
+
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+                ['level' => 2, 'text' => 'Abschnitt'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => 'https://example.com'],
+                ['type' => 'internal', 'href' => 'https://example.com/about'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1><h2>Abschnitt</h2><p>' . $content . '</p></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $codes = array_column($issues, 'code');
+
+        $this->assertNotContains('very_low_text_content', $codes);
+    }
 }

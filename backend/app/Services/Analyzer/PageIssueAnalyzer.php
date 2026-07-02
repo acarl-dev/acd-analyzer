@@ -13,6 +13,8 @@ class PageIssueAnalyzer
     private const MIN_INTERNAL_LINKS = 2;
     private const MANY_EXTERNAL_LINKS = 20;
 
+    private const MIN_VISIBLE_WORDS = 80;
+
     private const LARGE_HTML_SIZE_BYTES = 500000;
 
     public function analyze(array $page): array
@@ -41,11 +43,14 @@ class PageIssueAnalyzer
             ...$this->analyzeLinks($page),
         ];
 
-        
-
         $issues = [
             ...$issues,
             ...$this->analyzeTechnicalSeo($page),
+        ];
+
+        $issues = [
+            ...$issues,
+            ...$this->analyzeContent($page),
         ];
 
         $issues = [
@@ -313,6 +318,39 @@ class PageIssueAnalyzer
                     'Die Seite hat keinen Canonical-Link.'
                 );
             }
+        }
+
+        return $issues;
+    }
+
+    private function analyzeContent(array $page): array
+    {
+        $issues = [];
+
+        $html = (string) ($page['html'] ?? '');
+
+        if ($html === '') {
+            return $issues;
+        }
+
+        $visibleText = preg_replace('/<script\b[^>]*>.*?<\/script>/is', ' ', $html);
+        $visibleText = preg_replace('/<style\b[^>]*>.*?<\/style>/is', ' ', $visibleText ?? '');
+        $visibleText = strip_tags($visibleText ?? '');
+        $visibleText = html_entity_decode($visibleText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $visibleText = trim(preg_replace('/\s+/u', ' ', $visibleText) ?? '');
+
+        if ($visibleText === '') {
+            $wordCount = 0;
+        } else {
+            $wordCount = str_word_count($visibleText);
+        }
+
+        if ($wordCount < self::MIN_VISIBLE_WORDS) {
+            $issues[] = $this->issue(
+                'very_low_text_content',
+                'warning',
+                'Die Seite enthält sehr wenig sichtbaren Textinhalt.'
+            );
         }
 
         return $issues;
