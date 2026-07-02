@@ -772,15 +772,28 @@ Completed:
 
 ### Sprint 4.6 – Basic Technology Detection
 
-Status: In progress / mostly completed
+Status: Completed
+
+Goal:
+Detect basic website technologies from the initial HTML and make them visible in the internal dashboard.
 
 Completed:
 - Added persistent `detected_technologies` storage.
-- Added a website technology analyzer for basic CMS, frontend framework and rendering detection.
-- Detects WordPress, TYPO3, Wix, Next.js, Nuxt and JS-heavy pages from initial HTML signals.
-- Runs technology detection automatically after crawl data and page issues are persisted.
-- Exposes detected technologies in the crawl results API.
-- Displays detected technologies in the frontend.
-- Deduplicates repeated technology detections in result output.
+- Added `DetectedTechnology` model and relations to websites, crawl runs and pages.
+- Added `DetectedTechnologyData` DTO.
+- Added `WebsiteTechnologyAnalyzer` for basic technology detection.
+- Added detection for WordPress, TYPO3, Wix, Next.js, Nuxt and JS-heavy pages.
+- Added `TechnologyDetectionService` to analyze stored crawl pages and persist detections.
+- Integrated technology detection into the crawl lifecycle after crawl data and page issues are persisted.
+- Exposed detected technologies through the crawl results API.
+- Displayed detected technologies in the frontend crawl results view.
+- Deduplicated repeated technology detections in result output.
 - Improved internal link detection by treating `www` and non-`www` hosts as the same website.
-- Prevents non-crawlable schemes such as `mailto:` from being treated as internal crawl targets.
+- Fixed non-crawlable schemes such as `mailto:` being treated as internal links.
+- Fixed image persistence for decimal image dimensions.
+- Removed duplicate image persistence in `CrawlResultPersister`.
+
+Notes:
+- JS-heavy detection is based on initial HTML signals and is a heuristic.
+- `maxPages` is a crawl limit, not a target count. If a JS-heavy page exposes no crawlable internal links in the initial HTML, only the start page may be crawled.
+- Rendered crawling with Playwright remains out of scope for this sprint.

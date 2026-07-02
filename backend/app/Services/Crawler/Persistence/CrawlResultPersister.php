@@ -31,13 +31,27 @@ class CrawlResultPersister
         }
 
         foreach ($page->images as $image) {
-            $storedPage->images()->create($image);
-        }
-
-        foreach ($page->images as $image) {
-            $storedPage->images()->create($image);
+            $storedPage->images()->create([
+                'src' => $image['src'] ?? null,
+                'alt' => $image['alt'] ?? null,
+                'width' => $this->normalizeImageDimension($image['width'] ?? null),
+                'height' => $this->normalizeImageDimension($image['height'] ?? null),
+            ]);
         }
 
         return $storedPage;
+    }
+
+    private function normalizeImageDimension(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (!is_numeric($value)) {
+            return null;
+        }
+
+        return (int) round((float) $value);
     }
 }

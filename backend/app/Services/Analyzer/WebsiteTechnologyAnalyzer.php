@@ -86,10 +86,43 @@ class WebsiteTechnologyAnalyzer
             || str_contains($lowerHtml, "id='app'");
 
         $scriptCount = substr_count($lowerHtml, '<script');
+        $linkCount = substr_count($lowerHtml, '<a ');
 
         $textContent = trim(strip_tags($html));
         $visibleTextLength = mb_strlen(preg_replace('/\s+/', ' ', $textContent) ?? '');
 
-        return $hasAppRoot && $scriptCount >= 3 && $visibleTextLength < 500;
+        $hasLoadingHint = str_contains($lowerHtml, 'loading')
+            || str_contains($lowerHtml, 'enable javascript')
+            || str_contains($lowerHtml, 'please enable javascript')
+            || str_contains($lowerHtml, 'javascript');
+
+        if ($hasAppRoot && $scriptCount >= 3 && $visibleTextLength < 500) {
+            return true;
+        }
+
+        return $scriptCount >= 2
+            && $linkCount === 0
+            && $visibleTextLength < 1000
+            && $hasLoadingHint;
+    }
+
+    public function test_it_detects_script_app_shell_pages_as_js_heavy(): void
+    {
+        $analyzer = new WebsiteTechnologyAnalyzer();
+
+        $detections = $analyzer->analyze(
+            '<html>
+                <head>
+                    <title>App</title>
+                    <script src="/app.js"></script>
+                    <script src="/vendor.js"></script>
+                </head>
+                <body>
+                    <p>Loading application. Please enable JavaScript.</p>
+                </body>
+            </html>'
+        );
+
+        $this->assertDetectionExists($detections, 'rendering', 'JS-heavy');
     }
 }

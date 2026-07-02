@@ -31,6 +31,7 @@ ACD entwickelt eine Intelligence Engine, die Unternehmenswebsites analysiert, wi
 * Keine Architektur für Probleme bauen, die noch nicht existieren.
 * Wiederverwendbare Komponenten bevorzugen.
 * Technische Metriken müssen im Frontend verständlich und ehrlich benannt werden.
+* Analyseergebnisse müssen erklärbar und nachvollziehbar bleiben.
 
 ---
 
@@ -44,6 +45,7 @@ ACD entwickelt eine Intelligence Engine, die Unternehmenswebsites analysiert, wi
 * Persister
 * Analyzer
 * Page-level issue detection belongs in analyzer classes.
+* Technology detection belongs in analyzer classes.
 * Result mapping belongs in result services.
 
 ### Dashboard
@@ -142,7 +144,9 @@ pages_crawled wird nach Abschluss des Crawl-Loops im CrawlerService berechnet.
 
 CrawlAnalysisService läuft erst nach Abschluss des vollständigen Crawl-Loops.
 
-Ein CrawlRun gilt erst als completed, wenn Crawl-Daten persistiert und die Analyse erfolgreich abgeschlossen wurden.
+TechnologyDetectionService läuft nach Persistierung der Crawl-Daten und nach der Page-Issue-Analyse.
+
+Ein CrawlRun gilt erst als completed, wenn Crawl-Daten persistiert, Issues analysiert und Technology Detection erfolgreich abgeschlossen wurden.
 
 Ein CrawlRun verwendet `finished_at` als Abschlusszeitpunkt. Der Service darf keine nicht vorhandenen Zeitstempelspalten wie `completed_at` beschreiben.
 
@@ -170,11 +174,13 @@ Die Backend-Validierung ist die Quelle der Wahrheit.
 
 Das Frontend darf Werte zur besseren Bedienbarkeit clientseitig begrenzen, ersetzt aber niemals die Backend-Validierung.
 
+`maxPages` ist ein Limit, kein Zielwert. Wenn eine Website im initialen HTML keine crawlbaren internen Links enthält, kann ein Crawl trotz höherem `maxPages`-Wert nur aus der Startseite bestehen.
+
 ---
 
 ## 9. Analyse-Architektur
 
-CrawlResultsService liest gespeicherte Crawl-Daten und gespeicherte Issues.
+CrawlResultsService liest gespeicherte Crawl-Daten, gespeicherte Issues und gespeicherte Technology Detections.
 
 CrawlAnalysisService orchestriert die Analyse eines CrawlRuns und speichert Issues.
 
@@ -198,7 +204,141 @@ Crawl-Fehler enthalten ebenfalls eine Tiefe, damit Multi-Page-Ergebnisse korrekt
 
 ---
 
-## 10. Frontend- und UX-Regeln
+## 10. Technology Detection
+
+Seit Sprint 4.6 erkennt der Analyzer grundlegende Website-Technologien auf Basis des initial heruntergeladenen HTML.
+
+Technology Detection ist bewusst heuristisch und kein vollständiger Ersatz für Werkzeuge wie Wappalyzer.
+
+Aktuelle Kategorien:
+
+* CMS
+* Frontend Framework
+* Rendering-Verhalten
+
+Aktuell erkannte Technologien:
+
+* WordPress
+* TYPO3
+* Wix
+* Next.js
+* Nuxt
+* JS-heavy
+
+Technology Detection Ergebnisse werden in `detected_technologies` gespeichert.
+
+Gespeichert werden:
+
+* Website-Referenz
+* CrawlRun-Referenz
+* optionale Page-Referenz
+* Typ
+* Name
+* Confidence
+* Evidence
+
+Analyzer-Klassen erkennen Technologien.
+
+DTOs transportieren Detection-Ergebnisse.
+
+Services orchestrieren die Analyse eines CrawlRuns.
+
+Result Services mappen gespeicherte Technologien für die API-Ausgabe.
+
+Das Frontend zeigt erkannte Technologien an, führt aber keine eigene Erkennung durch.
+
+Mehrfache Erkennungen derselben Kombination aus `type` und `name` werden in der Ergebnis-Ausgabe dedupliziert.
+
+Beispiel:
+
+* `cms:WordPress`
+* `cms:WordPress`
+* `cms:Wix`
+
+wird in der Ergebnisansicht zu:
+
+* `WordPress`
+* `Wix`
+
+Bei Duplikaten wird bevorzugt die Erkennung mit der höheren Confidence angezeigt.
+
+---
+
+## 11. JS-heavy Websites und Analysegrenzen
+
+JS-heavy bedeutet, dass die Website vermutlich stark von clientseitigem JavaScript abhängt.
+
+Der aktuelle HTTP-Crawler analysiert nur das initiale HTML.
+
+Wenn das initiale HTML keine crawlbaren internen Links enthält, kann der Crawler keine weiteren Unterseiten finden.
+
+Das ist erwartetes Verhalten, bis gerendertes Crawling mit Playwright oder einem ähnlichen Browser-basierten Ansatz eingeführt wird.
+
+JS-heavy-Erkennung ist ein Hinweis auf mögliche Analysegrenzen, kein Fehlerzustand.
+
+Beispiel:
+
+* Eine App-Seite kann `maxPages = 5` erhalten.
+* Wenn im initialen HTML keine internen Links vorhanden sind, wird trotzdem nur die Startseite gecrawlt.
+* Das Ergebnis ist technisch korrekt, aber möglicherweise nicht vollständig im Sinne der gerenderten Website.
+
+Das Dashboard soll solche Fälle später verständlich erklären.
+
+---
+
+## 12. URL Normalization und interne Links
+
+Interne Link-Erkennung behandelt `www` und non-`www` Hosts als dieselbe Website.
+
+Beispiel:
+
+* `https://example.com`
+* `https://www.example.com`
+
+gelten gegenseitig als intern.
+
+Nicht crawlbare Link-Schemata dürfen nicht als interne Crawl-Ziele behandelt werden.
+
+Dazu gehören:
+
+* `mailto:`
+* `tel:`
+* `javascript:`
+* reine Ankerlinks wie `#kontakt`
+
+URL-Normalisierung gehört ausschließlich in den UrlNormalizer.
+
+Crawler, Parser, Persister und Controller dürfen keine eigene Host- oder URL-Sonderlogik duplizieren.
+
+---
+
+## 13. Persistenzregeln
+
+Persister speichern Datenbank-kompatible Werte.
+
+Parser extrahieren Rohinformationen aus HTML.
+
+Wenn extrahierte Werte nicht direkt zur Datenbank passen, normalisiert der Persister diese Werte vor dem Speichern.
+
+Bild-Dimensionen können im HTML Dezimalwerte enthalten.
+
+Beispiel:
+
+* `822.857142857`
+
+wird vor dem Speichern zu:
+
+* `823`
+
+Bild-Dimensionen werden als nullable Integer gespeichert.
+
+Der Crawl darf nicht fehlschlagen, nur weil eine Website Dezimalwerte für Bildbreiten oder Bildhöhen liefert.
+
+Bilder dürfen nicht versehentlich doppelt gespeichert werden.
+
+---
+
+## 14. Frontend- und UX-Regeln
 
 Das Frontend visualisiert den Zustand des Systems.
 
@@ -221,87 +361,110 @@ Wenn der Analyzer `<img>`-Tags zählt, wird im Frontend von `Bild-Elementen` ges
 
 Alt-Text-Metriken werden als `Ohne Alt-Text` bezeichnet.
 
+Erkannte Technologien werden im Frontend angezeigt, aber nicht im Frontend berechnet.
+
+Technology Badges sollen verständlich machen:
+
+* Name der Technologie
+* Kategorie
+* Confidence
+
 ---
 
-## 11. Datenbank- und Entwicklungsumgebung
+## 15. Datenbank- und Entwicklungsumgebung
 
-Bei lokaler Laravel-Ausführung mit `php artisan serve` und PostgreSQL in Docker wird als Datenbankhost verwendet:
+ACD wird lokal standardmäßig vollständig über Docker Compose entwickelt.
 
-```env
-DB_HOST=127.0.0.1
-````
+Die PostgreSQL-Datenbank läuft im Docker-Service `postgres`.
 
-Wenn Laravel selbst im Docker-Container läuft, wird als Datenbankhost verwendet:
+Da Laravel im Docker-Container läuft, verwendet das Backend in der Docker-Entwicklung:
 
 ```env
 DB_HOST=postgres
-```
 
-Nach Änderungen an `.env` oder Datenbankkonfiguration sollte der Laravel-Konfigurationscache geleert werden:
+Artisan-Befehle werden in der Docker-Entwicklung im App-Container ausgeführt:
 
-```bash
-php artisan config:clear
-php artisan cache:clear
-php artisan optimize:clear
-```
+docker compose exec app php artisan migrate
+docker compose exec app php artisan test
+docker compose exec app php artisan tinker
 
-`php artisan migrate:fresh` löscht die aktuell konfigurierte Datenbank.
+Falls Tinker im Container wegen PsySH-Rechten Probleme macht, kann HOME=/tmp gesetzt werden:
 
-Für Tests soll möglichst `php artisan test` verwendet werden.
+docker compose exec -e HOME=/tmp app php artisan tinker
+
+Frontend-Befehle werden im Frontend-Container ausgeführt:
+
+docker compose exec frontend npm run lint
+docker compose exec frontend npm run build
+
+Die API-URL für das Frontend ist eine Browser-URL, keine Docker-interne Service-URL.
+
+Da der Browser außerhalb des Docker-Netzwerks läuft, verwendet das Frontend:
+
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+
+Merksatz:
+
+Container zu Container: Docker-Service-Namen, z. B. postgres
+Browser zu Container: veröffentlichte Ports, z. B. localhost:8000
+
+Lokale Befehle wie php artisan ... oder npm run ... außerhalb der Container werden vermieden, damit Entwicklungsumgebung, Datenbankverbindung und Testverhalten konsistent bleiben.
+
+Wenn .env-Werte geändert werden, wird der Laravel-Cache im Container geleert:
+
+docker compose exec app php artisan optimize:clear
+
+php artisan migrate:fresh löscht die aktuell konfigurierte Datenbank.
+
+Für Tests soll möglichst verwendet werden:
+
+docker compose exec app php artisan test
 
 Wenn eine Testdatenbank explizit zurückgesetzt wird, muss sichergestellt sein, dass nicht versehentlich die Entwicklungsdatenbank verwendet wird.
 
----
-
-## 12. Coding Standards
-
-* PSR-12
-* TypeScript Strict Mode
-* SOLID
-* Kleine Klassen
-* Kleine Methoden
-* Aussagekräftige Namen
-* Nullable Felder werden im Frontend explizit typisiert
-* TypeScript-Fehler werden als Hinweis auf fehlerhafte Verträge ernst genommen
-
----
-
-## 13. Definition of Done
+16. Coding Standards
+PSR-12
+TypeScript Strict Mode
+SOLID
+Kleine Klassen
+Kleine Methoden
+Aussagekräftige Namen
+Nullable Felder werden im Frontend explizit typisiert
+TypeScript-Fehler werden als Hinweis auf fehlerhafte Verträge ernst genommen
+Analyzer-Logik wird getestet
+Persistenz-Normalisierung wird getestet
+API-Verträge werden durch Feature-Tests abgesichert
+17. Definition of Done
 
 Eine Aufgabe ist erst abgeschlossen wenn
 
-* Docker läuft
-* Tests erfolgreich sind
-* TypeScript-Build erfolgreich ist
-* Architektur sauber bleibt
-* API-Verträge stabil sind
-* ADR bei Bedarf erstellt oder ergänzt wurde
-* Handbook aktualisiert wurde
-* Roadmap geprüft wurde
-
----
-
-## 14. Sprint Workflow
+Docker läuft
+Backend-Tests erfolgreich sind
+Frontend-Lint erfolgreich ist
+TypeScript-Build erfolgreich ist
+Architektur sauber bleibt
+API-Verträge stabil sind
+ADR bei Bedarf erstellt oder ergänzt wurde
+Handbook aktualisiert wurde
+Roadmap geprüft wurde
+18. Sprint Workflow
 
 Jeder Sprint besitzt
 
-* Ziel
-* Aufgaben
-* Definition of Done
-* Architekturentscheidungen
-* Abschluss
+Ziel
+Aufgaben
+Definition of Done
+Architekturentscheidungen
+Abschluss
 
 Am Ende eines Sprints wird geprüft:
 
-* Was wurde fachlich erreicht?
-* Was wurde technisch verbessert?
-* Welche Architekturentscheidungen wurden getroffen?
-* Müssen ROADMAP, Handbook, ADRs oder README angepasst werden?
-* Ist ein sinnvoller Commit-Zustand erreicht?
-
----
-
-## 15. Dokumentation
+Was wurde fachlich erreicht?
+Was wurde technisch verbessert?
+Welche Architekturentscheidungen wurden getroffen?
+Müssen ROADMAP, Handbook, ADRs oder README angepasst werden?
+Ist ein sinnvoller Commit-Zustand erreicht?
+19. Dokumentation
 
 ROADMAP beschreibt den Entwicklungsplan.
 
@@ -315,12 +478,8 @@ AGENTS.md enthält Regeln für KI-Assistenten.
 
 Dokumentation wird nicht erst am Projektende gepflegt, sondern sprintweise aktualisiert.
 
----
-
-## 16. Philosophie
+20. Philosophie
 
 Wir entwickeln keine Software, die heute funktioniert.
 
 Wir entwickeln Software, die in fünf Jahren noch erweitert werden kann.
-
-

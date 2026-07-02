@@ -167,4 +167,32 @@ class CrawlerServiceTest extends TestCase
 
         Http::assertSentCount(2);
     }
+
+    public function test_it_persists_decimal_image_dimensions_as_integer_values(): void
+    {
+        Http::fake([
+            'https://example.com' => Http::response(
+                '<html>
+                    <head>
+                        <title>Startseite</title>
+                        <meta name="description" content="Das ist die Startseite.">
+                    </head>
+                    <body>
+                        <h1>Startseite</h1>
+                        <img src="/image.png" alt="Example image" width="1920" height="822.857142857">
+                    </body>
+                </html>',
+                200
+            ),
+        ]);
+
+        $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
+
+        $this->assertSame('completed', $crawlRun->fresh()->status);
+
+        $this->assertDatabaseHas('images', [
+            'width' => 1920,
+            'height' => 823,
+        ]);
+    }
 }
