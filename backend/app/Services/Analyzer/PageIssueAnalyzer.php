@@ -11,6 +11,7 @@ class PageIssueAnalyzer
     private const MAX_META_DESCRIPTION_LENGTH = 160;
 
     private const MIN_INTERNAL_LINKS = 2;
+    private const MANY_EXTERNAL_LINKS = 20;
 
     private const LARGE_HTML_SIZE_BYTES = 500000;
 
@@ -123,6 +124,48 @@ class PageIssueAnalyzer
                 'few_internal_links',
                 'warning',
                 'Die Seite hat sehr wenige interne Links.'
+            );
+        }
+
+        $externalLinks = array_filter($links, static function (array $link): bool {
+            return ($link['type'] ?? null) === 'external';
+        });
+
+        $emptyHrefLinks = array_filter($links, static function (array $link): bool {
+            return trim((string) ($link['href'] ?? '')) === '';
+        });
+
+        if (count($emptyHrefLinks) > 0) {
+            $issues[] = $this->issue(
+                'empty_link_href',
+                'warning',
+                sprintf(
+                    '%d Link(s) haben kein gültiges Ziel.',
+                    count($emptyHrefLinks)
+                )
+            );
+        }
+
+        if (count($externalLinks) > self::MANY_EXTERNAL_LINKS) {
+            $issues[] = $this->issue(
+                'many_external_links',
+                'warning',
+                'Die Seite enthält sehr viele externe Links.'
+            );
+        }
+
+        $insecureExternalLinks = array_filter($externalLinks, static function (array $link): bool {
+            return str_starts_with(trim((string) ($link['href'] ?? '')), 'http://');
+        });
+
+        if (count($insecureExternalLinks) > 0) {
+            $issues[] = $this->issue(
+                'insecure_external_links',
+                'warning',
+                sprintf(
+                    '%d externe Link(s) verwenden kein HTTPS.',
+                    count($insecureExternalLinks)
+                )
             );
         }
 

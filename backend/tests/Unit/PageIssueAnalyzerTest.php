@@ -75,8 +75,8 @@ class PageIssueAnalyzerTest extends TestCase
                 ['alt' => 'Useful image description'],
             ],
             'links' => [
-                ['type' => 'internal'],
-                ['type' => 'internal'],
+                ['type' => 'internal', 'href' => 'https://example.com'],
+                ['type' => 'internal', 'href' => 'https://example.com/about'],
             ],
             'html_size_bytes' => 120000,
         ]);
@@ -218,5 +218,86 @@ class PageIssueAnalyzerTest extends TestCase
 
         $this->assertNotNull($robotsNoindexIssue);
         $this->assertSame('error', $robotsNoindexIssue['severity']);
+    }
+
+    public function test_it_detects_empty_link_href(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => 'https://example.com'],
+                ['type' => 'internal', 'href' => 'https://example.com/about'],
+                ['type' => 'external', 'href' => ''],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $emptyLinkIssue = collect($issues)->firstWhere('code', 'empty_link_href');
+
+        $this->assertNotNull($emptyLinkIssue);
+        $this->assertSame('warning', $emptyLinkIssue['severity']);
+    }
+
+    public function test_it_detects_insecure_external_links(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => 'https://example.com'],
+                ['type' => 'internal', 'href' => 'https://example.com/about'],
+                ['type' => 'external', 'href' => 'http://external-example.com'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $insecureLinksIssue = collect($issues)->firstWhere('code', 'insecure_external_links');
+
+        $this->assertNotNull($insecureLinksIssue);
+        $this->assertSame('warning', $insecureLinksIssue['severity']);
+    }
+
+    public function test_it_detects_many_external_links(): void
+    {
+        $externalLinks = [];
+
+        for ($i = 1; $i <= 21; $i++) {
+            $externalLinks[] = [
+                'type' => 'external',
+                'href' => "https://external-example-{$i}.com",
+            ];
+        }
+
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'Eine ausreichend lange Beispielseite',
+            'meta_description' => 'Diese Meta Description ist lang genug, um keinen bestehenden Fehler auszulösen.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Hauptüberschrift'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => 'https://example.com'],
+                ['type' => 'internal', 'href' => 'https://example.com/about'],
+                ...$externalLinks,
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1></body></html>',
+            'html_size_bytes' => 1000,
+        ]);
+
+        $manyExternalLinksIssue = collect($issues)->firstWhere('code', 'many_external_links');
+
+        $this->assertNotNull($manyExternalLinksIssue);
+        $this->assertSame('warning', $manyExternalLinksIssue['severity']);
     }
 }

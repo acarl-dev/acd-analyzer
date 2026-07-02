@@ -66,6 +66,7 @@ final class CrawlAnalysisService
             'links' => $page->links
                 ->map(fn ($link) => [
                     'type' => $link->is_internal ? 'internal' : 'external',
+                    'href' => $link->href,
                 ])
                 ->values()
                 ->all(),
