@@ -52,6 +52,11 @@ class PageIssueAnalyzer
 
         $issues = [
             ...$issues,
+            ...$this->analyzeHttpStatus($page),
+        ];
+
+        $issues = [
+            ...$issues,
             ...$this->analyzeContent($page),
         ];
 
@@ -404,5 +409,25 @@ class PageIssueAnalyzer
         }
 
         return $issues;
+    }
+
+    private function analyzeHttpStatus(array $page): array
+    {
+        $statusCode = $page['status_code'] ?? null;
+
+        if (! is_int($statusCode) || $statusCode < 400) {
+            return [];
+        }
+
+        return [
+            [
+                'code' => 'http_error_status',
+                'severity' => 'error',
+                'message' => sprintf('Die Seite liefert einen problematischen HTTP-Statuscode: %d.', $statusCode),
+                'context' => [
+                    'status_code' => $statusCode,
+                ],
+            ],
+        ];
     }
 }

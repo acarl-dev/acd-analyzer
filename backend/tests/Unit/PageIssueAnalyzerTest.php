@@ -445,5 +445,52 @@ class PageIssueAnalyzerTest extends TestCase
         $this->assertNotContains('slow_response_time', array_column($issues, 'code'));
     }
 
+    public function test_it_detects_http_error_status(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Main heading'],
+                ['level' => 2, 'text' => 'Section heading'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => '/about'],
+                ['type' => 'internal', 'href' => '/contact'],
+            ],
+            'html' => str_repeat('word ', 120),
+            'html_size_bytes' => 1000,
+            'status_code' => 404,
+        ]);
 
+        $issue = collect($issues)->firstWhere('code', 'http_error_status');
+
+        $this->assertNotNull($issue);
+        $this->assertSame('error', $issue['severity']);
+    }
+
+    public function test_it_does_not_detect_http_error_status_for_successful_status(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Main heading'],
+                ['level' => 2, 'text' => 'Section heading'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => '/about'],
+                ['type' => 'internal', 'href' => '/contact'],
+            ],
+            'html' => str_repeat('word ', 120),
+            'html_size_bytes' => 1000,
+            'status_code' => 200,
+        ]);
+
+        $issue = collect($issues)->firstWhere('code', 'http_error_status');
+
+        $this->assertNull($issue);
+    }
 }

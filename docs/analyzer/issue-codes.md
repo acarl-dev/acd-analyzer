@@ -53,6 +53,7 @@ Die Severity ist keine endgültige SEO-Wahrheit, sondern eine erste interne Prio
 | `slow_response_time`         | `warning` | Performance      |
 | `large_html_size`            |    `info` | HTML             |
 | `crawl_error`                |   `error` | Crawl            |
+| `http_error_status`          | `error`   | HTTP-Statuscode  |
 
 
 ---
@@ -358,6 +359,14 @@ Mögliche spätere Verbesserungen:
 - Durchschnittswerte über mehrere Crawls berücksichtigen.
 - Unterschied zwischen Server-Antwortzeit und vollständiger Ladezeit klarer im UI erklären.
 - Optional nach Seitentyp oder Crawl-Tiefe gewichten.
+
+### `http_error_status`
+
+Diese Regel erkennt gespeicherte Pages, deren HTTP-Statuscode `>= 400` ist. Solche Seiten wurden zwar als Page persistiert, liefern aber aus Sicht eines Website-Audits keinen erfolgreichen HTTP-Status.
+
+Die Regel unterscheidet sich von Crawl Errors: Crawl Errors beschreiben Fälle, in denen eine URL nicht erfolgreich gecrawlt oder verarbeitet werden konnte. `http_error_status` bewertet dagegen Pages, die gespeichert wurden, aber einen problematischen HTTP-Statuscode wie `404`, `410` oder `500` zurückgeben.
+
+Aktuell wird jeder Statuscode ab `400` als `error` bewertet. Eine spätere Verfeinerung kann zwischen Client Errors (`4xx`), Server Errors (`5xx`), absichtlich geschützten Seiten (`401`/`403`) und Redirect-Themen unterscheiden.
 
 ---
 
