@@ -100,6 +100,7 @@ export interface CrawlRunListItem {
   startedAt: string | null;
   finishedAt: string | null;
   createdAt: string | null;
+  healthScore: number;
   issueSummary: {
     total: number;
     errors: number;

@@ -186,6 +186,10 @@ export function CrawlRunList({
                       {crawlRun.pagesCrawled} Seite{crawlRun.pagesCrawled === 1 ? "" : "n"}
                     </span>
 
+                    <span className="rounded-full border border-slate-700 bg-slate-950 px-2 py-0.5">
+                      Health Score: {crawlRun.healthScore}/100
+                    </span>
+
                     <span
                       className={
                         crawlRun.issueSummary.total > 0
