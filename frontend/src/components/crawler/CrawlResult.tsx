@@ -58,6 +58,38 @@ function formatBytes(bytes: number | null) {
   return `${(bytes / 1024).toFixed(1)} KB`;
 }
 
+function getTechnologyTypeLabel(type: string): string {
+  if (type === "cms") {
+    return "CMS";
+  }
+
+  if (type === "frontend") {
+    return "Frontend";
+  }
+
+  if (type === "rendering") {
+    return "Rendering";
+  }
+
+  return "Sonstige";
+}
+
+function getTechnologyGroupOrder(type: string): number {
+  if (type === "cms") {
+    return 1;
+  }
+
+  if (type === "frontend") {
+    return 2;
+  }
+
+  if (type === "rendering") {
+    return 3;
+  }
+
+  return 99;
+}
+
 export function CrawlResult({ crawlRun }: CrawlResultProps) {
   const [results, setResults] = useState<CrawlResultsResponse | null>(null);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
@@ -104,6 +136,25 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
 
     return page.issues.some((issue) => issue.severity === severityFilter);
   });
+
+  const technologies = results?.technologies ?? [];
+
+  const technologyGroups = technologies.reduce<Record<string, typeof technologies>>(
+    (groups, technology) => {
+      const type = technology.type;
+
+      return {
+        ...groups,
+        [type]: [...(groups[type] ?? []), technology],
+      };
+    },
+    {},
+  );
+
+  const sortedTechnologyGroups = Object.entries(technologyGroups).sort(
+    ([firstType], [secondType]) =>
+      getTechnologyGroupOrder(firstType) - getTechnologyGroupOrder(secondType),
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -222,28 +273,46 @@ export function CrawlResult({ crawlRun }: CrawlResultProps) {
               </div>
             </dl>
 
-            {results.technologies.length > 0 && (
-              <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+            <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+              <div className="mb-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
                   Erkannte Technologien
                 </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Gruppiert nach Technologie-Kategorie mit Erkennungssicherheit und
+                  Hinweis zur Erkennung.
+                </p>
+              </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {results.technologies.map((technology) => (
-                    <span
-                      key={technology.id}
-                      title={`${technology.evidence} Sicherheit: ${Math.round(
-                        technology.confidence * 100,
-                      )}%`}
-                      className="rounded-full border border-slate-700 bg-slate-950 px-2.5 py-1 text-xs font-medium text-slate-300"
-                    >
-                      {technology.name} · {technology.type} ·{" "}
-                      {Math.round(technology.confidence * 100)}%
-                    </span>
+              {technologies.length === 0 ? (
+                <p className="text-sm text-slate-400">
+                  Für diesen Crawl wurden keine Technologien erkannt.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {sortedTechnologyGroups.map(([type, groupedTechnologies]) => (
+                    <div key={type}>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        {getTechnologyTypeLabel(type)}
+                      </p>
+
+                      <div className="flex flex-wrap gap-2">
+                        {groupedTechnologies.map((technology) => (
+                          <span
+                            key={technology.id}
+                            title={technology.evidence}
+                            className="rounded-full border border-slate-700 bg-slate-950 px-2.5 py-1 text-xs font-medium text-slate-300"
+                          >
+                            {technology.name} ·{" "}
+                            {Math.round(technology.confidence * 100)}%
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-4">
               {[
