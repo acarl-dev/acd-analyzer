@@ -106,23 +106,5 @@ class WebsiteTechnologyAnalyzer
             && $hasLoadingHint;
     }
 
-    public function test_it_detects_script_app_shell_pages_as_js_heavy(): void
-    {
-        $analyzer = new WebsiteTechnologyAnalyzer();
-
-        $detections = $analyzer->analyze(
-            '<html>
-                <head>
-                    <title>App</title>
-                    <script src="/app.js"></script>
-                    <script src="/vendor.js"></script>
-                </head>
-                <body>
-                    <p>Loading application. Please enable JavaScript.</p>
-                </body>
-            </html>'
-        );
-
-        $this->assertDetectionExists($detections, 'rendering', 'JS-heavy');
-    }
+    
 }
