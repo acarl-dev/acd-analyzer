@@ -4,7 +4,7 @@ namespace App\Services\Crawler;
 
 use App\Models\CrawlRun;
 use App\Models\Website;
-use App\Services\Crawler\Download\PageDownloader;
+use App\Services\Crawler\Download\PageContentFetcher;
 use App\Services\Crawler\Parsing\HtmlParser;
 use App\Services\Crawler\Persistence\CrawlResultPersister;
 use App\Services\CrawlAnalysisService;
@@ -16,7 +16,7 @@ class CrawlerService
 {
 
     public function __construct(
-        private readonly PageDownloader $downloader,
+        private readonly PageContentFetcher $contentFetcher,
         private readonly HtmlParser $parser,
         private readonly CrawlResultPersister $persister,
         private readonly CrawlAnalysisService $crawlAnalysisService,
@@ -64,7 +64,7 @@ class CrawlerService
                 $visited[$currentUrl] = true;
 
                 try {
-                    $downloadedPage = $this->downloader->download($currentUrl);
+                    $downloadedPage = $this->contentFetcher->fetchHttp($currentUrl);
                     $parsedPage = $this->parser->parse($downloadedPage);
 
                     $this->persister->persist(
