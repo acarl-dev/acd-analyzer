@@ -45,5 +45,14 @@ services:
       - "3000:3000"
     command: sh -c "npm install && npm run dev"
 
+  renderer:
+    image: mcr.microsoft.com/playwright:v1.61.1-jammy
+    working_dir: /app
+    volumes:
+      - ./renderer:/app
+    ports:
+      - "3001:3001"
+    command: sh -c "npm install && npm run dev"
+
 volumes:
   postgres_data:

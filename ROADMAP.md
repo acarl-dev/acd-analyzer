@@ -797,3 +797,24 @@ Notes:
 - JS-heavy detection is based on initial HTML signals and is a heuristic.
 - `maxPages` is a crawl limit, not a target count. If a JS-heavy page exposes no crawlable internal links in the initial HTML, only the start page may be crawled.
 - Rendered crawling with Playwright remains out of scope for this sprint.
+
+## Phase 5: Rendered Page Analysis / JS-heavy Support
+
+### Sprint 5.1: Browser Rendering Proof of Concept
+
+Status: In progress / completed after final validation
+
+- Introduced a separate Docker Compose `renderer` service based on Node.js, Playwright and Chromium.
+- Added a minimal `/render` endpoint that accepts a single URL and returns rendered HTML.
+- Verified that JavaScript execution changes the DOM before HTML is returned.
+- Added Laravel-side `BrowserRendererClient` as a small integration boundary.
+- Added unit tests for the renderer client using `Http::fake()`.
+- Documented the architectural decision in ADR-0009.
+
+Not included yet:
+
+- automatic crawler integration
+- multi-page browser crawling
+- automatic rendering fallback for JS-heavy pages
+- rendered DOM persistence
+- screenshots, Lighthouse, network diagnostics

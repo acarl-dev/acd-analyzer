@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'renderer' => [
+        'url' => env('RENDERER_URL', 'http://renderer:3001'),
+    ],
+
 ];
