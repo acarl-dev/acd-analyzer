@@ -4,7 +4,17 @@
 
 A modern website crawling and technical website analysis platform built with **Laravel**, **Next.js**, **TypeScript**, **PostgreSQL** and **Docker**.
 
-Designed as a modular foundation for technical website audits, SEO analysis and future quality checks.
+</p>
+
+<p align="center">
+
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=nextdotjs&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-lightgrey)
 
 </p>
 
