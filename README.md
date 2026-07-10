@@ -1,372 +1,297 @@
 # ACD Analyzer
 
-**ACD Analyzer** ist ein internes Analyse- und Crawling-Dashboard für Alan Carl Digital. Das Projekt dient als technische Grundlage für eine spätere datengetriebene Website-Analyse-Plattform.
+<p align="center">
 
-Der Analyzer kann aktuell eine Website per HTTP abrufen, zentrale HTML-Daten extrahieren, diese in PostgreSQL speichern und erste technische sowie SEO-nahe Hinweise im Dashboard anzeigen.
+A modern website crawling and technical website analysis platform built with **Laravel**, **Next.js**, **TypeScript**, **PostgreSQL** and **Docker**.
 
-> **Projektstatus:** In Entwicklung  
-> Das Projekt ist noch kein fertiges Produkt und aktuell als internes Lern-, Architektur- und Portfolio-Projekt angelegt.
+Designed as a modular foundation for technical website audits, SEO analysis and future quality checks.
 
----
-
-## Ziel des Projekts
-
-Langfristig soll der ACD Analyzer Websites strukturiert untersuchen, typische technische und inhaltliche Schwachstellen erkennen und daraus verständliche Handlungsempfehlungen ableiten.
-
-Der Fokus liegt nicht auf einer klassischen Webagentur-Lösung, sondern auf einer modularen Analyse-Engine, die später für interne Auswertungen, Reports, Akquise-Unterstützung oder eigene SaaS-Ideen erweitert werden kann.
+</p>
 
 ---
 
-## Aktueller Funktionsumfang
-
-Aktuell umgesetzt:
-
-- Start eines Website-Crawls über ein internes Dashboard
-- HTTP-Abruf einer eingegebenen URL
-- Normalisierung einfacher URLs
-- Speicherung von Website, CrawlRun, Page, Headings, Links, Images und CrawlErrors
-- Extraktion von:
-  - HTTP-Statuscode
-  - HTML
-  - Title
-  - Meta Description
-  - H1-H3-Überschriften
-  - Links
-  - Bildern und Alt-Texten
-- API-Endpunkte zum Starten von Crawls, Abrufen letzter Crawl-Läufe und Anzeigen von Crawl-Ergebnissen
-- Eigene Analyzer-Klasse für Page-Level-Issues (`PageIssueAnalyzer`)
-- Erste Analyse-Regeln für typische Seitenprobleme
-- Zusammenfassung der Ergebnisse im Dashboard
-- Filterung der Ergebnisse nach Severity (`error`, `warning`, `info`)
-- Backend-Tests für Analyzer-Regeln und Ergebnis-Mapping
-- Dokumentation von Architekturentscheidungen über ADRs
-
-Noch nicht umgesetzt bzw. geplant:
-
-- Mehrseitiger Crawl
-- Crawl-Limits und Queue-basierte Verarbeitung
-- robots.txt- und Sitemap-Unterstützung
-- Login / Benutzerverwaltung für das Dashboard
-- Report-Export
-- Scoring-Modell
-- Playwright-Unterstützung für JavaScript-lastige Websites
-- produktionsreife Deployment-Konfiguration
+![Dashboard](docs/images/dashboard-overview.png)
 
 ---
 
-## Tech Stack
+## Features
 
-### Backend
+- 🌐 Crawl websites via HTTP
+- 📄 Multi-page website crawling
+- 📊 Dashboard with crawl statistics
+- ❤️ Health Score calculation
+- 🔍 Technical SEO analysis
+- 🏷️ Technology detection (CMS, Frontend, Rendering)
+- ⚠️ Severity-based issue detection
+- 📑 Crawl history
+- 📈 Aggregated issue statistics
+- 🐳 Docker-first development environment
 
-- Laravel
-- PHP 8.3+
-- PostgreSQL
-- REST API
-- Symfony DomCrawler
-- PHPUnit
+---
 
-### Frontend
+# Screenshots
 
-- Next.js
+## Dashboard
+
+Overview of all crawled websites, detected technologies and the most common issues.
+
+![Dashboard Overview](docs/images/dashboard-summary.png)
+
+---
+
+## Start a Crawl
+
+Configure the crawl and start analyzing a website.
+
+![Crawler](docs/images/crawler.png)
+
+---
+
+## Crawl Results
+
+Detailed analysis including Health Score, technologies and aggregated findings.
+
+![Results](docs/images/crawl-results.png)
+
+---
+
+## Page Analysis
+
+Every crawled page is analyzed individually.
+
+Detected issues are grouped by severity and displayed together with HTTP status, crawl depth and additional metadata.
+
+![Page Analysis](docs/images/page-analysis.png)
+
+---
+
+# Features in Detail
+
+## Website Crawling
+
+- configurable crawl depth
+- configurable page limit
+- HTTP status tracking
+- crawl history
+- crawl persistence
+
+## Technical SEO
+
+The analyzer currently detects issues such as
+
+- Missing page title
+- Short page title
+- Long page title
+- Missing meta description
+- Short meta description
+- Long meta description
+- Missing H1
+- Multiple H1 headings
+- Missing H2 structure
+- Duplicate headings
+- Missing HTML language
+- Missing viewport meta tag
+- Missing canonical tag
+- Robots noindex
+- Images without alt text
+- High ratio of missing alt texts
+- Empty link text
+- Few internal links
+- Slow response times
+- HTTP error pages
+- Large HTML documents
+
+---
+
+## Health Score
+
+Each crawl receives an overall Health Score.
+
+The score summarizes all detected issues while taking their severity into account.
+
+Example:
+
+- Error
+- Warning
+- Information
+
+The goal is not to replace manual reviews but to provide a quick technical overview of website quality.
+
+---
+
+## Technology Detection
+
+The analyzer detects common technologies including:
+
+- TYPO3
+- WordPress
+- Wix
 - React
-- TypeScript
-- Tailwind CSS
+- Vue
+- Angular
+- Next.js
+- Bootstrap
 
-### Infrastruktur
+and identifies likely JavaScript-heavy websites.
 
+---
+
+# Architecture
+
+```
+                    +----------------------+
+                    |     Next.js UI       |
+                    +----------+-----------+
+                               |
+                               | REST API
+                               |
+                    +----------v-----------+
+                    |     Laravel API      |
+                    +----------+-----------+
+                               |
+          +--------------------+--------------------+
+          |                                         |
+          |                                         |
++---------v---------+                 +-------------v------------+
+|   Website Crawler |                 | Crawl Analysis Service   |
++---------+---------+                 +-------------+------------+
+          |                                         |
+          +--------------------+--------------------+
+                               |
+                     +---------v---------+
+                     |   PostgreSQL DB   |
+                     +-------------------+
+```
+
+---
+
+# Tech Stack
+
+| Backend | Frontend | Database | DevOps |
+|---------|----------|-----------|--------|
+| Laravel 12 | Next.js | PostgreSQL | Docker Compose |
+| PHP 8.3 | React | | Nginx |
+| PHPUnit | TypeScript | | |
+
+---
+
+# Project Structure
+
+```
+backend/
+frontend/
+docker/
+docs/
+```
+
+---
+
+# Getting Started
+
+## Requirements
+
+- Docker
 - Docker Compose
-- PostgreSQL 16
-- Nginx
-- Node 22
 
 ---
 
-## Architekturüberblick
-
-Das Projekt ist bewusst in Backend, Frontend, Datenbank und Infrastruktur getrennt.
-
-```text
-acd-analyzer/
-├── backend/              # Laravel API, Crawler, Analyzer, Datenmodell
-├── frontend/             # Next.js Dashboard
-├── docker/               # Docker-Konfiguration für PHP/Nginx
-├── docs/                 # Architektur- und Analyzer-Dokumentation
-├── docker-compose.yml    # Lokale Entwicklungsumgebung
-└── ROADMAP.md            # Langfristige Produkt- und Architekturplanung
-```
-
-### Backend-Struktur
-
-Wichtige Bereiche im Laravel-Backend:
-
-```text
-backend/app/
-├── Http/
-│   ├── Controllers/Api/       # API Controller
-│   ├── Requests/              # Validierung eingehender Requests
-│   └── Resources/             # API Response Resources
-├── Models/                    # Eloquent Models
-└── Services/
-    ├── Analyzer/              # Analyse-Regeln
-    ├── Crawler/               # Download, Parsing, Persistierung
-    └── CrawlResultsService.php
-```
-
-Der Controller enthält bewusst möglichst wenig Geschäftslogik. Crawling, Parsing, Persistierung und Analyse sind in eigene Services aufgeteilt.
-
----
-
-## Analyse-Regeln
-
-Die aktuelle Analyse ist bewusst einfach gehalten und dient als erste Grundlage für spätere Erweiterungen.
-
-Aktuell erkannte Issues:
-
-- fehlender Title
-- zu kurzer oder zu langer Title
-- fehlende Meta Description
-- zu kurze oder zu lange Meta Description
-- fehlende H1
-- mehrere H1-Überschriften
-- Bilder ohne Alt-Text
-- hoher Anteil fehlender Alt-Texte
-- sehr wenige interne Links
-- ungewöhnlich große HTML-Größe
-- Crawl-Fehler
-
-Die Issue-Codes sind in `docs/analyzer/issue-codes.md` dokumentiert.
-
----
-
-## API-Endpunkte
-
-### Crawl starten
-
-```http
-POST /api/crawl
-```
-
-Beispiel-Body:
-
-```json
-{
-  "url": "https://example.com"
-}
-```
-
-### Letzte Crawl-Läufe abrufen
-
-```http
-GET /api/crawl-runs
-```
-
-Dieser Endpunkt liefert die letzten Crawl-Läufe mit Website, Status, Seitenanzahl und Zeitstempeln.
-
-### Crawl-Ergebnisse abrufen
-
-```http
-GET /api/crawl-runs/{crawlRun}/results
-```
-
-Dieser Endpunkt liefert eine zusammengeführte Ergebnisstruktur mit Summary, Seiteninformationen und Issues.
-
----
-
-## Lokale Entwicklung
-
-### Voraussetzungen
-
-- Docker und Docker Compose
-- Git
-- Optional für lokale Entwicklung ohne Container:
-  - PHP 8.3+
-  - Composer
-  - Node.js 22+
-  - npm
-
----
-
-## Setup mit Docker Compose
-
-Repository klonen:
+Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/<username>/acd-analyzer.git
+
 cd acd-analyzer
 ```
 
-Benutzer-ID für Docker setzen:
-
-```bash
-export UID=$(id -u)
-export GID=$(id -g)
-```
-
-Container starten:
+Start the environment
 
 ```bash
 docker compose up -d
 ```
 
-Backend-Abhängigkeiten installieren:
+Backend
 
 ```bash
 docker compose exec app composer install
-```
-
-Backend-Environment erstellen:
-
-```bash
-cp backend/.env.example backend/.env
-```
-
-In `backend/.env` die Datenbankverbindung für Docker anpassen:
-
-```env
-DB_CONNECTION=pgsql
-DB_HOST=postgres
-DB_PORT=5432
-DB_DATABASE=acd_analyzer
-DB_USERNAME=acd_user
-DB_PASSWORD=acd_password
-```
-
-Laravel-App-Key generieren:
-
-```bash
-docker compose exec app php artisan key:generate
-```
-
-Migrationen ausführen:
-
-```bash
 docker compose exec app php artisan migrate
 ```
 
-Das Frontend wird über den `frontend`-Service gestartet. Falls nötig, kann das Frontend auch manuell im Container installiert werden:
+Frontend
 
 ```bash
 docker compose exec frontend npm install
 ```
 
----
+Open
 
-## Lokale URLs
-
-Nach dem Start der Container:
-
-- Frontend: `http://localhost:3000`
-- Backend API über Nginx: `http://localhost:8000/api`
-- PostgreSQL: `localhost:5432`
-
-Das Frontend verwendet standardmäßig:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ```
+Frontend:
+http://localhost:3000
 
-Falls das Backend lokal über `php artisan serve` läuft, kann stattdessen z. B. gesetzt werden:
-
-```env
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8080/api
+Backend API:
+http://localhost:8000
 ```
 
 ---
 
-## Entwicklung ohne Backend-Container
+# Development Philosophy
 
-Während der Entwicklung kann PostgreSQL weiterhin in Docker laufen, während Laravel lokal gestartet wird.
+The project follows a modular architecture.
 
-In diesem Fall muss `backend/.env` auf den lokalen Port zeigen:
+Key principles include:
 
-```env
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=acd_analyzer
-DB_USERNAME=acd_user
-DB_PASSWORD=acd_password
-```
-
-Laravel lokal starten:
-
-```bash
-cd backend
-php artisan serve --host=127.0.0.1 --port=8080
-```
-
-Frontend-Environment anpassen:
-
-```env
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8080/api
-```
-
-Frontend lokal starten:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
+- Docker-first development
+- Small focused services
+- Typed frontend API
+- Persistent crawl analysis
+- Testable backend services
+- Separation of crawling and analysis
+- Incremental feature development
 
 ---
 
-## Tests
+# Roadmap
 
-Backend-Tests ausführen:
+## Completed
 
-```bash
-cd backend
-php artisan test
-```
-
-Oder im Docker-Container:
-
-```bash
-docker compose exec app php artisan test
-```
-
-Aktuell gibt es unter anderem Tests für den `PageIssueAnalyzer` und für das Mapping im `CrawlResultsService`.
+- HTTP crawler
+- Crawl persistence
+- Dashboard
+- Health Score
+- Technology Detection
+- Technical SEO Analyzer
+- Crawl History
+- Severity-based issue system
+- Multi-page crawling
+- Aggregated statistics
 
 ---
 
-## Dokumentation
+## Planned
 
-Wichtige Projektdokumente:
-
-- `ROADMAP.md` – langfristige Produkt- und Entwicklungsplanung
-- `docs/handbook/engineering-handbook.md` – technische Arbeitsweise und Architekturprinzipien
-- `docs/adr/` – Architecture Decision Records
-- `docs/adr/0006-page-issue-analyzer.md` – Entscheidung zur Trennung der Analyzer-Regeln vom Ergebnis-Mapping
-- `docs/analyzer/issue-codes.md` – Dokumentation der Analyzer-Regeln
-
-Die Dokumentation ist Teil des Projekts und soll bei größeren technischen Entscheidungen mitgepflegt werden.
-
----
-
-## Roadmap
-
-Kurzfristige nächste Schritte:
-
-- Analyzer-Regeln weiter strukturieren
-- Ergebnisdarstellung im Dashboard verbessern
-- Mehrseitigen Crawl vorbereiten
-- Fehlerfälle sauberer abbilden
-- Crawler stärker modularisieren
-- Erste Score- oder Priorisierungslogik entwerfen
-
-Langfristige mögliche Erweiterungen:
-
-- Playwright für JavaScript-lastige Websites
-- Report-Export
-- historische Crawl-Vergleiche
-- technische Qualitäts-Scores
-- Handlungsempfehlungen für Website-Betreiber
-- SaaS- oder internes Akquise-Dashboard
+- Lighthouse integration
+- JavaScript rendering (Playwright)
+- Sitemap support
+- PDF reports
+- Authentication
+- User management
+- Scheduled crawls
+- Export functions
+- Custom analyzer rules
+- Plugin system
 
 ---
 
-## Hinweis
+# Motivation
 
-Dieses Projekt befindet sich bewusst in einem frühen Entwicklungsstand. Der Schwerpunkt liegt aktuell auf sauberer Architektur, nachvollziehbaren Entwicklungsschritten und einer erweiterbaren technischen Grundlage.
+Most website audit tools are either closed-source or difficult to extend.
 
+The goal of ACD Analyzer is to build a modular and extensible platform that can evolve from an internal developer tool into a comprehensive website quality analysis platform.
+
+The project serves both as a practical development platform and as an opportunity to explore scalable software architecture using Laravel, Next.js and Docker.
+
+---
+
+# License
+
+This project is licensed under the MIT License.
