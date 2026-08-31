@@ -13,12 +13,19 @@ class DetectedTechnology extends Model
         'page_id',
         'type',
         'name',
+        'slug',
+        'category',
         'confidence',
+        'version',
         'evidence',
+        'sources',
+        'detected_on_pages',
     ];
 
     protected $casts = [
-        'confidence' => 'float',
+        'evidence' => 'array',
+        'sources' => 'array',
+        'detected_on_pages' => 'integer',
     ];
 
     public function website(): BelongsTo

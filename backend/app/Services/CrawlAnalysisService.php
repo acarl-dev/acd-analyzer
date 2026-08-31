@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CrawlRun;
 use App\Models\Page;
 use App\Services\Analyzer\PageIssueAnalyzer;
+use App\Services\Analyzer\TechnologyDetector;
 
 final class CrawlAnalysisService
 {
@@ -12,6 +13,7 @@ final class CrawlAnalysisService
 
     public function __construct(
         private readonly PageIssueAnalyzer $pageIssueAnalyzer,
+        private readonly TechnologyDetector $technologyDetector,
     ) {
     }
 
@@ -26,10 +28,12 @@ final class CrawlAnalysisService
 
         $crawlRun->issues()->delete();
 
+        // Analyze pages for issues
         foreach ($crawlRun->pages as $page) {
             $this->analyzePage($crawlRun, $page);
         }
 
+        // Analyze crawl errors
         foreach ($crawlRun->errors as $crawlError) {
             $crawlRun->issues()->create([
                 'crawl_error_id' => $crawlError->id,
@@ -43,6 +47,9 @@ final class CrawlAnalysisService
                 'analyzer_version' => self::ANALYZER_VERSION,
             ]);
         }
+
+        // Detect technologies
+        $this->technologyDetector->detect($crawlRun);
     }
 
     private function analyzePage(CrawlRun $crawlRun, Page $page): void

@@ -205,7 +205,19 @@ final class CrawlResultsService
     private function mapTechnologies($technologies): array
     {
         return $technologies
-            ->sortByDesc('confidence')
+            ->sort(function ($a, $b) {
+                // Sort by confidence desc (handle both string and numeric), then by ID asc
+                $aConf = is_numeric($a->confidence) ? (float) $a->confidence : 0;
+                $bConf = is_numeric($b->confidence) ? (float) $b->confidence : 0;
+                
+                $confDiff = $bConf <=> $aConf;
+                if ($confDiff !== 0) {
+                    return $confDiff;
+                }
+                
+                // If confidence is equal, sort by ID (earlier created first)
+                return $a->id <=> $b->id;
+            })
             ->unique(fn ($technology) => $technology->type . ':' . $technology->name)
             ->map(fn ($technology) => [
                 'id' => $technology->id,

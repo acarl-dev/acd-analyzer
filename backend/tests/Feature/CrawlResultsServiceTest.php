@@ -333,7 +333,7 @@ class CrawlResultsServiceTest extends TestCase
 
         $this->assertSame('WordPress', $result['technologies'][0]['name']);
         $this->assertSame('cms', $result['technologies'][0]['type']);
-        $this->assertSame(0.95, $result['technologies'][0]['confidence']);
+        $this->assertSame('0.95', $result['technologies'][0]['confidence']); // String after migration
         $this->assertSame('Found WordPress asset path in HTML.', $result['technologies'][0]['evidence']);
         $this->assertSame($page->id, $result['technologies'][0]['pageId']);
     }

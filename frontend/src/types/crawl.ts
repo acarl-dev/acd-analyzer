@@ -61,12 +61,38 @@ export interface PageAnalysisResult {
   issues: PageAnalysisIssue[];
 }
 
+export type TechnologyCategory = 
+  | "cms"
+  | "website_builder"
+  | "ecommerce"
+  | "frontend"
+  | "js_library"
+  | "css_ui"
+  | "analytics"
+  | "consent"
+  | "marketing"
+  | "video_maps"
+  | "captcha"
+  | "infrastructure"
+  | "fonts";
+
+export type TechnologyConfidence = "high" | "medium" | "low";
+
 export interface DetectedTechnology {
   id: number;
   type: string;
   name: string;
-  confidence: number;
-  evidence: string;
+  slug: string;
+  category: TechnologyCategory;
+  confidence: TechnologyConfidence;
+  version: string | null;
+  evidence: Array<{
+    source: string;
+    value: string;
+    context?: string;
+  }>;
+  sources: string[];
+  detectedOnPages: number;
   pageId: number | null;
 }
 
