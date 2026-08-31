@@ -179,7 +179,7 @@ Diese Architektur wird weiterentwickelt und nicht grundsätzlich ersetzt.
 
 Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die Datengrundlage zuverlässig ist.
 
-## Status: In Progress (2/7 Sub-Milestones abgeschlossen)
+## Status: In Progress (4/7 Sub-Milestones abgeschlossen)
 
 ## Aufgaben
 
@@ -219,27 +219,49 @@ Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die 
 
 ---
 
-### M1.3 – robots.txt Support
+### M1.3 – robots.txt Support ✅ ABGESCHLOSSEN
 
-* [ ] robots.txt abrufen
-* [ ] Existenz erfassen
-* [ ] grundlegende Direktiven auswerten
-* [ ] Sitemap-Verweise erkennen
-* [ ] User-agent Regeln parsen
-* [ ] Disallow-Pfade speichern
-* [ ] Tests für robots.txt Parsing
+* [x] robots.txt abrufen
+* [x] Existenz erfassen (200/404/5xx unterscheidbar)
+* [x] grundlegende Direktiven auswerten
+* [x] Sitemap-Verweise erkennen
+* [x] User-agent Regeln parsen
+* [x] Disallow-Pfade speichern
+* [x] Allow-Pfade speichern
+* [x] Kommentare und Leerzeilen behandeln
+* [x] CRLF/CR/LF Line Endings unterstützen
+* [x] Case-insensitive Direktiven
+* [x] Timeout-Behandlung
+* [x] URL-Normalisierung
+* [x] 18 Unit Tests für Parser + 11 Unit Tests für Fetcher + 8 Feature Tests
+* [x] ADR-0013 dokumentiert
+
+**Migration:** `2026_08_31_081300_create_robots_txt_table.php`
 
 ---
 
-### M1.4 – sitemap.xml Support
+### M1.4 – sitemap.xml Support ✅ ABGESCHLOSSEN
 
-* [ ] Sitemap erkennen (robots.txt + /sitemap.xml)
-* [ ] Sitemap laden
-* [ ] URLs extrahieren
-* [ ] Sitemap-URLs mit Crawl vergleichen
-* [ ] URLs erkennen, die nur in Sitemap vorkommen
-* [ ] gecrawlte URLs erkennen, die nicht in Sitemap vorkommen
-* [ ] Nested Sitemaps unterstützen
+* [x] Sitemap erkennen (robots.txt + /sitemap.xml fallback)
+* [x] Sitemap laden und parsen
+* [x] URLs extrahieren mit lastmod, changefreq, priority
+* [x] Original- und normalisierte URLs speichern
+* [x] Nested Sitemaps mit Limits unterstützen (MAX_SITEMAPS=50, MAX_DEPTH=3, MAX_URLS=10000)
+* [x] Sitemap Indizes rekursiv folgen
+* [x] XML-Namespaces behandeln
+* [x] Sitemaps ohne Namespaces unterstützen
+* [x] 404/5xx/Timeout/ungültiges XML unterscheidbar speichern
+* [x] Zwei-Tabellen-Architektur (sitemaps + sitemap_urls)
+* [x] parent_sitemap_id für verschachtelte Sitemaps
+* [x] Redirects korrekt behandeln
+* [x] 17 Unit Tests für Parser + 14 Unit Tests für Fetcher + 10 Feature Tests
+* [x] ADR-0014 dokumentiert
+
+**Migrations:** 
+- `2026_08_31_081715_create_sitemaps_table.php`
+- `2026_08_31_081716_create_sitemap_urls_table.php`
+
+**Hinweis:** Sitemap-URLs sind jetzt erfasst, werden aber noch nicht automatisch zum Crawl-Queue hinzugefügt. Gap-Analyse (Vergleich Sitemap ↔ Crawl) folgt in späteren Milestones.
 
 ---
 
