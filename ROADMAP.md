@@ -179,7 +179,7 @@ Diese Architektur wird weiterentwickelt und nicht grundsätzlich ersetzt.
 
 Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die Datengrundlage zuverlässig ist.
 
-## Status: In Progress (6/8 Sub-Milestones abgeschlossen)
+## Status: In Progress (7/9 Sub-Milestones abgeschlossen)
 
 ## Aufgaben
 
@@ -305,14 +305,83 @@ Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die 
 
 ---
 
-### M1.7 – Error Handling & Logging
+### M1.7 – Error Handling & Logging ✅ ABGESCHLOSSEN
 
-* [ ] 4xx erfassen und kategorisieren
-* [ ] 5xx erfassen und kategorisieren
-* [ ] Timeouts erfassen
-* [ ] Crawl-Abbrüche sauber protokollieren
-* [ ] Connection-Fehler behandeln
-* [ ] DNS-Fehler behandeln
+* [x] Strukturiertes Error-Modell mit code, severity, source, context, occurred_at
+* [x] 13 Error-Codes definiert (HTTP_4XX, HTTP_5XX, TIMEOUT, CONNECTION_FAILED, DNS_FAILED, REDIRECT_LOOP, REDIRECT_LIMIT_EXCEEDED, RENDERER_TIMEOUT, RENDERER_UNAVAILABLE, RENDERER_FAILED, ROBOTS_FETCH_FAILED, SITEMAP_FETCH_FAILED, SITEMAP_PARSE_FAILED, PARSE_FAILED, UNKNOWN)
+* [x] 4 Severity-Levels (LOW, MEDIUM, HIGH, CRITICAL)
+* [x] 6 Error-Sources (CRAWLER, HTTP, RENDERER, ROBOTS, SITEMAP, PARSER)
+* [x] ErrorService mit recordError(), isFatal(), determineSeverity()
+* [x] Automatische Severity-Bestimmung basierend auf Error-Code
+* [x] Recoverable vs Fatal Error Logic (nur Start-URL Fehler sind fatal)
+* [x] Context JSON für flexible Error-Metadaten
+* [x] depth nullable für Fehler außerhalb des Crawls
+* [x] CrawlerService vollständig integriert (HTTP, Network, Renderer, Redirect-Limits)
+* [x] API-Endpunkt mit Pagination und Filtern (severity, source, code)
+* [x] Frontend ErrorsTab mit Filter-Dropdowns und expandierbaren Details
+* [x] 10 Unit Tests + 9 Feature Tests
+* [x] ADR-0017 dokumentiert
+
+**Migration:** `2026_09_01_120000_enhance_crawl_errors_table.php`
+
+**Error Codes:** HTTP_4XX, HTTP_5XX, TIMEOUT, CONNECTION_FAILED, DNS_FAILED, REDIRECT_LOOP, REDIRECT_LIMIT_EXCEEDED, RENDERER_TIMEOUT, RENDERER_UNAVAILABLE, RENDERER_FAILED, ROBOTS_FETCH_FAILED, SITEMAP_FETCH_FAILED, SITEMAP_PARSE_FAILED, PARSE_FAILED, UNKNOWN
+
+**Hinweis:** Fatal Errors brechen nur den Crawl ab, wenn sie bei der Start-URL auftreten. Alle Subpage-Fehler sind recoverable und führen zum Überspringen der betroffenen Seite.
+
+---
+
+### M1.7.1 – Technology Detection Expansion
+
+* [ ] Datenmodell erweitern (name, slug, category, confidence, version, evidence, sources, detected_on_pages)
+* [ ] Signal Collection Layer (Meta tags, HTML patterns, Script URLs, Stylesheet URLs, Headers, Cookies, DOM attributes, Resource URLs)
+* [ ] Technology Matching von Signal Collection trennen
+* [ ] Deklaratives Signature-System für Technologien
+* [ ] Confidence-System (HIGH, MEDIUM, LOW) mit klaren Regeln
+* [ ] Evidence Recording für jede Detection
+* [ ] Version Detection wo zuverlässig möglich (Meta Generator, DOM Attributes)
+* [ ] Raw + Rendered HTML als Signal-Quellen nutzen
+* [ ] Website-Level Deduplizierung (aggregiert über alle Pages)
+* [ ] Technologie-Kategorien (CMS, Website Builder, Shop, Frontend, CSS/UI, Analytics, Consent, Marketing, Video/Maps, CAPTCHA, Infrastructure, Fonts)
+
+**Priorität A – Core Technologies (~40-50 Technologien):**
+- CMS: WordPress, TYPO3, Drupal, Joomla
+- Builders: Wix, Squarespace, Webflow
+- Shops: WooCommerce, Shopify, Shopware, Magento, PrestaShop
+- Frontend: React, Next.js, Vue, Nuxt, Angular, Svelte, Astro, jQuery
+- CSS/UI: Bootstrap, Tailwind CSS
+- Analytics: Google Analytics, Google Tag Manager, Matomo
+- Consent: Cookiebot, Usercentrics, Borlabs Cookie, Complianz, consentmanager
+- Marketing: Meta Pixel, Hotjar, HubSpot
+- Embeds: YouTube, Vimeo, Google Maps
+- CAPTCHA: reCAPTCHA, hCaptcha, Cloudflare Turnstile
+- Infrastructure: Cloudflare, Vercel, Netlify
+- Fonts: Google Fonts, Adobe Fonts
+
+**Frontend:**
+- [ ] TechnologiesTab erweitern mit Gruppierung nach Kategorie
+- [ ] Filter nach category, confidence, technology
+- [ ] Evidence Details expandierbar anzeigen
+- [ ] Pages-Liste pro Technology
+- [ ] Version-Information wo verfügbar
+
+**Tests:**
+- [ ] Unit Tests für jede Signature (positive + negative)
+- [ ] False-Positive Protection Tests
+- [ ] Weak vs Strong Evidence Tests
+- [ ] Combined Evidence Tests
+- [ ] Version Extraction Tests
+- [ ] Raw vs Rendered HTML Tests
+- [ ] Confidence Aggregation Tests
+- [ ] Multi-Technology Detection Tests
+
+**Dokumentation:**
+- [ ] ADR-0017-1 erstellen
+- [ ] Technology Signatures dokumentieren
+- [ ] Confidence Rules dokumentieren
+
+**Migration:** `2026_09_01_130000_enhance_detected_technologies_table.php`
+
+**Hinweis:** Keine Wappalyzer-Kopie. Fokus auf relevante KMU-Website-Technologien mit mehreren unabhängigen Signalen pro Detection. Low-Confidence-Detections werden im normalen Dashboard nicht prominent angezeigt.
 
 ---
 
