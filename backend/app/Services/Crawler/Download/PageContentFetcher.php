@@ -19,21 +19,6 @@ class PageContentFetcher
 
     public function fetchRendered(string $url): ?DownloadedPage
     {
-        $started = microtime(true);
-
-        $html = $this->browserRenderer->render($url);
-
-        $responseTimeMs = (int) ((microtime(true) - $started) * 1000);
-
-        if ($html === null) {
-            return null;
-        }
-
-        return new DownloadedPage(
-            url: $url,
-            statusCode: 200,
-            html: $html,
-            responseTimeMs: $responseTimeMs,
-        );
+        return $this->browserRenderer->renderAsDownloadedPage($url);
     }
 }

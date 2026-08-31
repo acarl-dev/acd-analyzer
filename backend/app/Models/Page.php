@@ -12,12 +12,20 @@ class Page extends Model
         'website_id',
         'crawl_run_id',
         'url',
+        'requested_url',
+        'final_url',
         'status_code',
+        'redirect_count',
+        'redirect_chain',
         'title',
         'meta_description',
         'html',
         'response_time_ms',
         'depth',
+    ];
+
+    protected $casts = [
+        'redirect_chain' => 'array',
     ];
 
     public function issues(): HasMany

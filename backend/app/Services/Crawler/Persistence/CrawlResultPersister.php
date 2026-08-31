@@ -20,8 +20,12 @@ class CrawlResultPersister
         $storedPage = $crawlRun->pages()->create([
             'website_id' => $website->id,
             'url' => $page->url,
+            'requested_url' => $page->requestedUrl,
+            'final_url' => $page->finalUrl,
             'depth' => $depth,
             'status_code' => $page->statusCode,
+            'redirect_count' => $page->redirectCount,
+            'redirect_chain' => $page->redirectChain,
             'title' => $page->title,
             'meta_description' => $page->metaDescription,
             'html' => $page->html,

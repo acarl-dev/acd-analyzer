@@ -18,7 +18,8 @@ class PageContentFetcherTest extends TestCase
         $page = app(PageContentFetcher::class)->fetchHttp('https://example.com');
 
         $this->assertInstanceOf(DownloadedPage::class, $page);
-        $this->assertSame('https://example.com', $page->url);
+        $this->assertSame('https://example.com', $page->requestedUrl);
+        $this->assertSame('https://example.com', $page->finalUrl);
         $this->assertSame(200, $page->statusCode);
         $this->assertSame('<html><body>HTTP</body></html>', $page->html);
     }
@@ -38,7 +39,8 @@ class PageContentFetcherTest extends TestCase
         $page = app(PageContentFetcher::class)->fetchRendered('https://example.com');
 
         $this->assertInstanceOf(DownloadedPage::class, $page);
-        $this->assertSame('https://example.com', $page->url);
+        $this->assertSame('https://example.com', $page->requestedUrl);
+        $this->assertSame('https://example.com', $page->finalUrl);
         $this->assertSame(200, $page->statusCode);
         $this->assertSame('<html><body><h1>Rendered</h1></body></html>', $page->html);
     }

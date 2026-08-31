@@ -2,6 +2,7 @@
 
 namespace App\Services\Renderer;
 
+use App\Services\Crawler\DTO\DownloadedPage;
 use Illuminate\Support\Facades\Http;
 
 class BrowserRendererClient
@@ -23,6 +24,29 @@ class BrowserRendererClient
         }
 
         return $html;
+    }
+
+    public function renderAsDownloadedPage(string $url): ?DownloadedPage
+    {
+        $started = microtime(true);
+
+        $html = $this->render($url);
+
+        if ($html === null) {
+            return null;
+        }
+
+        $responseTimeMs = (int) ((microtime(true) - $started) * 1000);
+
+        return new DownloadedPage(
+            requestedUrl: $url,
+            finalUrl: $url,
+            statusCode: 200,
+            html: $html,
+            responseTimeMs: $responseTimeMs,
+            redirectCount: 0,
+            redirectChain: null,
+        );
     }
 
     private function baseUrl(): string

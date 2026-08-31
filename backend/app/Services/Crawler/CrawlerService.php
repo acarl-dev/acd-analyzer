@@ -68,6 +68,11 @@ class CrawlerService
                     $downloadedPage = $this->contentFetcher->fetchHttp($currentUrl);
                     $parsedPage = $this->parser->parse($downloadedPage);
 
+                    // Mark final URL as visited too if it's different (redirect)
+                    if ($downloadedPage->finalUrl !== $currentUrl) {
+                        $visited[$downloadedPage->finalUrl] = true;
+                    }
+
                     $this->persister->persist(
                         website: $website,
                         crawlRun: $crawlRun,

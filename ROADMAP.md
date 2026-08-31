@@ -179,59 +179,100 @@ Diese Architektur wird weiterentwickelt und nicht grundsätzlich ersetzt.
 
 Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die Datengrundlage zuverlässig ist.
 
+## Status: In Progress (2/7 Sub-Milestones abgeschlossen)
+
 ## Aufgaben
 
-### URL Handling
+### M1.1 – URL & Link Consistency ✅ ABGESCHLOSSEN
 
-* [ ] URL-Normalisierung überprüfen
-* [ ] relative URLs zuverlässig auflösen
-* [ ] Fragment-URLs korrekt behandeln
-* [ ] Query-Parameter sinnvoll behandeln
-* [ ] HTTP/HTTPS-Varianten erkennen
-* [ ] www/non-www berücksichtigen
-* [ ] Redirect-Ziele korrekt behandeln
-* [ ] Redirect-Ketten erkennen
+* [x] URL-Normalisierung überprüfen (RFC 3986-konform)
+* [x] relative URLs zuverlässig auflösen (../contact, ./about, etc.)
+* [x] Fragment-URLs korrekt behandeln (entfernt bei Normalisierung)
+* [x] Query-Parameter sinnvoll behandeln (beibehalten)
+* [x] HTTP/HTTPS-Varianten erkennen (interne Links übernehmen Schema der Base-URL)
+* [x] www/non-www berücksichtigen (normalisiert für Vergleiche)
+* [x] externe URLs eindeutig von internen URLs unterscheiden (zentrale `isInternal()` Logik)
+* [x] `normalized_url` zu links Tabelle hinzugefügt
+* [x] Queue-Deduplizierung mit visited + queued Sets
+* [x] 30 Unit Tests + 7 Feature Tests
+* [x] ADR-0011 dokumentiert
 
-### Crawl
+**Migration:** `2026_08_31_100000_add_normalized_url_to_links_table.php`
 
-* [ ] 3xx zuverlässig behandeln
-* [ ] 4xx erfassen
-* [ ] 5xx erfassen
-* [ ] Timeouts erfassen
-* [ ] Crawl-Abbrüche sauber protokollieren
-* [ ] externe URLs eindeutig von internen URLs unterscheiden
+---
 
-### robots.txt
+### M1.2 – Redirect Handling ✅ ABGESCHLOSSEN
+
+* [x] Redirect-Ziele korrekt behandeln
+* [x] Redirect-Ketten erkennen und tracken
+* [x] 3xx zuverlässig behandeln (301, 302, 307, 308)
+* [x] Redirect-Count speichern
+* [x] Redirect-Chain mit Status Codes speichern
+* [x] Relative Location Headers auflösen
+* [x] Max Redirects (10) gegen Loops
+* [x] `requested_url` und `final_url` in pages Tabelle
+* [x] Queue-Deduplizierung berücksichtigt `final_url`
+* [x] 11 Unit Tests + 5 Feature Tests
+* [x] ADR-0012 dokumentiert
+
+**Migration:** `2026_08_31_110000_add_redirect_tracking_to_pages_table.php`
+
+---
+
+### M1.3 – robots.txt Support
 
 * [ ] robots.txt abrufen
 * [ ] Existenz erfassen
 * [ ] grundlegende Direktiven auswerten
 * [ ] Sitemap-Verweise erkennen
+* [ ] User-agent Regeln parsen
+* [ ] Disallow-Pfade speichern
+* [ ] Tests für robots.txt Parsing
 
-### sitemap.xml
+---
 
-* [ ] Sitemap erkennen
+### M1.4 – sitemap.xml Support
+
+* [ ] Sitemap erkennen (robots.txt + /sitemap.xml)
 * [ ] Sitemap laden
 * [ ] URLs extrahieren
 * [ ] Sitemap-URLs mit Crawl vergleichen
 * [ ] URLs erkennen, die nur in Sitemap vorkommen
 * [ ] gecrawlte URLs erkennen, die nicht in Sitemap vorkommen
+* [ ] Nested Sitemaps unterstützen
 
-### Canonical
+---
 
-* [ ] Canonical extrahieren
+### M1.5 – Canonical Handling
+
+* [ ] Canonical extrahieren (link rel="canonical")
 * [ ] fehlende Canonicals erkennen
 * [ ] Canonical auf andere URL erkennen
 * [ ] Canonical auf fehlerhafte URL erkennen
 * [ ] widersprüchliche Canonicals erkennen
+* [ ] Self-referencing Canonicals validieren
 
-### Renderer
+---
+
+### M1.6 – Error Handling & Logging
+
+* [ ] 4xx erfassen und kategorisieren
+* [ ] 5xx erfassen und kategorisieren
+* [ ] Timeouts erfassen
+* [ ] Crawl-Abbrüche sauber protokollieren
+* [ ] Connection-Fehler behandeln
+* [ ] DNS-Fehler behandeln
+
+---
+
+### M1.7 – Renderer Integration
 
 * [ ] Renderer-Zuverlässigkeit prüfen
 * [ ] JS-lastige Websites erkennen
 * [ ] Renderer-Fallback definieren
 * [ ] Render-Timeouts behandeln
 * [ ] Renderer-Fehler protokollieren
+* [ ] Redirect-Tracking im Renderer (Playwright Network Monitoring)
 
 ## Definition of Done
 

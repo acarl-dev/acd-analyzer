@@ -26,7 +26,8 @@ class RenderedPageParser
         }
 
         $downloadedPage = new DownloadedPage(
-            url: $url,
+            requestedUrl: $url,
+            finalUrl: $url,
             statusCode: 200,
             html: $html,
             responseTimeMs: $responseTimeMs,

@@ -17,6 +17,36 @@ class UrlNormalizer
         return $this->normalizeAbsoluteUrl($url);
     }
 
+    /**
+     * Normalize a redirect Location header URL.
+     * Unlike normalizeLink(), this preserves the explicit scheme in the Location header.
+     * Only resolves relative URLs - absolute URLs keep their scheme unchanged.
+     *
+     * @param string $location The Location header value
+     * @param string $currentUrl The current URL (before redirect)
+     * @return string|null The normalized absolute URL, or null if invalid
+     */
+    public function normalizeRedirectLocation(string $location, string $currentUrl): ?string
+    {
+        // Check for non-HTTP protocols
+        if (Str::contains($location, ':')) {
+            $scheme = strtolower(explode(':', $location, 2)[0]);
+            if (!in_array($scheme, ['http', 'https'], true)) {
+                return null;
+            }
+        }
+
+        // Resolve relative URLs using RFC 3986 algorithm
+        $resolved = $this->resolveUrl($location, $currentUrl);
+
+        if ($resolved === null) {
+            return null;
+        }
+
+        // Normalize but DON'T change the scheme - redirects should preserve explicit schemes
+        return $this->normalizeAbsoluteUrl($resolved);
+    }
+
     public function normalizeLink(string $href, string $baseUrl): ?string
     {
         $href = trim($href);

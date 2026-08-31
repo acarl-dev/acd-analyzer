@@ -10,17 +10,21 @@ class HtmlParser
 {
     public function parse(DownloadedPage $page): ParsedPage
     {
-        $crawler = new Crawler($page->html, $page->url);
+        $crawler = new Crawler($page->html, $page->finalUrl);
 
         return new ParsedPage(
-            url: $page->url,
+            url: $page->finalUrl,
+            requestedUrl: $page->requestedUrl,
+            finalUrl: $page->finalUrl,
             statusCode: $page->statusCode,
             title: $this->title($crawler),
             metaDescription: $this->metaDescription($crawler),
             html: $page->html,
             responseTimeMs: $page->responseTimeMs,
+            redirectCount: $page->redirectCount,
+            redirectChain: $page->redirectChain,
             headings: $this->headings($crawler),
-            links: $this->links($crawler, $page->url),
+            links: $this->links($crawler, $page->finalUrl),
             images: $this->images($crawler),
         );
     }
