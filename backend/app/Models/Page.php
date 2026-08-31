@@ -25,6 +25,8 @@ class Page extends Model
         'canonical_href',
         'canonical_url',
         'canonical_count',
+        'fetch_method',
+        'renderer_reason',
     ];
 
     protected $casts = [

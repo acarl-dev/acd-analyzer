@@ -37,6 +37,9 @@ return [
 
     'renderer' => [
         'url' => env('RENDERER_URL', 'http://renderer:3001'),
+        'enabled' => env('RENDERER_ENABLED', true),
+        'timeout' => env('RENDERER_TIMEOUT', 20),
+        'max_per_crawl' => env('RENDERER_MAX_PER_CRAWL', 10),
     ],
 
 ];

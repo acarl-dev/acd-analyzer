@@ -33,6 +33,8 @@ class CrawlResultPersister
             'canonical_href' => $page->canonicalHref,
             'canonical_url' => $page->canonicalUrl,
             'canonical_count' => $page->canonicalCount,
+            'fetch_method' => $page->fetchMethod,
+            'renderer_reason' => $page->rendererReason,
         ]);
 
         foreach ($page->headings as $heading) {

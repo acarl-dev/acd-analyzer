@@ -21,6 +21,8 @@ class ParsedPage
         public readonly ?string $canonicalHref,
         public readonly ?string $canonicalUrl,
         public readonly int $canonicalCount,
+        public readonly string $fetchMethod = 'http',
+        public readonly ?string $rendererReason = null,
     ) {
     }
 }

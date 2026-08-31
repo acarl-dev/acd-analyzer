@@ -179,7 +179,7 @@ Diese Architektur wird weiterentwickelt und nicht grundsätzlich ersetzt.
 
 Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die Datengrundlage zuverlässig ist.
 
-## Status: In Progress (5/7 Sub-Milestones abgeschlossen)
+## Status: In Progress (6/8 Sub-Milestones abgeschlossen)
 
 ## Aufgaben
 
@@ -284,7 +284,28 @@ Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die 
 
 ---
 
-### M1.6 – Error Handling & Logging
+### M1.6 – Renderer Integration ✅ ABGESCHLOSSEN
+
+* [x] Renderer als kontrollierter Fallback bei unzureichendem HTTP-Content
+* [x] RenderDecisionService zur Bewertung der Content-Qualität
+* [x] Erkennung leerer Body-Inhalte (< 50 sichtbare Zeichen)
+* [x] Erkennung SPA-Root-Elemente mit unzureichendem Content
+* [x] Erkennung JS-lastiger Seiten mit minimalem analysierbarem Content
+* [x] fetch_method ('http'/'renderer') und renderer_reason in pages Tabelle
+* [x] Fallback zu HTTP bei Renderer-Fehlern
+* [x] Renderer-Konfiguration (enabled, timeout, max_per_crawl)
+* [x] Frontend zeigt Fetch-Methode und Renderer-Grund
+* [x] API-Endpunkte liefern HTTP/Rendered-Statistiken
+* [x] 11 Unit Tests + 7 Feature Tests
+* [x] ADR-0016 dokumentiert
+
+**Migration:** `2026_09_01_100000_add_fetch_method_to_pages_table.php`
+
+**Konfiguration:** `RENDERER_URL`, `RENDERER_ENABLED`, `RENDERER_TIMEOUT`, `RENDERER_MAX_PER_CRAWL`
+
+---
+
+### M1.7 – Error Handling & Logging
 
 * [ ] 4xx erfassen und kategorisieren
 * [ ] 5xx erfassen und kategorisieren
@@ -295,14 +316,16 @@ Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die 
 
 ---
 
-### M1.7 – Renderer Integration
+### M1.8 – Real-World Crawl Validation
 
-* [ ] Renderer-Zuverlässigkeit prüfen
-* [ ] JS-lastige Websites erkennen
-* [ ] Renderer-Fallback definieren
-* [ ] Render-Timeouts behandeln
-* [ ] Renderer-Fehler protokollieren
-* [ ] Redirect-Tracking im Renderer (Playwright Network Monitoring)
+* [ ] Test mit realer mittelgroßer Unternehmenswebsite (50-200 Seiten)
+* [ ] Test mit JS-lastiger Website (SPA/React/Next.js)
+* [ ] Test mit multilingualer Website
+* [ ] Test mit großer Content-Website (500+ Seiten)
+* [ ] Crawl-Zuverlässigkeit dokumentieren
+* [ ] Renderer-Verhalten in Production validieren
+* [ ] Edge Cases identifizieren und dokumentieren
+* [ ] Performance-Benchmarks erstellen
 
 ## Definition of Done
 

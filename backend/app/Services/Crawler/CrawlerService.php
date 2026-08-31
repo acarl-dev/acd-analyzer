@@ -13,6 +13,7 @@ use App\Services\Crawler\DTO\CrawlOptions;
 use App\Services\Analyzer\TechnologyDetectionService;
 use App\Services\Crawler\RobotsTxt\RobotsTxtService;
 use App\Services\Crawler\Sitemap\SitemapService;
+use App\Services\Crawler\Rendering\RenderDecisionService;
 
 class CrawlerService
 {
@@ -26,6 +27,7 @@ class CrawlerService
         private readonly TechnologyDetectionService $technologyDetectionService,
         private readonly RobotsTxtService $robotsTxtService,
         private readonly SitemapService $sitemapService,
+        private readonly RenderDecisionService $renderDecisionService,
     ) {
     }
 
@@ -61,6 +63,9 @@ class CrawlerService
 
             $visited = [];
             $queued = [$normalizedUrl => true];
+            $renderedCount = 0;
+            $rendererEnabled = config('services.renderer.enabled', true);
+            $maxRenderedPages = config('services.renderer.max_per_crawl', 10);
 
             while ($queue !== [] && count($visited) < $options->maxPages) {
                 $next = array_shift($queue);
@@ -75,8 +80,42 @@ class CrawlerService
                 $visited[$currentUrl] = true;
 
                 try {
+                    // Fetch HTTP content first
                     $downloadedPage = $this->contentFetcher->fetchHttp($currentUrl);
-                    $parsedPage = $this->parser->parse($downloadedPage);
+                    
+                    $fetchMethod = 'http';
+                    $rendererReason = null;
+
+                    // Check if rendering is needed
+                    $shouldRender = $rendererEnabled 
+                        && $renderedCount < $maxRenderedPages
+                        && $this->renderDecisionService->shouldRender($downloadedPage);
+
+                    if ($shouldRender) {
+                        $rendererReason = $this->renderDecisionService->getReason($downloadedPage);
+                        
+                        // Try to render
+                        try {
+                            $renderedPage = $this->contentFetcher->fetchRendered($currentUrl);
+                            
+                            if ($renderedPage !== null) {
+                                // Successfully rendered - use rendered content
+                                $downloadedPage = $renderedPage;
+                                $fetchMethod = 'renderer';
+                                $renderedCount++;
+                            }
+                            // If renderer returns null, fall back to HTTP content
+                        } catch (\Throwable $rendererException) {
+                            // Renderer failed - fall back to HTTP content
+                            // Log the error but don't fail the crawl
+                            \Log::warning('Renderer failed for URL', [
+                                'url' => $currentUrl,
+                                'error' => $rendererException->getMessage(),
+                            ]);
+                        }
+                    }
+
+                    $parsedPage = $this->parser->parse($downloadedPage, $fetchMethod, $rendererReason);
 
                     // Mark final URL as visited too if it's different (redirect)
                     if ($downloadedPage->finalUrl !== $currentUrl) {

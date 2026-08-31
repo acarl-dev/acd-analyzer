@@ -13,7 +13,7 @@ class HtmlParser
     ) {
     }
 
-    public function parse(DownloadedPage $page): ParsedPage
+    public function parse(DownloadedPage $page, string $fetchMethod = 'http', ?string $rendererReason = null): ParsedPage
     {
         $crawler = new Crawler($page->html, $page->finalUrl);
 
@@ -36,6 +36,8 @@ class HtmlParser
             canonicalHref: $canonical['href'],
             canonicalUrl: $canonical['url'],
             canonicalCount: $canonical['count'],
+            fetchMethod: $fetchMethod,
+            rendererReason: $rendererReason,
         );
     }
 

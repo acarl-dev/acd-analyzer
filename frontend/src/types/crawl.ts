@@ -125,6 +125,8 @@ export interface CrawlRunOverview {
   healthScore: number;
   metrics: {
     crawledPages: number;
+    httpPages: number;
+    renderedPages: number;
     issues: number;
     errorIssues: number;
     warningIssues: number;
@@ -151,8 +153,8 @@ export interface PageListItem {
   canonicalUrl: string | null;
   redirectCount: number;
   depth: number;
-  issueCount: number;
-}
+  issueCount: number;  fetchMethod: string;
+  rendererReason: string | null;}
 
 export interface PageDetail {
   id: number;

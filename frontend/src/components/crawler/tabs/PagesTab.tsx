@@ -90,6 +90,7 @@ export function PagesTab({ crawlRunId }: PagesTabProps) {
             <tr>
               <th className="px-4 py-3">URL</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Fetch</th>
               <th className="px-4 py-3">Title</th>
               <th className="px-4 py-3">H1</th>
               <th className="px-4 py-3">Canonical</th>
@@ -125,6 +126,18 @@ export function PagesTab({ crawlRunId }: PagesTabProps) {
                   >
                     {page.statusCode}
                   </span>
+                </td>
+                <td className="px-4 py-3">
+                  {page.fetchMethod === 'renderer' ? (
+                    <span 
+                      className="text-violet-300"
+                      title={page.rendererReason ? `Reason: ${page.rendererReason}` : 'Rendered'}
+                    >
+                      🌐 Rendered
+                    </span>
+                  ) : (
+                    <span className="text-slate-400">HTTP</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-slate-300">
                   {page.title ? (

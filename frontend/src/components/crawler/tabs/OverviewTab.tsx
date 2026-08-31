@@ -93,6 +93,9 @@ export function OverviewTab({ crawlRunId }: OverviewTabProps) {
           <p className="mt-2 text-3xl font-semibold text-slate-100">
             {metrics.crawledPages}
           </p>
+          <p className="mt-1 text-xs text-slate-500">
+            HTTP: {metrics.httpPages} · Rendered: {metrics.renderedPages}
+          </p>
         </div>
 
         <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">

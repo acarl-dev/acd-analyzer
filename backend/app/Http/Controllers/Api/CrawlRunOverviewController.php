@@ -90,6 +90,10 @@ final class CrawlRunOverviewController extends Controller
         // Technologies
         $technologyCount = $crawlRun->detectedTechnologies->unique('name')->count();
 
+        // Fetch methods
+        $httpPages = $crawlRun->pages->where('fetch_method', 'http')->count();
+        $renderedPages = $crawlRun->pages->where('fetch_method', 'renderer')->count();
+
         return response()->json([
             'data' => [
                 'crawlRunId' => $crawlRun->id,
@@ -101,6 +105,8 @@ final class CrawlRunOverviewController extends Controller
                 'healthScore' => $healthScore,
                 'metrics' => [
                     'crawledPages' => $totalPages,
+                    'httpPages' => $httpPages,
+                    'renderedPages' => $renderedPages,
                     'issues' => $totalIssues,
                     'errorIssues' => $errorIssues,
                     'warningIssues' => $warningIssues,

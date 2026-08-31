@@ -25,6 +25,8 @@ final class CrawlRunPagesController extends Controller
                 'redirectCount' => $page->redirect_count,
                 'depth' => $page->depth,
                 'issueCount' => $page->issues()->count(),
+                'fetchMethod' => $page->fetch_method,
+                'rendererReason' => $page->renderer_reason,
             ]);
 
         return response()->json([
