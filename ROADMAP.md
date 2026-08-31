@@ -1,820 +1,1118 @@
-# Alan Carl Digital – Analyzer Roadmap
+# ACD Analyzer – Roadmap
 
-## Vision
+## Ziel des Projekts
 
-ACD Analyzer ist die interne Intelligence Engine von Alan Carl Digital.
+Der **ACD Analyzer** ist zunächst ein internes Werkzeug von **Alan Carl Digital (ACD)** zur effizienten und reproduzierbaren Analyse von Unternehmenswebsites.
 
-Die Plattform sammelt, strukturiert und analysiert Daten von Unternehmenswebsites und bildet die Grundlage für zukünftige Produkte, SaaS-Lösungen und Dienstleistungen.
+Der Analyzer ist aktuell **kein SaaS-Produkt** und keine öffentlich zugängliche Analyseplattform.
 
-Das langfristige Ziel ist keine klassische Webagentur, sondern eine datengetriebene Produktplattform mit einer wiederverwendbaren Analyse-Engine.
+Sein primäres Ziel ist:
+
+> Möglichst viele objektiv prüfbare Bestandteile einer professionellen Website-Analyse automatisiert zu erfassen, aufzubereiten und zu bewerten, sodass die manuelle Analysezeit deutlich reduziert wird.
+
+Der Analyzer unterstützt insbesondere das ACD-Angebot **„Website-Analyse“**.
+
+Der Mensch bleibt dabei ein wesentlicher Bestandteil der Analyse.
+
+Der Analyzer sammelt Fakten, erkennt technische Auffälligkeiten und bereitet Findings vor.
+
+ACD bewertet anschließend insbesondere:
+
+* geschäftliche Relevanz
+* Nutzerführung
+* Qualität des Anfrageprozesses
+* Priorität von Problemen
+* Verbesserungspotenziale
+* Aufwand und Nutzen möglicher Maßnahmen
+
+Ziel ist nicht, möglichst viele technische Meldungen zu erzeugen.
+
+Ziel ist eine verständliche Antwort auf:
+
+> **Was sollte an dieser Website verbessert werden, warum ist es relevant und was sollte zuerst passieren?**
 
 ---
 
-# Version 0.1 – Foundation
+# Geschäftsmodell
+
+Der Analyzer unterstützt den ACD-Kundenprozess:
+
+```text
+Analysieren
+    ↓
+Verbesserungspotenziale erkennen
+    ↓
+Entwickeln / Optimieren
+    ↓
+Betreuen & Monitoring
+    ↓
+später: Digitalisieren & Automatisieren
+```
+
+Eine Website-Analyse kann dadurch gleichzeitig ein eigenständiges Produkt und der Einstieg in eine längerfristige Kundenbeziehung sein.
+
+---
+
+# Ziel für Version 1.0
+
+Version 1.0 ist erreicht, wenn mit dem Analyzer eine reale Unternehmenswebsite zuverlässig untersucht und daraus eine professionelle ACD Website-Analyse erstellt werden kann.
+
+Der komplette Prozess soll langfristig ungefähr folgendes Zeitbudget ermöglichen:
+
+| Tätigkeit                       |                Ziel |
+| ------------------------------- | ------------------: |
+| Website anlegen & Crawl starten |             ~10 min |
+| automatische Ergebnisse prüfen  |             ~30 min |
+| technische Stichprobe           |             ~20 min |
+| UX & mobile Darstellung         |             ~30 min |
+| Anfrageprozess                  |             ~30 min |
+| Findings priorisieren           |             ~20 min |
+| Bericht kontrollieren           |             ~20 min |
+| Ergebnisgespräch                |             ~45 min |
+| Administration                  |             ~15 min |
+| **Gesamt**                      | **ca. 3–4 Stunden** |
+
+Der Analyzer soll insbesondere die zeitaufwendige Datensammlung und wiederkehrende technische Bewertung automatisieren.
+
+---
+
+# Entwicklungsprinzipien
+
+## 1. Business Value vor Featureumfang
+
+Vor Version 1.0 wird ein Feature nur umgesetzt, wenn es mindestens eines dieser Ziele erfüllt:
+
+1. Es spart bei einer realen Website-Analyse messbar Zeit.
+2. Es verbessert die Qualität oder Zuverlässigkeit der Analyse.
+3. Es erzeugt Informationen, die für Kunden relevant sind.
+4. Es hilft dabei, konkrete Folgeaufträge zu erkennen.
+5. Es wird für den professionellen Analysebericht benötigt.
+
+Features außerhalb dieser Kriterien werden zurückgestellt.
+
+---
+
+## 2. Analyzer statt SaaS
+
+Vor Version 1.0 werden insbesondere nicht priorisiert:
+
+* öffentliche Benutzerregistrierung
+* Kundenaccounts
+* Bezahlsystem
+* öffentliches SaaS
+* Mandantenfähigkeit
+* öffentliche API als Produkt
+* Branchenbenchmarking
+* Wettbewerbsdatenbanken
+* komplexe KI-Funktionen
+* automatische KI-Berichte
+
+Diese Funktionen können später neu bewertet werden.
+
+---
+
+## 3. Automatisieren, was objektiv messbar ist
+
+Der Analyzer soll objektiv prüfbare Informationen möglichst automatisch erfassen.
+
+Beispiele:
+
+* Statuscodes
+* Meta-Daten
+* Links
+* Sicherheitsheader
+* externe Dienste
+* Performance-Metriken
+* Accessibility-Verstöße
+* Formulareigenschaften
+
+Subjektive oder geschäftliche Bewertungen bleiben zunächst bewusst beim Menschen.
+
+Beispiele:
+
+* Ist die Startseite verständlich?
+* Ist die Nutzerführung sinnvoll?
+* Erzeugt die Website Vertrauen?
+* Ist das Anfrageformular für diesen Betrieb angemessen?
+* Welche Maßnahme besitzt den größten geschäftlichen Nutzen?
+
+---
+
+# Milestone 0 – Bestehende Grundlage
+
+Bereits vorhandene Funktionen bilden die Basis der weiteren Entwicklung.
+
+Dazu gehören insbesondere:
+
+* Laravel Backend
+* Next.js Frontend
+* PostgreSQL
+* Docker
+* Playwright Renderer
+* Website-Modell
+* CrawlRun
+* Page
+* Link
+* Image
+* Heading
+* CrawlError
+* PageIssue
+* DetectedTechnology
+* Website-Crawling
+* Crawl-Tiefe und Seitenlimits
+* HTML Parsing
+* Page Issue Analysis
+* Technology Detection
+* Health Score
+* Ergebnisaggregation
+* Crawl-Historie
+* Ergebnisansicht
+* Dashboard-Grundlage
+
+Diese Architektur wird weiterentwickelt und nicht grundsätzlich ersetzt.
+
+---
+
+# Milestone 1 – Crawl Reliability
 
 ## Ziel
 
-Eine stabile, modulare und erweiterbare technische Basis schaffen.
+Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die Datengrundlage zuverlässig ist.
 
----
+## Aufgaben
 
-## Architektur
+### URL Handling
 
-### Backend
-
-* Laravel
-* REST API
-* Service Layer
-
-### Frontend
-
-* Next.js
-* internes Dashboard
-
-### Infrastruktur
-
-* Docker Compose
-* PostgreSQL
-* Nginx
-
----
-
-## Engine
-
-### Crawling
-
-* HTTP Downloader
-* URL-Normalisierung
-* CrawlRun-Verwaltung
-
-### Parsing
-
-* HTML Parser
-* DTOs
-* Modularer CrawlerService
-
-### Persistierung
-
-* CrawlResultPersister
-* PostgreSQL
-
----
-
-## API
-
-* REST API
-* POST `/api/crawl`
-* JSON Responses
-* Vorbereitung für spätere Dashboard-Kommunikation
-
----
-
-## Dashboard (intern)
-
-Command Center ausschließlich für die Entwicklung.
-
-### Funktionen
-
-* Crawl starten
-* Crawlstatus anzeigen
-* Websites anzeigen
-* Crawlhistorie anzeigen
-* Debugging
-* Datenkontrolle
-
----
-
-## Gespeicherte Daten
-
-### Website
-
-* URL
-* Host
+* [ ] URL-Normalisierung überprüfen
+* [ ] relative URLs zuverlässig auflösen
+* [ ] Fragment-URLs korrekt behandeln
+* [ ] Query-Parameter sinnvoll behandeln
+* [ ] HTTP/HTTPS-Varianten erkennen
+* [ ] www/non-www berücksichtigen
+* [ ] Redirect-Ziele korrekt behandeln
+* [ ] Redirect-Ketten erkennen
 
 ### Crawl
 
-* Status
-* Startzeit
-* Endzeit
-* Fehler
-* Anzahl Seiten
+* [ ] 3xx zuverlässig behandeln
+* [ ] 4xx erfassen
+* [ ] 5xx erfassen
+* [ ] Timeouts erfassen
+* [ ] Crawl-Abbrüche sauber protokollieren
+* [ ] externe URLs eindeutig von internen URLs unterscheiden
 
-### Seiten
+### robots.txt
 
-* HTML
-* HTTP Statuscode
-* Response Time
-* Title
-* Meta Description
+* [ ] robots.txt abrufen
+* [ ] Existenz erfassen
+* [ ] grundlegende Direktiven auswerten
+* [ ] Sitemap-Verweise erkennen
 
-### Inhalte
+### sitemap.xml
 
-* Headings
-* Links
-* Bilder
+* [ ] Sitemap erkennen
+* [ ] Sitemap laden
+* [ ] URLs extrahieren
+* [ ] Sitemap-URLs mit Crawl vergleichen
+* [ ] URLs erkennen, die nur in Sitemap vorkommen
+* [ ] gecrawlte URLs erkennen, die nicht in Sitemap vorkommen
+
+### Canonical
+
+* [ ] Canonical extrahieren
+* [ ] fehlende Canonicals erkennen
+* [ ] Canonical auf andere URL erkennen
+* [ ] Canonical auf fehlerhafte URL erkennen
+* [ ] widersprüchliche Canonicals erkennen
+
+### Renderer
+
+* [ ] Renderer-Zuverlässigkeit prüfen
+* [ ] JS-lastige Websites erkennen
+* [ ] Renderer-Fallback definieren
+* [ ] Render-Timeouts behandeln
+* [ ] Renderer-Fehler protokollieren
+
+## Definition of Done
+
+Eine typische Unternehmenswebsite kann reproduzierbar gecrawlt werden und die gespeicherten Seiten entsprechen weitgehend der tatsächlich erreichbaren Website.
 
 ---
 
-## Architekturziele
-
-* Kleine Services
-* Eine Verantwortung pro Klasse
-* DTOs zwischen den Schichten
-* Controller enthalten keine Geschäftslogik
-* Erweiterbarkeit durch modulare Komponenten
-
----
-
-# Version 0.2 – Analyzer
+# Milestone 2 – Website-Level Analysis
 
 ## Ziel
 
-Eigene Analyse-Engine entwickeln.
+Zusätzlich zu Problemen einzelner Seiten müssen Probleme erkannt werden, die erst im Vergleich mehrerer Seiten sichtbar werden.
 
-### SEO
+## Architektur
 
-* fehlender Title
-* fehlende Meta Description
-* H1 Analyse
-* Überschriftenstruktur
-* Bilder ohne Alt
-* interne/externe Links
-* Statuscode-Auswertung
+Ein eigener Analyzer wird eingeführt:
 
-### Crawling
+```text
+WebsiteIssueAnalyzer
+```
 
-* Mehrseitiger Crawl
-* Crawl-Limits
-* robots.txt berücksichtigen
-* Sitemap-Unterstützung
+bzw. eine vergleichbare klar getrennte Website-Level-Analyse.
 
-### JavaScript
+## Aufgaben
 
-* Erkennung JS-lastiger Websites
-* Vorbereitung für Playwright
+* [ ] Duplicate Titles erkennen
+* [ ] Duplicate Meta Descriptions erkennen
+* [ ] Duplicate H1 erkennen
+* [ ] fehlende Titles websiteweit aggregieren
+* [ ] fehlende Descriptions aggregieren
+* [ ] fehlende H1 aggregieren
+* [ ] Canonical-Konflikte erkennen
+* [ ] Broken Internal Links aggregieren
+* [ ] Seiten ohne interne eingehende Links erkennen
+* [ ] ungewöhnlich tiefe Seiten erkennen
+* [ ] Sitemap/Crawl-Abweichungen erkennen
+* [ ] HTTP/HTTPS-Inkonsistenzen erkennen
+* [ ] Host-Inkonsistenzen erkennen
 
-### Architektur
+## Definition of Done
 
-* Aufteilung des HtmlParsers in einzelne Extractor-Klassen
-* Analyzer-Module
-* Persistente Analyseergebnisse über page_issues
-* Analyseausführung nach erfolgreicher Crawl-Persistierung
-* Results-Endpunkt liest gespeicherte Issues statt Live-Analyse auszuführen
+Der Analyzer kann nicht nur sagen:
 
----
+> „Auf Seite X fehlt ein Title.“
 
-# Version 0.3 – Dashboard
+sondern beispielsweise:
 
-## Ziel
-
-Das interne Dashboard wird zum Analysezentrum.
-
-### Visualisierung
-
-* Websiteübersicht
-* Crawlhistorie
-* Statistiken
-* Diagramme
-* Fehlerübersicht
-* Detailansicht einzelner Seiten
-
-### Bedienung
-
-* Projekte
-* Filter
-* Suche
-* Analyse erneut starten
+> „Auf 14 von 32 untersuchten Seiten fehlen individuelle Meta Descriptions.“
 
 ---
 
-# Version 0.4 – Scanner
+# Milestone 3 – Security Analysis
 
 ## Ziel
 
-Integration etablierter Analysewerkzeuge.
+Grundlegende technische Sicherheitsmerkmale einer Website automatisiert prüfen.
 
-### Lighthouse
+Der Analyzer führt ausdrücklich **keinen Penetrationstest** und keine vollständige Sicherheitsprüfung durch.
 
-* Performance
-* Best Practices
+## Aufgaben
+
+### Transport
+
+* [ ] HTTPS prüfen
+* [ ] HTTP → HTTPS Redirect prüfen
+* [ ] Mixed Content erkennen
+
+### Security Headers
+
+* [ ] Strict-Transport-Security
+* [ ] Content-Security-Policy
+* [ ] X-Content-Type-Options
+* [ ] Referrer-Policy
+* [ ] Permissions-Policy
+* [ ] X-Frame-Options
+
+### Weitere Indikatoren
+
+* [ ] unsichere Form Actions erkennen
+* [ ] HTTP-Ressourcen erkennen
+* [ ] offensichtliche Versionsinformationen erfassen, soweit sinnvoll
+* [ ] externe Scriptquellen erfassen
+
+## Definition of Done
+
+Der Analyzer kann grundlegende technische Sicherheitsmerkmale nachvollziehbar darstellen und Auffälligkeiten als Findings ausgeben.
+
+---
+
+# Milestone 4 – Privacy & External Services
+
+## Ziel
+
+Technisch erkennbare externe Dienste und datenschutzrelevante Integrationen identifizieren.
+
+Die Analyse stellt **keine Rechtsberatung und keine rechtliche DSGVO-Prüfung** dar.
+
+## Phase 1 – Detection
+
+Erkennung unter anderem von:
+
+* [ ] Google Analytics
+* [ ] Google Tag Manager
+* [ ] Google Fonts
+* [ ] Google Maps
+* [ ] YouTube
+* [ ] Vimeo
+* [ ] Meta Pixel
+* [ ] reCAPTCHA
+* [ ] Hotjar
+* [ ] Matomo
+* [ ] HubSpot
+* [ ] weiteren relevanten externen Diensten
+
+### Consent Management
+
+Erkennung unter anderem von:
+
+* [ ] Cookiebot
+* [ ] Usercentrics
+* [ ] Borlabs Cookie
+* [ ] Complianz
+* [ ] consentmanager
+* [ ] weiteren CMPs
+
+### Externe Ressourcen
+
+* [ ] externe Scripts erfassen
+* [ ] externe Stylesheets erfassen
+* [ ] externe Fonts erfassen
+* [ ] externe Frames erfassen
+* [ ] externe Requests soweit sinnvoll kategorisieren
+
+## Phase 2 – Consent Behaviour
+
+Erst nach stabiler Phase 1:
+
+* [ ] Browser-Network-Requests erfassen
+* [ ] Requests vor Consent erfassen
+* [ ] Requests nach Consent vergleichbar machen
+* [ ] Tracker vor Einwilligung erkennen
+* [ ] auffälliges Consent-Verhalten dokumentieren
+
+## Definition of Done
+
+ACD erhält schnell einen Überblick darüber, welche externen Dienste eine Website technisch einbindet und welche Punkte manuell näher geprüft werden sollten.
+
+---
+
+# Milestone 5 – Accessibility
+
+## Ziel
+
+Automatisierte Barrierefreiheitsprüfung als Bestandteil der Website-Analyse.
+
+## Technologie
+
+Bevorzugt:
+
+```text
+Playwright + axe-core
+```
+
+## Aufgaben
+
+* [ ] axe-core integrieren
+* [ ] Scan über Renderer ausführen
+* [ ] Violations erfassen
+* [ ] Impact speichern
+* [ ] betroffene Elemente speichern
+* [ ] Rule-ID speichern
+* [ ] Beschreibung speichern
+* [ ] Ergebnisse in Analyzer-Findings überführen
+
+Zusätzliche eigene Prüfungen nur dort, wo sie einen klaren Mehrwert bieten.
+
+## Manuelle Prüfung
+
+Automatisierte Ergebnisse ersetzen keine vollständige Accessibility-Prüfung.
+
+ACD ergänzt insbesondere Stichproben zu:
+
+* Tastaturbedienung
+* Navigation
+* Verständlichkeit
+* Fokusverhalten
+* visueller Nutzbarkeit
+
+## Definition of Done
+
+Automatisch erkennbare Accessibility-Probleme werden reproduzierbar erfasst und für die manuelle Bewertung aufbereitet.
+
+---
+
+# Milestone 6 – Screenshots & Visual Inspection
+
+## Ziel
+
+Die manuelle visuelle Prüfung soll möglichst schnell durchgeführt werden können.
+
+## Aufgaben
+
+### Desktop
+
+* [ ] Desktop Screenshot erzeugen
+* [ ] sinnvolle Standardauflösung definieren
+* [ ] Full-Page Screenshot unterstützen
+
+### Mobile
+
+* [ ] Smartphone Viewport definieren
+* [ ] Mobile Screenshot erzeugen
+* [ ] Full-Page Screenshot unterstützen
+
+### Speicherung
+
+* [ ] Screenshots CrawlRun/Page zuordnen
+* [ ] Screenshots im Dashboard anzeigen
+* [ ] Fehler beim Screenshot erfassen
+
+## Später optional
+
+* Screenshot-Vergleich zwischen Crawls
+* visuelle Regression
+* automatische Layout-Anomalien
+
+Diese Funktionen sind nicht Teil von Version 1.0.
+
+## Definition of Done
+
+ACD kann die wichtigsten Seiten einer Website direkt aus dem Analyzer in Desktop- und Mobilansicht überprüfen.
+
+---
+
+# Milestone 7 – Form & Inquiry Analysis
+
+## Ziel
+
+Formulare und Anfragewege technisch erfassen und für die manuelle geschäftliche Bewertung vorbereiten.
+
+Dies ist ein strategisch wichtiger Bereich für ACD.
+
+## Datenextraktion
+
+Für jedes Formular soweit möglich erfassen:
+
+* [ ] Seite
+* [ ] action
+* [ ] method
+* [ ] Anzahl Felder
+* [ ] Input Types
+* [ ] Textareas
+* [ ] Selects
+* [ ] Checkboxen
+* [ ] Radio Buttons
+* [ ] File Upload
+* [ ] required
+* [ ] Labels
+* [ ] autocomplete
+* [ ] Submit Element
+* [ ] Datenschutzhinweis/Checkbox soweit technisch erkennbar
+
+## Automatische Findings
+
+Mögliche Regeln:
+
+* [ ] Formular ohne Labels
+* [ ] Formular ohne Submit
+* [ ] unsichere Form Action
+* [ ] ungeeigneter Input Type für E-Mail
+* [ ] ungeeigneter Input Type für Telefonnummer
+* [ ] fehlendes Autocomplete
+* [ ] sehr hohe Anzahl Pflichtfelder markieren
+* [ ] File Upload erkennen
+* [ ] externe Formularanbieter erkennen
+
+## Wichtig
+
+Der Analyzer soll nicht automatisch entscheiden:
+
+> „Dieses Formular hat zu viele Felder.“
+
+Stattdessen:
+
+> „Dieses Formular besitzt 14 Felder, davon 11 Pflichtfelder.“
+
+Die geschäftliche Bewertung erfolgt durch ACD.
+
+## Definition of Done
+
+ACD erhält ohne manuelles Durchsuchen der Website einen strukturierten Überblick über vorhandene Formulare und deren technische Eigenschaften.
+
+---
+
+# Milestone 8 – Performance Analysis
+
+## Ziel
+
+Relevante Performance-Daten automatisch erfassen, ohne bestehende etablierte Messverfahren selbst nachzubauen.
+
+## Aufgaben
+
+* [ ] Lighthouse integrieren oder vergleichbare etablierte Messung verwenden
+* [ ] Performance Score erfassen
+* [ ] Largest Contentful Paint
+* [ ] Cumulative Layout Shift
+* [ ] First Contentful Paint
+* [ ] Total Blocking Time bzw. geeignete Lab-Metriken
+* [ ] relevante Performance Audits erfassen
+* [ ] Desktop/Mobile sinnvoll unterscheiden
+* [ ] Ergebnisse normalisieren
+
+## Wichtig
+
+Nicht alle Lighthouse-Meldungen werden ungefiltert an Kunden weitergegeben.
+
+ACD priorisiert die geschäftlich und technisch relevanten Ergebnisse.
+
+## Definition of Done
+
+Performance-Probleme können schnell erkannt, verglichen und verständlich in Findings überführt werden.
+
+---
+
+# Milestone 9 – Unified Finding Model
+
+## Ziel
+
+Technische Issues werden zu verständlichen und bearbeitbaren Analyse-Findings.
+
+Das Finding wird zum zentralen Element des Analyseprozesses.
+
+## Zielstruktur
+
+Ein Finding sollte konzeptionell mindestens enthalten:
+
+```text
+code
+category
+severity
+title
+description
+evidence
+recommendation
+business_impact
+effort
+source
+page
+```
+
+Nicht jedes Feld muss zwingend automatisch gesetzt werden.
+
+## Kategorien
+
+Mindestens:
+
+* Technik
 * SEO
+* Performance
+* Sicherheit
+* Datenschutz-Technik
+* Barrierefreiheit
+* Mobile
+* Nutzerführung
+* Anfrageprozess
+* Best Practices
 
-### Accessibility
+## Priorität
 
-* axe-core
+Beispielsweise:
 
-### Browser Rendering
+```text
+high
+medium
+low
+```
 
-* Playwright
+## Aufwand
+
+Beispielsweise:
+
+```text
+small
+medium
+large
+```
+
+## Source
+
+Beispielsweise:
+
+```text
+crawler
+page_analyzer
+website_analyzer
+security
+privacy
+axe
+lighthouse
+form_analyzer
+manual
+```
+
+## Evidence
+
+Findings sollen soweit möglich nachvollziehbare Belege enthalten.
+
+Beispiele:
+
+* betroffene URL
+* Element
+* Header
+* gemessener Wert
+* Anzahl betroffener Seiten
+* externe Domain
+
+## Definition of Done
+
+Ein Finding beantwortet nicht nur:
+
+> „Was ist technisch passiert?“
+
+sondern kann als Grundlage für eine konkrete Kundenempfehlung verwendet werden.
 
 ---
 
-# Version 0.5 – Business Analyzer
+# Milestone 10 – Manual Analysis Workflow
 
 ## Ziel
 
-Eigene Business-Regeln entwickeln.
+Automatische und manuelle Findings werden in einem gemeinsamen Analyseprozess zusammengeführt.
 
-### Beispiele
+## Aufgaben
 
-* Conversion
+* [ ] Findings im Dashboard anzeigen
+* [ ] Finding aktiv/inaktiv setzen
+* [ ] Finding bearbeiten
+* [ ] Priorität ändern
+* [ ] Aufwand setzen
+* [ ] Empfehlung bearbeiten
+* [ ] Business Impact ergänzen
+* [ ] manuelles Finding erstellen
+* [ ] Finding löschen/aus Bericht ausschließen
+* [ ] Notizen ergänzen
+
+## Manuelle Kategorien
+
+Besonders relevant:
+
+### Nutzerführung
+
+* Verständlichkeit Startseite
+* Navigation
+* Informationsarchitektur
 * Vertrauen
+* Calls-to-Action
+* mobile Nutzung
+
+### Anfrageprozess
+
 * Kontaktmöglichkeiten
-* lokale Auffindbarkeit
-* UX
-* Informationsstruktur
-* Contentqualität
-* Call-to-Actions
-* Terminbuchung
-* Branchenregeln
+* Formularqualität
+* Informationsbedarf
+* Hürden
+* Bestätigung
+* nächster Schritt
+* Eignung für den jeweiligen Betrieb
+
+## Definition of Done
+
+ACD kann eine vollständige Website-Analyse innerhalb des Analyzer-Dashboards vorbereiten, ohne Ergebnisse parallel in externen Notizen sammeln zu müssen.
 
 ---
 
-# Version 0.6 – KI
+# Milestone 11 – Priorisierung & Recommendations
 
 ## Ziel
 
-KI als Analyse- und Assistenzsystem.
+Aus technischen Befunden wird ein verständlicher Maßnahmenplan.
 
-### Funktionen
+## Aufgaben
 
-* Zusammenfassungen
-* Priorisierung
-* Handlungsempfehlungen
-* automatische Berichte
-* Erkennung wiederkehrender Muster
-* Vergleich ähnlicher Unternehmen
+* [ ] Findings nach Priorität sortieren
+* [ ] Findings nach Kategorie filtern
+* [ ] Findings nach Aufwand filtern
+* [ ] wichtigste Maßnahmen markieren
+* [ ] Top-Maßnahmen definieren
+* [ ] Sofortmaßnahmen definieren
+* [ ] mittelfristige Maßnahmen definieren
+* [ ] optionale Weiterentwicklung definieren
+
+## Darstellung
+
+Beispiel:
+
+```text
+Hohe Priorität
+Kleiner Aufwand
+
+Meta Descriptions für wichtige Leistungsseiten ergänzen.
+
+Betroffen:
+7 Seiten
+
+Warum:
+...
+
+Empfehlung:
+...
+```
+
+## Definition of Done
+
+Die Analyse liefert eine nachvollziehbare Reihenfolge konkreter Maßnahmen und nicht lediglich eine Sammlung technischer Fehler.
 
 ---
 
-# Version 1.0
+# Milestone 12 – Report Generator
 
-## Erstes internes Release
+## Ziel
 
-### Engine
+Aus den freigegebenen Findings wird automatisch ein professioneller Analysebericht vorbereitet.
 
-* vollständig modular
-* produktiv nutzbar
+## Berichtstruktur
 
-### Dashboard
+### 1. Deckblatt
 
-* vollständiges internes Analysezentrum
+* Unternehmen
+* Website
+* Datum
+* ACD Website-Analyse
 
-### Analyse
+### 2. Executive Summary
 
-* reale Unternehmensanalysen
-* stabile Crawls
-* aussagekräftige Auswertungen
+Kurze Gesamtbewertung.
+
+### 3. Wichtigste Maßnahmen
+
+Beispielsweise:
+
+```text
+Die 5 wichtigsten Maßnahmen
+```
+
+### 4. Kategorien
+
+* Technik
+* SEO
+* Performance
+* Sicherheit
+* Datenschutz-Technik
+* Barrierefreiheit
+* Nutzerführung
+* Anfrageprozess
+
+### 5. Maßnahmenplan
+
+Unterteilung beispielsweise in:
+
+* Sofortmaßnahmen
+* mittelfristige Verbesserungen
+* optionale Weiterentwicklung
+
+### 6. Methodik & Grenzen
+
+Insbesondere Hinweise:
+
+* keine Rechtsberatung
+* kein Penetrationstest
+* automatisierte Accessibility-Tests sind nicht vollständig
+* Performance-Messungen sind Momentaufnahmen
+* Analyse basiert auf dem untersuchten Crawl-Zeitpunkt
+
+### 7. Nächste Schritte
+
+Sachlicher Hinweis darauf, dass ACD auf Wunsch bei der Umsetzung der Maßnahmen unterstützen kann.
+
+## Definition of Done
+
+Der Bericht kann weitgehend aus den vorhandenen Analyzer-Daten erzeugt werden und benötigt nur noch eine abschließende menschliche Kontrolle.
+
+---
+
+# Milestone 13 – PDF Export
+
+## Ziel
+
+Der fertige Bericht kann professionell an Kunden ausgeliefert werden.
+
+## Aufgaben
+
+* [ ] PDF-Layout definieren
+* [ ] ACD Branding integrieren
+* [ ] Inhaltsverzeichnis falls sinnvoll
+* [ ] Seitenumbrüche kontrollieren
+* [ ] Findings sauber darstellen
+* [ ] Screenshots optional einbinden
+* [ ] Datum und CrawlRun dokumentieren
+* [ ] PDF erzeugen
+* [ ] PDF archivieren
+
+## Definition of Done
+
+Eine vollständige ACD Website-Analyse kann als professioneller PDF-Bericht an einen zahlenden Kunden ausgeliefert werden.
+
+---
+
+# Milestone 14 – Real World Validation
+
+## Ziel
+
+Nicht weiterentwickeln, sondern testen.
+
+Nach Erreichen der vorherigen Milestones wird eine reale Unternehmenswebsite analysiert.
+
+## Ablauf
+
+Timer starten.
+
+```text
+Website anlegen
+↓
+Crawl
+↓
+automatische Analyse
+↓
+Ergebnisse prüfen
+↓
+manuelle Analyse
+↓
+Findings priorisieren
+↓
+Bericht erstellen
+↓
+Bericht kontrollieren
+```
+
+Dokumentieren:
+
+* [ ] Gesamtdauer
+* [ ] Crawl-Dauer
+* [ ] manuelle Analysezeit
+* [ ] Zeit für Bericht
+* [ ] fehlende Informationen
+* [ ] falsche Positive
+* [ ] falsche Negative
+* [ ] unnötige Findings
+* [ ] wiederkehrende manuelle Tätigkeiten
+* [ ] Stellen mit Medienbruch
+* [ ] technische Fehler
+
+## Entscheidungsregel
+
+Neue Features werden anschließend anhand real beobachteter Probleme priorisiert.
+
+Beispiel:
+
+> Wenn bei drei Analysen dieselbe Information jeweils 15 Minuten manuell gesucht werden muss, ist dies ein starker Kandidat für Automatisierung.
+
+## Definition of Done
+
+Mindestens eine vollständige Analyse wurde mit einer realen, fremden Unternehmenswebsite durchgeführt und der Workflow anhand der tatsächlichen Erfahrung verbessert.
+
+---
+
+# Version 1.0 – Sellable Analyzer
+
+Version 1.0 ist erreicht, wenn:
+
+* [ ] reale Unternehmenswebsites zuverlässig gecrawlt werden
+* [ ] technische Website-Probleme erkannt werden
+* [ ] Website-Level-Probleme erkannt werden
+* [ ] grundlegende Security-Prüfungen vorhanden sind
+* [ ] externe Dienste und Datenschutzindikatoren erkannt werden
+* [ ] Accessibility automatisiert geprüft wird
+* [ ] Desktop-/Mobile-Prüfung unterstützt wird
+* [ ] Formulare strukturiert analysiert werden
+* [ ] Performance-Daten vorhanden sind
+* [ ] automatische Findings erzeugt werden
+* [ ] manuelle Findings ergänzt werden können
+* [ ] Findings priorisiert und bearbeitet werden können
+* [ ] Empfehlungen hinterlegt werden können
+* [ ] ein Maßnahmenplan erstellt werden kann
+* [ ] ein professioneller Bericht erzeugt werden kann
+* [ ] PDF-Export funktioniert
+* [ ] der vollständige Workflow an realen Websites getestet wurde
+
+Dann gilt:
+
+> **Der Analyzer ist ausreichend fertig, um die ACD Website-Analyse professionell zu verkaufen.**
+
+Nicht erforderlich für Version 1.0:
+
+> perfekte Software.
+
+---
+
+# Nach Version 1.0
+
+Die weitere Entwicklung richtet sich nach realer Kundennachfrage.
+
+---
+
+## Version 1.x – Workflow Optimization
+
+Mögliche Weiterentwicklungen:
+
+* Analysezeit weiter reduzieren
+* bessere False-Positive-Erkennung
+* wiederkehrende Empfehlungen
+* Finding Templates
+* Vergleich mehrerer Crawls
+* automatische Rechecks
+* bessere Screenshots
+* bessere Report-Erstellung
+* Maßnahmenstatus
+* Projektübergabe aus Analyse
+
+Priorisierung ausschließlich nach tatsächlichem Nutzen.
+
+---
+
+# Phase 2 – Betreuung & Monitoring
+
+Wenn ACD erste Betreuungskunden besitzt, kann der Analyzer zur Monitoring-Plattform weiterentwickelt werden.
+
+Mögliche Funktionen:
+
+* geplante Crawls
+* regelmäßige technische Checks
+* Uptime Monitoring
+* SSL Monitoring
+* Domain Monitoring
+* Performance-Verlauf
+* neue Fehler seit letztem Crawl
+* behobene Fehler
+* neue externe Dienste
+* Änderungen an Technologien
+* Accessibility Regression
+* regelmäßiger Kundenbericht
+
+Ziel:
+
+> Wiederkehrende Betreuung effizienter machen und den Wert der Betreuung sichtbar machen.
+
+---
+
+# Phase 3 – Digitalization & Request Intelligence
+
+Wenn reale Kundenanforderungen dies bestätigen, kann der Bereich Anfrageprozesse deutlich ausgebaut werden.
+
+Mögliche Funktionen:
+
+* detaillierte Formanalyse
+* Anfragewege erkennen
+* Funnel-Schritte modellieren
+* CRM-Integrationen erkennen
+* Medienbrüche dokumentieren
+* manuelle Prozesse erfassen
+* Optimierungspotenziale bewerten
+* Request-Flow-Dokumentation
+* Request Engine
+
+Dieser Bereich wird erst priorisiert, wenn reale Kundenprojekte die Nachfrage bestätigen.
+
+---
+
+# Phase 4 – Productization
+
+Erst nach erfolgreichem Einsatz im ACD-Kundengeschäft wird geprüft, ob Teile des Analyzers als eigenständiges Produkt sinnvoll sind.
+
+Mögliche Optionen:
+
+* Kundenportal
+* Self-Service Website Check
+* Agenturtool
+* Monitoring SaaS
+* API
+* White Label
+* Benchmarking
+* Branchenvergleich
+* automatisierte Reports
+* KI-Unterstützung
+
+Keine dieser Optionen ist aktuell Teil des Kernprojekts.
+
+---
+
+# KI
+
+KI wird nicht integriert, nur weil sie technisch möglich ist.
+
+Eine Integration erfolgt nur, wenn ein konkreter Nutzen nachgewiesen werden kann.
+
+Sinnvolle zukünftige Einsatzmöglichkeiten könnten sein:
+
+* Zusammenfassung technischer Findings
+* Formulierung verständlicher Erklärungen
+* Clustering ähnlicher Probleme
+* Unterstützung bei Empfehlungen
+* Zusammenfassung großer Websites
+* Erkennung ungewöhnlicher Muster
+* Unterstützung bei manueller UX-Analyse
+
+Entscheidungen über Priorität, geschäftliche Relevanz und Kundenempfehlungen bleiben nachvollziehbar und kontrollierbar.
 
 ---
 
 # Langfristige Vision
 
-Aus der Intelligence Engine entstehen:
+Der ACD Analyzer kann langfristig die technische Grundlage für mehrere Bereiche von Alan Carl Digital bilden:
 
-* SaaS-Produkte
-* Branchenlösungen
-* APIs
-* Plugins
-* Reports
-* Benchmarking
-* KI-gestützte Empfehlungen
-* automatisierte Audits
-* White-Label-Lösungen
+```text
+Website Analyse
+       ↓
+Optimierung / Entwicklung
+       ↓
+Betreuung
+       ↓
+Monitoring
+       ↓
+Prozessanalyse
+       ↓
+Digitalisierung
+```
 
----
-
-# Aktueller Entwicklungsstand
-
-## Sprint 1
-
-✅ Docker-Grundlage
-
-✅ PostgreSQL
-
-✅ Laravel
-
-✅ Next.js
-
-✅ Datenmodell
+Die langfristige Vision darf jedoch die aktuelle Priorität nicht verdrängen.
 
 ---
 
-## Sprint 2
+# Aktuelle Priorität
 
-✅ Modularisierung des Crawlers
+```text
+1. Crawl Reliability
+2. Website-Level Analysis
+3. Security Analysis
+4. Privacy & External Services
+5. Accessibility
+6. Screenshots
+7. Forms & Inquiry Analysis
+8. Performance
+9. Unified Finding Model
+10. Manual Analysis Workflow
+11. Priorisierung & Recommendations
+12. Report Generator
+13. PDF Export
+14. Real World Validation
+```
 
-* Downloader
-* HTML Parser
-* DTOs
-* CrawlResultPersister
-* Modularer CrawlerService
-* REST API (Grundlage)
+Danach:
 
----
-
-## Sprint 3
-
-✅ Erste REST API
-
-### Backend
-
-* API installiert
-* `POST /api/crawl`
-* CrawlController
-* Form Request (`StoreCrawlRequest`)
-* API Resource (`CrawlRunResource`)
-* JSON Responses
-* Fehlerbehandlung über Laravel Validation
-
-### Architektur
-
-* Controller enthalten keine Geschäftslogik
-* Validierung über Form Requests
-* API-Ausgaben über Resources
-* Crawler vollständig über HTTP ansteuerbar
-
-### Ergebnis
-
-Der Crawler kann jetzt über eine REST API gestartet werden und liefert strukturierte JSON-Antworten zurück.
-
----
-
-## Sprint 4 – Dashboard MVP
-
-Status:
-🟡 In Arbeit
-
-Ziel von Sprint 4 ist der Aufbau eines ersten internen Dashboards, mit dem Crawls gestartet und grundlegende Analyseergebnisse sichtbar gemacht werden können.
-
----
-
-### Sprint 4.1 – Dashboard-Grundstruktur und API-Anbindung
-
-Status:
-✅ Abgeschlossen
-
-### Frontend
-
-* Startseite als internes Dashboard aufgebaut
-* Crawl-Formular erstellt
-* API-Client für Backend-Kommunikation angelegt
-* `useCrawler` Hook eingeführt
-* Crawl-Ergebnis-Komponente erstellt
-* TypeScript-Typen für CrawlRun/API-Responses ergänzt
-
-### Architektur
-
-* API-Zugriffe liegen nicht direkt in UI-Komponenten
-* Crawler-Logik im Frontend über Hook gekapselt
-* UI-Komponenten für Formular und Ergebnisanzeige getrennt
-* Frontend ist auf spätere Dashboard-Erweiterungen vorbereitet
-
-### Ergebnis
-
-Das Dashboard kann einen Crawl über die bestehende REST API starten und den zurückgegebenen CrawlRun anzeigen.
-
----
-
-### Sprint 4.2 – Erste Analyseergebnisse im Dashboard
-
-Status:
-✅ Abgeschlossen
-
----
-
-### Ziel
-
-Der ACD Analyzer soll nach einem Crawl erstmals echte, nutzbare Analyseergebnisse im internen Dashboard anzeigen.
-
-Der Fokus liegt auf einem vollständigen vertikalen Schnitt:
-
-```txt
-Crawler → Datenbank → Laravel Backend/API → typisiertes Frontend → Dashboard-Anzeige
+```text
+STOP FEATURE DEVELOPMENT
+↓
+erste reale Analysen durchführen
+↓
+Zeit messen
+↓
+Probleme beobachten
+↓
+gezielt verbessern
 ```
 
 ---
 
-### Backend
+# Leitfrage für jede neue Funktion
 
-Umgesetzt:
+Vor jeder Implementierung:
 
-* Neuer Endpoint eingeführt:
+> **Hilft diese Funktion dabei, eine ACD Website-Analyse schneller, zuverlässiger oder wertvoller für einen zahlenden Kunden zu machen?**
 
-```txt
-GET /api/crawl-runs/{crawlRun}/results
-```
+Wenn die Antwort **nein** lautet:
 
-* `CrawlResultsController` eingeführt
+> **Backlog.**
 
-* `CrawlResultsService` als zentrale Mapping- und Analyse-Schicht eingeführt
+Wenn die Antwort **ja** lautet:
 
-* CrawlRun-, Website-, Page-, Heading-, Image-, Link- und CrawlError-Daten werden backendseitig geladen und zu einer strukturierten Ergebnis-Response aufbereitet
-
-* Crawl-Fehler werden in dieselbe Ergebnisstruktur integriert wie erfolgreich gecrawlte Seiten
-
-* Crawl-Fehler werden als eigene Ergebniszeilen abgebildet mit:
-
-  * `hasCrawlError`
-  * `crawlError`
-  * `crawl_error` Issue
-
-* Summary-Werte werden backendseitig berechnet:
-
-  * Seiten gesamt
-  * erfolgreiche Seiten
-  * fehlgeschlagene Seiten
-  * Seiten mit Issues
-  * Issues gesamt
-  * Errors
-  * Warnings
-  * Infos
-
-* Erste Issue-Regeln umgesetzt:
-
-  * fehlender Title
-  * fehlende Meta Description
-  * fehlende H1
-  * mehrere H1
-  * Bilder ohne alt-Attribut
-  * Crawl-Fehler
-
-* Issue-Ergebnisse werden normalisiert ausgegeben mit:
-
-  * `code`
-  * `severity`
-  * `message`
+> Nutzen gegen Implementierungsaufwand bewerten und entsprechend priorisieren.
 
 ---
 
-### Frontend
+**Aktuelles Hauptziel:**
 
-Umgesetzt:
-
-* TypeScript-Typen für Crawl- und Analyseergebnisse ergänzt
-
-* API-Funktion `getCrawlResults` eingeführt
-
-* Analyseergebnisse werden nach einem Crawl geladen und im Dashboard angezeigt
-
-* Ergebniszeilen unterstützen sowohl echte Pages als auch Crawl-Fehler-Zeilen
-
-* Dashboard zeigt eine Summary mit:
-
-  * Seiten gesamt
-  * fehlgeschlagene Seiten
-  * Seiten mit Problemen
-  * Probleme gesamt
-  * Fehler
-  * Warnungen
-  * Hinweise
-
-* Dashboard zeigt pro Seite:
-
-  * URL
-  * HTTP-Status
-  * Title
-  * Title-Länge
-  * H1
-  * H1-Anzahl
-  * Meta Description
-  * Meta-Description-Länge
-  * Bilder gesamt
-  * Bilder ohne alt-Attribut
-  * interne Links
-  * externe Links
-  * HTML-Größe
-  * Issues
-
-* Issues werden abhängig von ihrer Severity visuell unterschieden:
-
-  * `error`
-  * `warning`
-  * `info`
-
-* Seiten ohne technische Crawl-Fehler werden als HTTP-Ergebnisse angezeigt
-
-* Crawl-Fehler werden als fehlgeschlagene Ergebniszeilen sichtbar gemacht
-
----
-
-### Architektur
-
-* Analyseergebnisse werden backendseitig berechnet, normalisiert und als View Model für das Frontend bereitgestellt
-
-* Das Frontend analysiert kein rohes HTML
-
-* Das Frontend rendert die vorbereiteten Ergebnisdaten und dupliziert keine Analyse-Logik
-
-* Der Controller bleibt schlank und delegiert Analyse- und Mapping-Logik an den `CrawlResultsService`
-
-* Die Frontend-Seite arbeitet mit typisierten API-Responses
-
-* Crawl-Fehler und erfolgreich gecrawlte Seiten werden in einem gemeinsamen Ergebnisformat dargestellt
-
-* Architekturentscheidung zu backendseitiger Analyse wurde in `ADR-0006: Backend-owned Analysis Results` dokumentiert
-
----
-
-### Validierung / Tests
-
-Sprint 4.2 wurde mit mehreren echten Websites getestet.
-
-Bestätigt wurde:
-
-* HTTP-Status wird korrekt angezeigt
-
-* erfolgreiche Seiten werden nicht als fehlgeschlagen gezählt
-
-* Crawl- und Analyseergebnisse werden korrekt im Dashboard dargestellt
-
-* Summary-Werte zählen korrekt:
-
-  * Seiten gesamt
-  * fehlgeschlagene Seiten
-  * Seiten mit Problemen
-  * Probleme gesamt
-  * Errors
-  * Warnings
-  * Infos
-
-* Fehlende H1 wird als Issue erkannt
-
-* Fehlende Meta Description wird als Issue erkannt
-
-* Bilder ohne alt-Attribut werden als Issue erkannt
-
-* Title, H1, Meta Description, Linkzahlen, Bildzahlen und HTML-Größe werden im Dashboard sichtbar
-
----
-
-### Ergebnis
-
-Nach einem Crawl zeigt das Dashboard erstmals echte Analyseergebnisse aus gespeicherten Crawl-Daten an.
-
-Neben erfolgreich gecrawlten Seiten werden auch Crawl-Fehler in derselben Ergebnisstruktur sichtbar gemacht. Damit steht ein vollständiger vertikaler Schnitt von Crawler über Datenbank und Backend-API bis zur Dashboard-Anzeige.
-
-Sprint 4.2 liefert damit den ersten nutzbaren Analyse-Stand des ACD Analyzers.
-
----
-
-### Bekannte Grenzen
-
-* Die Analyse-Regeln liegen aktuell noch direkt im `CrawlResultsService`
-
-* Die Severity-Semantik ist noch einfach gehalten
-
-* SEO-/Content-Probleme und technische Crawl-Probleme werden zwar unterschieden, aber noch nicht vollständig fachlich gewichtet
-
-* Es gibt noch keine Filterung nach Errors, Warnings oder Infos
-
-* Es gibt noch keine Detailansicht pro Seite
-
-* Die Ergebnisansicht ist für kleine Crawls nutzbar, aber noch nicht für größere Crawls optimiert
-
-* JavaScript-heavy Websites werden noch nicht gesondert erkannt oder behandelt
-
-* Es gibt noch keine automatisierten Tests für `CrawlResultsService`
-
----
-
-### Offen / nächste Schritte
-
-* Analyse-Regeln weiter ausbauen
-
-* Analyse-Logik aus `CrawlResultsService` herauslösen
-
-* Eigenen Analyzer-Service oder einzelne Analyzer-Klassen einführen
-
-* Severity-Semantik fachlich schärfen
-
-* Ergebnisliste optisch und funktional verbessern
-
-* Filterung nach Errors, Warnings und Infos ergänzen
-
-* Detailansicht pro Seite vorbereiten
-
-* Tests für `CrawlResultsService` bzw. zukünftige Analyzer ergänzen
-
-* Designsystem weiter vereinheitlichen
-
----
-
-### Nächster Sprint
-
-### Sprint 4.3 – Analyzer-Regeln strukturieren und erweitern
-
-Status:
-🚧 In Arbeit
-
----
-
-### Ziel
-
-Die Analyse-Logik wird aus dem `CrawlResultsService` herausgelöst und in eine besser erweiterbare Analyzer-Struktur überführt.
-
-Der Sprint stärkt die Trennung zwischen:
-
-```txt
-CrawlResultsService → lädt und mapped Ergebnisdaten
-PageIssueAnalyzer   → bewertet Seiten und erzeugt Issues
-Frontend            → zeigt normalisierte Issues an
-```
-
----
-
-### Gestartet / umgesetzt
-
-* `PageIssueAnalyzer` eingeführt
-
-* bestehende Issue-Regeln aus `CrawlResultsService` ausgelagert
-
-* `CrawlResultsService` delegiert Page-Issue-Erkennung an `PageIssueAnalyzer`
-
-* API-Response bleibt kompatibel zum Frontend:
-
-  * `code`
-  * `severity`
-  * `message`
-
-* erste neue Regeln ergänzt:
-
-  * Title zu kurz
-  * Title zu lang
-  * Meta Description zu kurz
-  * Meta Description zu lang
-  * auffällig große HTML-Datei
-  * sehr wenige interne Links
-  * hoher Anteil von Bildern ohne alt-Attribut
-
-* Severity-Semantik fachlich geschärft:
-
-  * `error` für klare Basisprobleme
-  * `warning` für auffällige Qualitäts- oder Optimierungspotenziale
-  * `info` für technische Hinweise oder Kontextinformationen
-
-* `few_internal_links` von `info` auf `warning` geändert
-
-* Issue-Codes dokumentiert:
-
-  * `docs/analyzer/issue-codes.md`
-
-* Unit-Tests für `PageIssueAnalyzer` ergänzt:
-
-  * Issue-Codes werden geprüft
-  * Severities werden geprüft
-  * aktuell 4 grüne Tests
-
-* Frontend-Filter nach Issue-Schweregrad ergänzt:
-
-  * Alle
-  * Fehler
-  * Warnungen
-  * Hinweise
-
-* Ergebnisliste kann nach `error`, `warning` und `info` gefiltert werden
-
-* leerer Filterzustand wird verständlich angezeigt
-
-* Architekturentscheidung dokumentiert:
-
-  * `ADR-0007: Page Issue Analyzer`
-* * Persistente Analyzer-Issues eingeführt:
-
-  * neue Tabelle `page_issues`
-  * neues Model `PageIssue`
-  * Issues werden nach Crawl-Läufen gespeichert
-  * alte Issues eines CrawlRuns werden bei erneuter Analyse ersetzt
-
-* `CrawlAnalysisService` eingeführt:
-
-  * lädt gespeicherte Crawl-Daten
-  * ruft `PageIssueAnalyzer` auf
-  * speichert erkannte Issues persistent
-  * mappt Crawl-Fehler als `crawl_error`
-
-* `CrawlResultsService` auf gespeicherte Issues umgestellt:
-
-  * Analyseergebnisse werden nicht mehr live beim Anzeigen erzeugt
-  * Dashboard liest persistente Issues aus der Datenbank
-
-* Dashboard-Gesamtübersicht ergänzt:
-
-  * Websites gesamt
-  * Crawls gesamt
-  * Websites mit Problemen
-  * Probleme gesamt
-  * Probleme nach Severity
-  * häufigste Probleme
-
-* Re-Analyze-Command ergänzt:
-
-  * `php artisan acd:analyze-crawl-runs`
-  * `php artisan acd:analyze-crawl-runs --id=...`
-
-* Tests erweitert:
-
-  * `CrawlAnalysisServiceTest`
-  * `DashboardSummaryServiceTest`
-
----
-
-## Sprint 4.4: Limited Multi-Page Crawling
-
-Status: Completed
-
-Goal: Extend the crawler from single-page crawling to a limited synchronous multi-page crawl.
-
-Completed:
-
-- Added `UrlNormalizer` for start URL normalization, relative link normalization, fragment removal and internal/external host checks.
-- Added `depth` to persisted pages.
-- Extended `CrawlerService` with an in-memory crawl queue.
-- Added synchronous crawl limits:
-  - maximum pages: 10
-  - maximum depth: 1
-- Start URL is crawled at depth 0.
-- Directly discovered internal links are crawled at depth 1.
-- External links are persisted as discovered links but are not crawled.
-- Duplicate internal URLs are not crawled multiple times.
-- Subpage crawl failures are persisted as crawl errors without failing the entire CrawlRun.
-- Start URL failures still fail the CrawlRun.
-- `CrawlAnalysisService` runs after the full crawl loop has completed.
-- `pages_crawled` is calculated after the crawl loop.
-- Crawl result API includes page depth.
-- Dashboard result view shows whether a page is the start page or a depth-1 page.
-- Added unit tests for URL normalization.
-- Added feature tests for internal link crawling, external link filtering and duplicate prevention.
-- Added ADR-0009 for synchronous limited multi-page crawling.
-- Updated Engineering Handbook with Sprint 4.4 crawler architecture rules.
-
-Definition of Done:
-
-- Multi-page crawl works for direct internal links.
-- Crawl limits prevent uncontrolled crawling.
-- Persisted crawl data remains the source of truth.
-- Analysis still runs only after persistence.
-- Backend tests pass.
-- Frontend lint passes.
-- ADR and Engineering Handbook are updated.
-
-### Sprint 4.5 – Multi-Page Crawl Usability
-
-Status: Completed
-
-Completed:
-- Added configurable crawl limits for maximum pages and crawl depth.
-- Persisted selected crawl limits on crawl runs.
-- Extended the crawl form with max pages and max depth controls.
-- Stabilized crawl result data for multi-page runs, including depth information for crawl errors.
-- Improved result ordering so failed and more severe pages appear first.
-- Clarified image metrics in the UI as technical image elements rather than visually unique images.
-
-### Sprint 4.6 – Basic Technology Detection
-
-Status: Completed
-
-Goal:
-Detect basic website technologies from the initial HTML and make them visible in the internal dashboard.
-
-Completed:
-- Added persistent `detected_technologies` storage.
-- Added `DetectedTechnology` model and relations to websites, crawl runs and pages.
-- Added `DetectedTechnologyData` DTO.
-- Added `WebsiteTechnologyAnalyzer` for basic technology detection.
-- Added detection for WordPress, TYPO3, Wix, Next.js, Nuxt and JS-heavy pages.
-- Added `TechnologyDetectionService` to analyze stored crawl pages and persist detections.
-- Integrated technology detection into the crawl lifecycle after crawl data and page issues are persisted.
-- Exposed detected technologies through the crawl results API.
-- Displayed detected technologies in the frontend crawl results view.
-- Deduplicated repeated technology detections in result output.
-- Improved internal link detection by treating `www` and non-`www` hosts as the same website.
-- Fixed non-crawlable schemes such as `mailto:` being treated as internal links.
-- Fixed image persistence for decimal image dimensions.
-- Removed duplicate image persistence in `CrawlResultPersister`.
-
-Notes:
-- JS-heavy detection is based on initial HTML signals and is a heuristic.
-- `maxPages` is a crawl limit, not a target count. If a JS-heavy page exposes no crawlable internal links in the initial HTML, only the start page may be crawled.
-- Rendered crawling with Playwright remains out of scope for this sprint.
-
-## Phase 5: Rendered Page Analysis / JS-heavy Support
-
-### Sprint 5.1: Browser Rendering Proof of Concept
-
-Status: In progress / completed after final validation
-
-- Introduced a separate Docker Compose `renderer` service based on Node.js, Playwright and Chromium.
-- Added a minimal `/render` endpoint that accepts a single URL and returns rendered HTML.
-- Verified that JavaScript execution changes the DOM before HTML is returned.
-- Added Laravel-side `BrowserRendererClient` as a small integration boundary.
-- Added unit tests for the renderer client using `Http::fake()`.
-- Documented the architectural decision in ADR-0009.
-
-Not included yet:
-
-- automatic crawler integration
-- multi-page browser crawling
-- automatic rendering fallback for JS-heavy pages
-- rendered DOM persistence
-- screenshots, Lighthouse, network diagnostics
+> **Nicht den perfekten Analyzer bauen. Den Analyzer bauen, mit dem ACD zuverlässig Geld verdienen kann.**
