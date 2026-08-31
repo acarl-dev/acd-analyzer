@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CrawlRunRobotsTxtController;
 use App\Http\Controllers\Api\CrawlRunSitemapsController;
 use App\Http\Controllers\Api\CrawlRunCanonicalsController;
 use App\Http\Controllers\Api\CrawlRunIssuesController;
+use App\Http\Controllers\Api\CrawlRunErrorsController;
 use App\Http\Controllers\Api\DashboardSummaryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,7 @@ Route::get('/crawl-runs/{crawlRun}/sitemaps', [CrawlRunSitemapsController::class
 Route::get('/crawl-runs/{crawlRun}/sitemaps/{sitemapId}', [CrawlRunSitemapsController::class, 'show']);
 Route::get('/crawl-runs/{crawlRun}/canonicals', [CrawlRunCanonicalsController::class, 'index']);
 Route::get('/crawl-runs/{crawlRun}/issues', [CrawlRunIssuesController::class, 'index']);
+Route::get('/crawl-runs/{crawlRun}/errors', CrawlRunErrorsController::class);
 
 Route::get('/dashboard/summary', [DashboardSummaryController::class, 'show']);
 

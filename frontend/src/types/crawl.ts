@@ -282,3 +282,31 @@ export interface IssueGroupItem {
   message: string;
   count: number;
 }
+
+// M1.7 Error Handling types
+
+export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type ErrorSource = 'crawler' | 'http' | 'renderer' | 'robots' | 'sitemap' | 'parser';
+
+export interface CrawlErrorItem {
+  id: number;
+  code: string;
+  severity: ErrorSeverity;
+  source: ErrorSource;
+  url: string;
+  message: string;
+  context: Record<string, any> | null;
+  depth: number | null;
+  occurredAt: string | null;
+  createdAt: string | null;
+}
+
+export interface CrawlErrorsResponse {
+  data: CrawlErrorItem[];
+  pagination: {
+    currentPage: number;
+    perPage: number;
+    total: number;
+    lastPage: number;
+  };
+}

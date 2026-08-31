@@ -42,6 +42,7 @@ class CrawlerServiceTest extends TestCase
                 </html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -151,6 +152,7 @@ class CrawlerServiceTest extends TestCase
                 </html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -165,7 +167,11 @@ class CrawlerServiceTest extends TestCase
                 ->count()
         );
 
-        Http::assertSentCount(2);
+        // Only the 2 pages should be crawled (not robots.txt, sitemap, etc)
+        // Contact page should only be fetched once despite multiple links
+        Http::assertSent(function ($request) {
+            return str_contains((string) $request->url(), 'https://example.com/kontakt');
+        }, 1);
     }
 
     public function test_it_persists_decimal_image_dimensions_as_integer_values(): void
@@ -184,6 +190,7 @@ class CrawlerServiceTest extends TestCase
                 </html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');

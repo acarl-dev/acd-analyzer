@@ -14,6 +14,10 @@ use App\Services\Analyzer\TechnologyDetectionService;
 use App\Services\Crawler\RobotsTxt\RobotsTxtService;
 use App\Services\Crawler\Sitemap\SitemapService;
 use App\Services\Crawler\Rendering\RenderDecisionService;
+use App\Services\Crawler\Enums\ErrorCode;
+use App\Services\Crawler\Enums\ErrorSource;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 
 class CrawlerService
 {
@@ -28,6 +32,7 @@ class CrawlerService
         private readonly RobotsTxtService $robotsTxtService,
         private readonly SitemapService $sitemapService,
         private readonly RenderDecisionService $renderDecisionService,
+        private readonly ErrorService $errorService,
     ) {
     }
 
@@ -83,6 +88,50 @@ class CrawlerService
                     // Fetch HTTP content first
                     $downloadedPage = $this->contentFetcher->fetchHttp($currentUrl);
                     
+                    // Check for HTTP errors
+                    if ($downloadedPage->statusCode >= 400) {
+                        $errorCode = $downloadedPage->statusCode >= 500 
+                            ? ErrorCode::HTTP_5XX 
+                            : ErrorCode::HTTP_4XX;
+                        
+                        $this->errorService->recordError(
+                            crawlRun: $crawlRun,
+                            code: $errorCode,
+                            source: ErrorSource::HTTP,
+                            url: $currentUrl,
+                            message: "HTTP {$downloadedPage->statusCode}",
+                            context: [
+                                'status_code' => $downloadedPage->statusCode,
+                                'final_url' => $downloadedPage->finalUrl,
+                            ],
+                            depth: $currentDepth
+                        );
+
+                        // Check if this is a fatal error (start URL)
+                        if ($this->errorService->isFatal($errorCode, $currentUrl, $normalizedUrl)) {
+                            throw new \RuntimeException("Start URL returned {$downloadedPage->statusCode}");
+                        }
+
+                        continue; // Skip this page but continue crawl
+                    }
+
+                    // Check for redirect loops or limits
+                    if ($downloadedPage->redirectCount >= 10) {
+                        $this->errorService->recordError(
+                            crawlRun: $crawlRun,
+                            code: ErrorCode::REDIRECT_LIMIT_EXCEEDED,
+                            source: ErrorSource::HTTP,
+                            url: $currentUrl,
+                            message: "Redirect limit exceeded (10 redirects)",
+                            context: [
+                                'redirect_count' => $downloadedPage->redirectCount,
+                                'redirect_chain' => $downloadedPage->redirectChain,
+                            ],
+                            depth: $currentDepth
+                        );
+                        continue;
+                    }
+                    
                     $fetchMethod = 'http';
                     $rendererReason = null;
 
@@ -103,15 +152,39 @@ class CrawlerService
                                 $downloadedPage = $renderedPage;
                                 $fetchMethod = 'renderer';
                                 $renderedCount++;
+                            } else {
+                                // Renderer returned null - record error and fall back
+                                $this->errorService->recordError(
+                                    crawlRun: $crawlRun,
+                                    code: ErrorCode::RENDERER_FAILED,
+                                    source: ErrorSource::RENDERER,
+                                    url: $currentUrl,
+                                    message: "Renderer returned null, falling back to HTTP content",
+                                    depth: $currentDepth
+                                );
                             }
-                            // If renderer returns null, fall back to HTTP content
+                        } catch (ConnectionException $rendererException) {
+                            // Renderer connection failed
+                            $this->errorService->recordError(
+                                crawlRun: $crawlRun,
+                                code: ErrorCode::RENDERER_UNAVAILABLE,
+                                source: ErrorSource::RENDERER,
+                                url: $currentUrl,
+                                message: "Renderer unavailable: {$rendererException->getMessage()}",
+                                context: ['exception' => get_class($rendererException)],
+                                depth: $currentDepth
+                            );
                         } catch (\Throwable $rendererException) {
-                            // Renderer failed - fall back to HTTP content
-                            // Log the error but don't fail the crawl
-                            \Log::warning('Renderer failed for URL', [
-                                'url' => $currentUrl,
-                                'error' => $rendererException->getMessage(),
-                            ]);
+                            // Other renderer errors
+                            $this->errorService->recordError(
+                                crawlRun: $crawlRun,
+                                code: ErrorCode::RENDERER_FAILED,
+                                source: ErrorSource::RENDERER,
+                                url: $currentUrl,
+                                message: "Renderer failed: {$rendererException->getMessage()}",
+                                context: ['exception' => get_class($rendererException)],
+                                depth: $currentDepth
+                            );
                         }
                     }
 
@@ -162,16 +235,67 @@ class CrawlerService
 
                         $queued[$targetUrl] = true;
                     }
+                } catch (ConnectionException $exception) {
+                    // Connection failed (network unreachable, connection refused, etc.)
+                    $errorCode = ErrorCode::CONNECTION_FAILED;
+                    
+                    // Check for specific DNS errors
+                    if (str_contains($exception->getMessage(), 'getaddrinfo') 
+                        || str_contains($exception->getMessage(), 'resolve host')
+                        || str_contains($exception->getMessage(), 'Could not resolve host')) {
+                        $errorCode = ErrorCode::DNS_FAILED;
+                    }
+
+                    $this->errorService->recordError(
+                        crawlRun: $crawlRun,
+                        code: $errorCode,
+                        source: ErrorSource::HTTP,
+                        url: $currentUrl,
+                        message: $exception->getMessage(),
+                        context: ['exception' => get_class($exception)],
+                        depth: $currentDepth
+                    );
+
+                    // Check if this is a fatal error (start URL)
+                    if ($this->errorService->isFatal($errorCode, $currentUrl, $normalizedUrl)) {
+                        throw $exception;
+                    }
+                } catch (RequestException $exception) {
+                    // HTTP request exception (timeouts, etc.)
+                    $errorCode = str_contains($exception->getMessage(), 'timed out') || str_contains($exception->getMessage(), 'timeout')
+                        ? ErrorCode::TIMEOUT
+                        : ErrorCode::CONNECTION_FAILED;
+
+                    $this->errorService->recordError(
+                        crawlRun: $crawlRun,
+                        code: $errorCode,
+                        source: ErrorSource::HTTP,
+                        url: $currentUrl,
+                        message: $exception->getMessage(),
+                        context: ['exception' => get_class($exception)],
+                        depth: $currentDepth
+                    );
+
+                    // Check if this is a fatal error (start URL)
+                    if ($this->errorService->isFatal($errorCode, $currentUrl, $normalizedUrl)) {
+                        throw $exception;
+                    }
                 } catch (\Throwable $exception) {
+                    // Generic error handling
+                    $this->errorService->recordError(
+                        crawlRun: $crawlRun,
+                        code: ErrorCode::UNKNOWN,
+                        source: ErrorSource::CRAWLER,
+                        url: $currentUrl,
+                        message: $exception->getMessage(),
+                        context: ['exception' => get_class($exception)],
+                        depth: $currentDepth
+                    );
+
+                    // Check if this is depth 0 (start URL) - fatal
                     if ($currentDepth === 0) {
                         throw $exception;
                     }
-
-                    $crawlRun->errors()->create([
-                        'url' => $currentUrl,
-                        'message' => $exception->getMessage(),
-                        'depth' => $currentDepth,
-                    ]);
                 }
             }
 

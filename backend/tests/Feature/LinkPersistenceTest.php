@@ -25,6 +25,7 @@ class LinkPersistenceTest extends TestCase
                 </html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -67,6 +68,7 @@ class LinkPersistenceTest extends TestCase
                 </html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -99,6 +101,7 @@ class LinkPersistenceTest extends TestCase
                 </html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -129,6 +132,7 @@ class LinkPersistenceTest extends TestCase
                 </html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -158,6 +162,7 @@ class LinkPersistenceTest extends TestCase
                 </html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -180,6 +185,7 @@ class LinkPersistenceTest extends TestCase
                 </html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');

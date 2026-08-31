@@ -25,7 +25,7 @@ class CanonicalIssuesTest extends TestCase
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -50,7 +50,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -82,7 +82,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -116,15 +116,16 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com' => Http::response($htmlOriginal, 200, [
-                'Content-Type' => 'text/html',
-            ]),
             'https://example.com/duplicate' => Http::response($htmlDuplicate, 200, [
                 'Content-Type' => 'text/html',
             ]),
             'https://example.com/original' => Http::response($htmlOriginal, 200, [
                 'Content-Type' => 'text/html',
             ]),
+            'https://example.com' => Http::response($htmlOriginal, 200, [
+                'Content-Type' => 'text/html',
+            ]),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com/duplicate');
@@ -156,7 +157,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');

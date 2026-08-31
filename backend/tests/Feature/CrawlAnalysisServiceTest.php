@@ -246,6 +246,9 @@ class CrawlAnalysisServiceTest extends TestCase
             'crawl_run_id' => $crawlRun->id,
             'url' => 'https://example.com/broken',
             'message' => 'Connection timeout',
+            'code' => 'timeout',
+            'severity' => 'medium',
+            'source' => 'http',
         ]);
 
         app(CrawlAnalysisService::class)->analyze($crawlRun);

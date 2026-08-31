@@ -19,6 +19,7 @@ class RedirectHandlingTest extends TestCase
                 '<html><head><title>Home</title></head><body><h1>Home</h1></body></html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('http://example.com');
@@ -47,6 +48,7 @@ class RedirectHandlingTest extends TestCase
                 '<html><head><title>Home</title></head><body><h1>Home</h1></body></html>',
                 200
             ),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('http://example.com');
@@ -130,6 +132,7 @@ class RedirectHandlingTest extends TestCase
             ),
             'https://example.com/external-redirect' => Http::response('', 302, ['Location' => 'https://external.com']),
             'https://external.com' => Http::response('<html><head><title>External</title></head></html>', 200),
+            '*' => Http::response('', 404),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');

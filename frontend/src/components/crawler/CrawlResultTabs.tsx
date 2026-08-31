@@ -10,6 +10,7 @@ import { RedirectsTab } from "./tabs/RedirectsTab";
 import { RobotsTxtTab } from "./tabs/RobotsTxtTab";
 import { SitemapsTab } from "./tabs/SitemapsTab";
 import { CanonicalsTab } from "./tabs/CanonicalsTab";
+import ErrorsTab from "./tabs/ErrorsTab";
 import { CrawlTechnologySummary } from "./CrawlTechnologySummary";
 import { getCrawlResults } from "@/api/crawl";
 import { useEffect } from "react";
@@ -23,6 +24,7 @@ type Tab =
   | "overview"
   | "pages"
   | "issues"
+  | "errors"
   | "links"
   | "redirects"
   | "robots-txt"
@@ -56,6 +58,7 @@ export function CrawlResultTabs({ crawlRun }: CrawlResultTabsProps) {
     { id: "overview", label: "Overview" },
     { id: "pages", label: "Pages" },
     { id: "issues", label: "Issues" },
+    { id: "errors", label: "Errors" },
     { id: "links", label: "Links" },
     { id: "redirects", label: "Redirects" },
     { id: "robots-txt", label: "robots.txt" },
@@ -95,6 +98,7 @@ export function CrawlResultTabs({ crawlRun }: CrawlResultTabsProps) {
       <div>
         {activeTab === "overview" && <OverviewTab crawlRunId={crawlRun.id} />}
         {activeTab === "pages" && <PagesTab crawlRunId={crawlRun.id} />}
+        {activeTab === "errors" && <ErrorsTab crawlRunId={crawlRun.id} />}
         {activeTab === "issues" && <IssuesTab crawlRunId={crawlRun.id} />}
         {activeTab === "links" && <LinksTab crawlRunId={crawlRun.id} />}
         {activeTab === "redirects" && <RedirectsTab crawlRunId={crawlRun.id} />}

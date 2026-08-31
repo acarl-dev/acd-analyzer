@@ -21,7 +21,7 @@ class CanonicalPersistenceTest extends TestCase
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -45,7 +45,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -68,7 +68,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -94,7 +94,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -117,7 +117,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -140,7 +140,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -164,7 +164,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         $crawlRun = app(CrawlerService::class)->crawl('https://example.com');
@@ -199,7 +199,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         // Only crawl the first page to avoid analyzing internal links
@@ -236,7 +236,7 @@ HTML;
 HTML;
 
         Http::fake([
-            'https://example.com*' => Http::response($html, 200),
+            '*' => Http::response($html, 200),
         ]);
 
         // Only crawl the first page to avoid analyzing internal links

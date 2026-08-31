@@ -154,6 +154,9 @@ class CrawlResultsServiceTest extends TestCase
             'crawl_run_id' => $crawlRun->id,
             'url' => 'https://example.com/broken',
             'message' => 'Connection timeout',
+            'code' => 'timeout',
+            'severity' => 'medium',
+            'source' => 'http',
             'depth' => 1,
         ]);
 
@@ -407,6 +410,9 @@ class CrawlResultsServiceTest extends TestCase
             'crawl_run_id' => $crawlRun->id,
             'url' => 'https://example.com/broken',
             'message' => 'Connection timeout',
+            'code' => 'timeout',
+            'severity' => 'medium',
+            'source' => 'http',
             'depth' => 1,
         ]);
     }

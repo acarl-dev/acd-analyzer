@@ -10,9 +10,19 @@ class CrawlError extends Model
 {
     protected $fillable = [
         'crawl_run_id',
+        'code',
+        'severity',
+        'source',
         'url',
         'message',
+        'context',
         'depth',
+        'occurred_at',
+    ];
+
+    protected $casts = [
+        'context' => 'array',
+        'occurred_at' => 'datetime',
     ];
 
     public function crawlRun(): BelongsTo
