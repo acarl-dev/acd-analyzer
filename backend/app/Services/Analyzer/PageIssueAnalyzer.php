@@ -338,11 +338,50 @@ class PageIssueAnalyzer
                 );
             }
 
-            if (! preg_match('/<link\b[^>]*\brel\s*=\s*["\']canonical["\'][^>]*>/i', $html)) {
+            // Check canonical using persisted data (not regex)
+            $canonicalCount = (int) ($page['canonical_count'] ?? 0);
+            $canonicalHref = $page['canonical_href'] ?? null;
+            $canonicalUrl = $page['canonical_url'] ?? null;
+            $finalUrl = $page['final_url'] ?? $page['url'] ?? null;
+            
+            if ($canonicalCount === 0) {
                 $issues[] = $this->issue(
                     'missing_canonical',
                     'info',
                     'Die Seite hat keinen Canonical-Link.'
+                );
+            } elseif ($canonicalCount > 1) {
+                $issues[] = $this->issue(
+                    'multiple_canonicals',
+                    'warning',
+                    sprintf('Die Seite enthält %d Canonical-Links. Nur der erste wird verwendet.', $canonicalCount)
+                );
+            }
+            
+            // Check for invalid canonical (has href but no resolved URL)
+            if ($canonicalHref !== null && $canonicalHref !== '' && $canonicalUrl === null) {
+                $issues[] = $this->issue(
+                    'invalid_canonical',
+                    'error',
+                    'Der Canonical-Link enthält eine ungültige oder nicht auflösbare URL.'
+                );
+            }
+            
+            // Check for empty canonical href
+            if ($canonicalHref === '' && $canonicalCount > 0) {
+                $issues[] = $this->issue(
+                    'empty_canonical',
+                    'warning',
+                    'Der Canonical-Link hat ein leeres href-Attribut.'
+                );
+            }
+            
+            // Check if canonical points to a different URL (not self-referencing)
+            if ($canonicalUrl !== null && $finalUrl !== null && $canonicalUrl !== $finalUrl) {
+                $issues[] = $this->issue(
+                    'canonical_to_other_url',
+                    'info',
+                    sprintf('Der Canonical-Link zeigt auf eine andere URL: %s', $canonicalUrl)
                 );
             }
         }

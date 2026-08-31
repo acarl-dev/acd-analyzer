@@ -22,6 +22,9 @@ class Page extends Model
         'html',
         'response_time_ms',
         'depth',
+        'canonical_href',
+        'canonical_url',
+        'canonical_count',
     ];
 
     protected $casts = [

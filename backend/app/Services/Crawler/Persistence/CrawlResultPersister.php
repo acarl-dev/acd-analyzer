@@ -30,6 +30,9 @@ class CrawlResultPersister
             'meta_description' => $page->metaDescription,
             'html' => $page->html,
             'response_time_ms' => $page->responseTimeMs,
+            'canonical_href' => $page->canonicalHref,
+            'canonical_url' => $page->canonicalUrl,
+            'canonical_count' => $page->canonicalCount,
         ]);
 
         foreach ($page->headings as $heading) {

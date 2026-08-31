@@ -18,6 +18,9 @@ class ParsedPage
         public readonly array $headings,
         public readonly array $links,
         public readonly array $images,
+        public readonly ?string $canonicalHref,
+        public readonly ?string $canonicalUrl,
+        public readonly int $canonicalCount,
     ) {
     }
 }

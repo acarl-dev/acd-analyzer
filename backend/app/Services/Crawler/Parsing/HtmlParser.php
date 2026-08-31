@@ -8,9 +8,16 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class HtmlParser
 {
+    public function __construct(
+        private readonly CanonicalExtractor $canonicalExtractor,
+    ) {
+    }
+
     public function parse(DownloadedPage $page): ParsedPage
     {
         $crawler = new Crawler($page->html, $page->finalUrl);
+
+        $canonical = $this->canonicalExtractor->extract($crawler, $page->finalUrl);
 
         return new ParsedPage(
             url: $page->finalUrl,
@@ -26,6 +33,9 @@ class HtmlParser
             headings: $this->headings($crawler),
             links: $this->links($crawler, $page->finalUrl),
             images: $this->images($crawler),
+            canonicalHref: $canonical['href'],
+            canonicalUrl: $canonical['url'],
+            canonicalCount: $canonical['count'],
         );
     }
 

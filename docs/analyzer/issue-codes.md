@@ -50,6 +50,10 @@ Die Severity ist keine endgültige SEO-Wahrheit, sondern eine erste interne Prio
 | `missing_viewport_meta`      | `warning` | Technical SEO    |
 | `robots_noindex`             |   `error` | Technical SEO    |
 | `missing_canonical`          |    `info` | Technical SEO    |
+| `multiple_canonicals`        | `warning` | Technical SEO    |
+| `invalid_canonical`          |   `error` | Technical SEO    |
+| `empty_canonical`            | `warning` | Technical SEO    |
+| `canonical_to_other_url`     |    `info` | Technical SEO    |
 | `very_low_text_content`      | `warning` | Content          |
 | `slow_response_time`         | `warning` | Performance      |
 | `large_html_size`            |    `info` | HTML             |
@@ -242,6 +246,113 @@ Es wurden mehr als eine H1-Überschrift gefunden.
 * moderne HTML5-Sektionslogik berücksichtigen
 * sichtbare und unsichtbare Überschriften unterscheiden
 * Kontext der H1-Elemente analysieren
+
+---
+
+## Canonical
+
+### `missing_canonical`
+
+**Severity:** `info`
+
+**Bedeutung:**
+Die Seite hat keinen Canonical-Link.
+
+**Warum relevant:**
+Der Canonical-Link hilft Suchmaschinen, die bevorzugte Version einer Seite zu identifizieren und Duplicate Content-Probleme zu vermeiden. Fehlt der Canonical, ist dies nicht automatisch ein Fehler, aber ein nützlicher Hinweis für SEO-Optimierungen.
+
+**Aktuelle Regel:**
+Es wurde kein `<link rel="canonical">` Tag gefunden.
+
+**Mögliche spätere Verbesserung:**
+
+* Seitentyp berücksichtigen (z.B. paginierte Seiten, Parameter-URLs)
+* Self-referencing Canonicals als Best Practice empfehlen
+* Zusammenhang mit Sitemap-Einträgen prüfen
+
+---
+
+### `multiple_canonicals`
+
+**Severity:** `warning`
+
+**Bedeutung:**
+Die Seite enthält mehrere Canonical-Links.
+
+**Warum relevant:**
+Mehrere Canonical-Links können Suchmaschinen verwirren. In der Regel wird nur der erste verwendet, die übrigen werden ignoriert.
+
+**Aktuelle Regel:**
+Es wurden mehr als ein `<link rel="canonical">` Tag gefunden. Die Anzahl wird im Issue angezeigt.
+
+**Mögliche spätere Verbesserung:**
+
+* Alle gefundenen Canonical-URLs auflisten
+* Prüfen, ob die URLs übereinstimmen oder unterschiedlich sind
+* Konflikte mit HTTP-Header Canonicals erkennen
+
+---
+
+### `invalid_canonical`
+
+**Severity:** `error`
+
+**Bedeutung:**
+Der Canonical-Link enthält eine ungültige oder nicht auflösbare URL.
+
+**Warum relevant:**
+Ein Canonical mit ungültiger URL ist technisch defekt und kann nicht von Suchmaschinen verarbeitet werden. Dies sollte korrigiert werden.
+
+**Aktuelle Regel:**
+Ein Canonical-Link wurde gefunden (`canonical_href` vorhanden), aber die URL konnte nicht aufgelöst werden (`canonical_url` ist null).
+
+**Mögliche spätere Verbesserung:**
+
+* Genaue Fehlerursache angeben (Syntax-Fehler, nicht auflösbar, etc.)
+* Beispiel der problematischen URL im Issue ausgeben
+* Prüfen auf häufige Fehler wie fehlende Protokolle
+
+---
+
+### `empty_canonical`
+
+**Severity:** `warning`
+
+**Bedeutung:**
+Der Canonical-Link hat ein leeres href-Attribut.
+
+**Warum relevant:**
+Ein leeres href-Attribut macht den Canonical-Link nutzlos und sollte entweder entfernt oder mit einer gültigen URL versehen werden.
+
+**Aktuelle Regel:**
+Ein `<link rel="canonical" href="">` Tag wurde gefunden.
+
+**Mögliche spätere Verbesserung:**
+
+* Mit CMS-Konfigurationen abgleichen
+* Prüfen, ob dies ein Template-Fehler ist
+
+---
+
+### `canonical_to_other_url`
+
+**Severity:** `info`
+
+**Bedeutung:**
+Der Canonical-Link zeigt auf eine andere URL als die aktuelle Seite.
+
+**Warum relevant:**
+Dies ist nicht automatisch ein Problem - Canonicals können bewusst auf eine andere URL verweisen (z.B. bei Duplikaten oder Parameter-URLs). Es ist jedoch ein wichtiger Hinweis für die manuelle Überprüfung.
+
+**Aktuelle Regel:**
+Die normalisierte Canonical-URL (`canonical_url`) unterscheidet sich von der finalen URL der Seite (`final_url`).
+
+**Mögliche spätere Verbesserung:**
+
+* Prüfen, ob die Ziel-URL existiert und erreichbar ist
+* Cross-Domain Canonicals gesondert markieren
+* Canonical-Chains erkennen (A→B→C)
+* Severity auf `warning` erhöhen, wenn Ziel-URL Fehler hat
 
 ---
 

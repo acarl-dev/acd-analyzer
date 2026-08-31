@@ -75,6 +75,11 @@ final class CrawlAnalysisService
             'html_size_bytes' => $page->html !== null ? strlen($page->html) : 0,
             'response_time_ms' => $page->response_time_ms,
             'status_code' => $page->status_code,
+            'canonical_count' => $page->canonical_count,
+            'canonical_href' => $page->canonical_href,
+            'canonical_url' => $page->canonical_url,
+            'final_url' => $page->final_url,
+            'url' => $page->url,
         ]);
 
         foreach ($issues as $issue) {

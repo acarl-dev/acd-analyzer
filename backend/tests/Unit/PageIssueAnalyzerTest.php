@@ -195,6 +195,7 @@ class PageIssueAnalyzerTest extends TestCase
             ],
             'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="canonical" href="https://example.com"></head><body><h1>Hauptüberschrift</h1></body></html>',
             'html_size_bytes' => 1000,
+            'canonical_count' => 1,
         ]);
 
         $codes = array_column($issues, 'code');
@@ -526,6 +527,139 @@ class PageIssueAnalyzerTest extends TestCase
         ]);
 
         $issue = collect($issues)->firstWhere('code', 'http_error_status');
+
+        $this->assertNull($issue);
+    }
+
+    public function test_it_detects_multiple_canonicals(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Main heading'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => '/about'],
+                ['type' => 'internal', 'href' => '/contact'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width"><link rel="canonical" href="https://example.com/first"><link rel="canonical" href="https://example.com/second"></head><body>' . str_repeat('word ', 120) . '</body></html>',
+            'html_size_bytes' => 1000,
+            'canonical_count' => 2,
+            'canonical_href' => 'https://example.com/first',
+            'canonical_url' => 'https://example.com/first',
+        ]);
+
+        $issue = collect($issues)->firstWhere('code', 'multiple_canonicals');
+
+        $this->assertNotNull($issue);
+        $this->assertSame('warning', $issue['severity']);
+        $this->assertStringContainsString('2', $issue['message']);
+    }
+
+    public function test_it_detects_invalid_canonical(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Main heading'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => '/about'],
+                ['type' => 'internal', 'href' => '/contact'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width"><link rel="canonical" href="javascript:void(0)"></head><body>' . str_repeat('word ', 120) . '</body></html>',
+            'html_size_bytes' => 1000,
+            'canonical_count' => 1,
+            'canonical_href' => 'javascript:void(0)',
+            'canonical_url' => null, // Could not be resolved
+        ]);
+
+        $issue = collect($issues)->firstWhere('code', 'invalid_canonical');
+
+        $this->assertNotNull($issue);
+        $this->assertSame('error', $issue['severity']);
+    }
+
+    public function test_it_detects_empty_canonical(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Main heading'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => '/about'],
+                ['type' => 'internal', 'href' => '/contact'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width"><link rel="canonical" href=""></head><body>' . str_repeat('word ', 120) . '</body></html>',
+            'html_size_bytes' => 1000,
+            'canonical_count' => 1,
+            'canonical_href' => '',
+            'canonical_url' => null,
+        ]);
+
+        $issue = collect($issues)->firstWhere('code', 'empty_canonical');
+
+        $this->assertNotNull($issue);
+        $this->assertSame('warning', $issue['severity']);
+    }
+
+    public function test_it_detects_canonical_to_other_url(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Main heading'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => '/about'],
+                ['type' => 'internal', 'href' => '/contact'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width"><link rel="canonical" href="https://example.com/original"></head><body>' . str_repeat('word ', 120) . '</body></html>',
+            'html_size_bytes' => 1000,
+            'canonical_count' => 1,
+            'canonical_href' => 'https://example.com/original',
+            'canonical_url' => 'https://example.com/original',
+            'final_url' => 'https://example.com/duplicate',
+        ]);
+
+        $issue = collect($issues)->firstWhere('code', 'canonical_to_other_url');
+
+        $this->assertNotNull($issue);
+        $this->assertSame('info', $issue['severity']);
+        $this->assertStringContainsString('https://example.com/original', $issue['message']);
+    }
+
+    public function test_it_does_not_detect_canonical_to_other_url_when_self_referencing(): void
+    {
+        $issues = (new PageIssueAnalyzer())->analyze([
+            'title' => 'A useful page title',
+            'meta_description' => 'This is a useful meta description for the page.',
+            'headings' => [
+                ['level' => 1, 'text' => 'Main heading'],
+            ],
+            'images' => [],
+            'links' => [
+                ['type' => 'internal', 'href' => '/about'],
+                ['type' => 'internal', 'href' => '/contact'],
+            ],
+            'html' => '<html lang="de"><head><meta name="viewport" content="width=device-width"><link rel="canonical" href="https://example.com/page"></head><body>' . str_repeat('word ', 120) . '</body></html>',
+            'html_size_bytes' => 1000,
+            'canonical_count' => 1,
+            'canonical_href' => 'https://example.com/page',
+            'canonical_url' => 'https://example.com/page',
+            'final_url' => 'https://example.com/page',
+        ]);
+
+        $issue = collect($issues)->firstWhere('code', 'canonical_to_other_url');
 
         $this->assertNull($issue);
     }

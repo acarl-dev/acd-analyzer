@@ -179,7 +179,7 @@ Diese Architektur wird weiterentwickelt und nicht grundsätzlich ersetzt.
 
 Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die Datengrundlage zuverlässig ist.
 
-## Status: In Progress (4/7 Sub-Milestones abgeschlossen)
+## Status: In Progress (5/7 Sub-Milestones abgeschlossen)
 
 ## Aufgaben
 
@@ -265,14 +265,22 @@ Bevor weitere Analysefunktionen entstehen, muss sichergestellt werden, dass die 
 
 ---
 
-### M1.5 – Canonical Handling
+### M1.5 – Canonical Handling ✅ ABGESCHLOSSEN
 
-* [ ] Canonical extrahieren (link rel="canonical")
-* [ ] fehlende Canonicals erkennen
-* [ ] Canonical auf andere URL erkennen
-* [ ] Canonical auf fehlerhafte URL erkennen
-* [ ] widersprüchliche Canonicals erkennen
-* [ ] Self-referencing Canonicals validieren
+* [x] Canonical extrahieren (link rel="canonical")
+* [x] fehlende Canonicals erkennen (`missing_canonical` issue)
+* [x] Canonical auf andere URL erkennen (`canonical_to_other_url` issue)
+* [x] Canonical auf fehlerhafte URL erkennen (`invalid_canonical` issue)
+* [x] widersprüchliche Canonicals erkennen (`multiple_canonicals` issue)
+* [x] Self-referencing Canonicals validieren (keine false-positives)
+* [x] Leere Canonical-hrefs erkennen (`empty_canonical` issue)
+* [x] 5 Unit Tests + 5 Feature Tests
+* [x] ADR-0015 dokumentiert
+* [x] Issue-Codes dokumentiert in `docs/analyzer/issue-codes.md`
+
+**Issue Codes:** `missing_canonical`, `multiple_canonicals`, `invalid_canonical`, `empty_canonical`, `canonical_to_other_url`
+
+**Hinweis:** Canonical-Chains (A→B→C) und HTTP-Header Canonicals bleiben für spätere Milestones reserviert.
 
 ---
 
