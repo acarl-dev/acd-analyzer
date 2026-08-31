@@ -11,6 +11,8 @@ use App\Services\CrawlAnalysisService;
 use App\Services\Crawler\Url\UrlNormalizer;
 use App\Services\Crawler\DTO\CrawlOptions;
 use App\Services\Analyzer\TechnologyDetectionService;
+use App\Services\Crawler\RobotsTxt\RobotsTxtService;
+use App\Services\Crawler\Sitemap\SitemapService;
 
 class CrawlerService
 {
@@ -22,6 +24,8 @@ class CrawlerService
         private readonly CrawlAnalysisService $crawlAnalysisService,
         private readonly UrlNormalizer $urlNormalizer,
         private readonly TechnologyDetectionService $technologyDetectionService,
+        private readonly RobotsTxtService $robotsTxtService,
+        private readonly SitemapService $sitemapService,
     ) {
     }
 
@@ -45,6 +49,12 @@ class CrawlerService
         ]);
 
         try {
+            // Fetch robots.txt before crawling
+            $this->robotsTxtService->fetchAndStore($website, $crawlRun);
+            
+            // Fetch sitemaps (discovers from robots.txt or fallback paths)
+            $this->sitemapService->fetchAndStore($website, $crawlRun);
+
             $queue = [
                 ['url' => $normalizedUrl, 'depth' => 0],
             ];

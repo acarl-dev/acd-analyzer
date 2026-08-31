@@ -112,3 +112,171 @@ export interface CrawlRunListItem {
 export interface CrawlRunListResponse {
   data: CrawlRunListItem[];
 }
+
+// New M1.5.1 types
+
+export interface CrawlRunOverview {
+  crawlRunId: number;
+  websiteId: number;
+  siteUrl: string;
+  status: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  healthScore: number;
+  metrics: {
+    crawledPages: number;
+    issues: number;
+    errorIssues: number;
+    warningIssues: number;
+    infoIssues: number;
+    internalLinks: number;
+    externalLinks: number;
+    redirectedPages: number;
+    canonicalIssues: number;
+    robotsTxtExists: boolean;
+    sitemaps: number;
+    sitemapUrls: number;
+    technologies: number;
+    crawlErrors: number;
+  };
+}
+
+export interface PageListItem {
+  id: number;
+  url: string;
+  statusCode: number;
+  title: string | null;
+  h1: string | null;
+  canonicalHref: string | null;
+  canonicalUrl: string | null;
+  redirectCount: number;
+  depth: number;
+  issueCount: number;
+}
+
+export interface PageDetail {
+  id: number;
+  url: string;
+  requestedUrl: string | null;
+  finalUrl: string | null;
+  statusCode: number;
+  depth: number;
+  
+  // SEO
+  title: string | null;
+  titleLength: number | null;
+  metaDescription: string | null;
+  metaDescriptionLength: number | null;
+  h1: string | null;
+  h1Count: number;
+  
+  // Canonical
+  canonicalHref: string | null;
+  canonicalUrl: string | null;
+  canonicalCount: number;
+  
+  // Redirects
+  redirectCount: number;
+  redirectChain: any[] | null;
+  
+  // Headings
+  headings: Array<{ level: number; text: string }>;
+  
+  // Links
+  internalLinksCount: number;
+  externalLinksCount: number;
+  
+  // Images
+  imageCount: number;
+  imagesWithoutAlt: number;
+  images: Array<{ src: string; alt: string | null }>;
+  
+  // Technical
+  htmlSizeBytes: number | null;
+  responseTimeMs: number | null;
+  
+  // Issues
+  issues: PageAnalysisIssue[];
+  
+  createdAt: string | null;
+}
+
+export interface LinkItem {
+  id: number;
+  href: string;
+  normalizedUrl: string;
+  text: string | null;
+  isInternal: boolean;
+  statusCode: number | null;
+  sourcePageUrl: string;
+  sourcePageId: number;
+}
+
+export interface RedirectItem {
+  id: number;
+  requestedUrl: string;
+  finalUrl: string;
+  url: string;
+  redirectCount: number;
+  redirectChain: any[];
+  statusCode: number;
+}
+
+export interface RobotsTxtData {
+  url: string;
+  statusCode: number;
+  exists: boolean;
+  content: string | null;
+  sitemaps: string[];
+  rules: any[];
+  fetchedAt: string;
+}
+
+export interface SitemapItem {
+  id: number;
+  url: string;
+  type: string;
+  statusCode: number;
+  exists: boolean;
+  urlCount: number;
+  parentSitemapId: number | null;
+  childSitemapCount: number;
+  fetchedAt: string;
+  error: string | null;
+  children?: SitemapItem[];
+}
+
+export interface SitemapUrl {
+  id: number;
+  url: string;
+  normalizedUrl: string;
+  lastmod: string | null;
+  changefreq: string | null;
+  priority: number | null;
+}
+
+export interface CanonicalItem {
+  id: number;
+  url: string;
+  canonicalHref: string | null;
+  canonicalUrl: string | null;
+  canonicalCount: number;
+  status: 'self' | 'other_url' | 'missing' | 'invalid' | 'multiple' | 'empty';
+}
+
+export interface IssueItem {
+  id: number;
+  code: string;
+  severity: IssueSeverity;
+  message: string;
+  pageId: number | null;
+  pageUrl: string | null;
+  crawlErrorId: number | null;
+}
+
+export interface IssueGroupItem {
+  code: string;
+  severity: IssueSeverity;
+  message: string;
+  count: number;
+}

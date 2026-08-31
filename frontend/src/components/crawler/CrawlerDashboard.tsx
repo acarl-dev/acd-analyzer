@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CrawlForm } from "@/components/crawler/CrawlForm";
-import { CrawlResult } from "@/components/crawler/CrawlResult";
+import { CrawlResultTabs } from "@/components/crawler/CrawlResultTabs";
 import { CrawlRunList } from "@/components/crawler/CrawlRunList";
 import type { CrawlRun, CrawlRunListItem } from "@/types/crawl";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
@@ -53,7 +53,7 @@ export function CrawlerDashboard() {
 
         <section className="min-w-0">
           {selectedCrawlRun ? (
-            <CrawlResult crawlRun={selectedCrawlRun} />
+            <CrawlResultTabs crawlRun={selectedCrawlRun} />
           ) : (
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
               <h2 className="text-xl font-semibold">Analyseergebnis</h2>

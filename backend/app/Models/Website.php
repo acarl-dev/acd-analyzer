@@ -26,4 +26,14 @@ class Website extends Model
     {
         return $this->hasMany(DetectedTechnology::class);
     }
+
+    public function robotsTxt(): HasMany
+    {
+        return $this->hasMany(\App\Models\RobotsTxt::class);
+    }
+
+    public function sitemaps(): HasMany
+    {
+        return $this->hasMany(\App\Models\Sitemap::class);
+    }
 }
