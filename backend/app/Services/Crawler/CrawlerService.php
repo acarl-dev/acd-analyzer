@@ -50,6 +50,7 @@ class CrawlerService
             ];
 
             $visited = [];
+            $queued = [$normalizedUrl => true];
 
             while ($queue !== [] && count($visited) < $options->maxPages) {
                 $next = array_shift($queue);
@@ -96,10 +97,16 @@ class CrawlerService
                             continue;
                         }
 
+                        if (isset($queued[$targetUrl])) {
+                            continue;
+                        }
+
                         $queue[] = [
                             'url' => $targetUrl,
                             'depth' => $currentDepth + 1,
                         ];
+
+                        $queued[$targetUrl] = true;
                     }
                 } catch (\Throwable $exception) {
                     if ($currentDepth === 0) {

@@ -64,11 +64,9 @@ class HtmlParser
 
     private function links(Crawler $crawler, string $baseUrl): array
     {
-        $host = parse_url($baseUrl, PHP_URL_HOST);
-
         $links = [];
 
-        $crawler->filter('a')->each(function (Crawler $node) use (&$links, $host) {
+        $crawler->filter('a')->each(function (Crawler $node) use (&$links) {
 
             $href = $node->attr('href');
 
@@ -76,15 +74,9 @@ class HtmlParser
                 return;
             }
 
-            $linkHost = parse_url($href, PHP_URL_HOST);
-
             $links[] = [
                 'href' => $href,
                 'text' => trim($node->text('')),
-                'is_internal' =>
-                    $linkHost === null ||
-                    $linkHost === $host ||
-                    str_starts_with($href, '/'),
             ];
         });
 

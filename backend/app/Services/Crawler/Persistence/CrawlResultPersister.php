@@ -6,9 +6,15 @@ use App\Models\CrawlRun;
 use App\Models\Page;
 use App\Models\Website;
 use App\Services\Crawler\DTO\ParsedPage;
+use App\Services\Crawler\Url\UrlNormalizer;
 
 class CrawlResultPersister
 {
+    public function __construct(
+        private readonly UrlNormalizer $urlNormalizer,
+    ) {
+    }
+
     public function persist(Website $website, CrawlRun $crawlRun, ParsedPage $page, int $depth = 0): Page
     {
         $storedPage = $crawlRun->pages()->create([
@@ -27,7 +33,24 @@ class CrawlResultPersister
         }
 
         foreach ($page->links as $link) {
-            $storedPage->links()->create($link);
+            $normalizedUrl = $this->urlNormalizer->normalizeLink(
+                href: $link['href'],
+                baseUrl: $page->url,
+            );
+
+            // Skip links that cannot be normalized (mailto, tel, javascript, etc.)
+            if ($normalizedUrl === null) {
+                continue;
+            }
+
+            $isInternal = $this->urlNormalizer->isInternal($normalizedUrl, $website->url);
+
+            $storedPage->links()->create([
+                'href' => $link['href'],
+                'normalized_url' => $normalizedUrl,
+                'text' => $link['text'] ?? null,
+                'is_internal' => $isInternal,
+            ]);
         }
 
         foreach ($page->images as $image) {

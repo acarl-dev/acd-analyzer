@@ -10,6 +10,7 @@ class Link extends Model
     protected $fillable = [
         'page_id',
         'href',
+        'normalized_url',
         'text',
         'is_internal',
         'status_code',
