@@ -26,16 +26,16 @@ A modern website crawling and technical website analysis platform built with **L
 
 ## Features
 
-- 🌐 Crawl websites via HTTP
-- 📄 Multi-page website crawling
-- 📊 Dashboard with crawl statistics
-- ❤️ Health Score calculation
-- 🔍 Technical SEO analysis
-- 🏷️ Technology detection (CMS, Frontend, Rendering)
-- ⚠️ Severity-based issue detection
-- 📑 Crawl history
-- 📈 Aggregated issue statistics
-- 🐳 Docker-first development environment
+- Crawl websites via HTTP
+- Multi-page website crawling
+- Dashboard with crawl statistics
+- Health Score calculation
+- Technical SEO analysis
+- Technology detection (CMS, Frontend, Rendering)
+- Severity-based issue detection
+- Crawl history
+- Aggregated issue statistics
+- Docker-first development environment
 
 ---
 
